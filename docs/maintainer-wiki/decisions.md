@@ -21,3 +21,11 @@ These records document current task scope, not new binding product decisions. [S
 **Rationale:** The broad user-required test-name pattern can conceal legitimate future tests. The suite-directory exception reduces this risk; future test fixtures outside that directory need explicit exceptions.
 
 **Tool deviation:** Filesystem MCP is not exposed to this task. Available file tools and read-only terminal validation are used instead. No claim of MCP execution, Git tracking verification or hook activation is made.
+
+## 2026-10-13 — Named root documentation follow-up
+
+**Status:** Authorized by the current human request to generate [README.md](../../README.md) and [CHANGELOG.md](../../CHANGELOG.md).
+
+**Decision:** Improve the existing overview and create an unreleased documentation changelog. This supersedes the initialization-only choice not to create a root changelog, not the historical initialization record. The exception applies to these named documents only; Q7 remains unresolved generally, and no implementation, installation, graph operation or gate approval is authorized.
+
+**Evidence note:** The wiki exclusion in [ignore rules](../../.gitignore:6) is currently commented out. Earlier initialization ignore evidence is historical, not proof of current wiki ignore or distribution status. Ignore settings are unchanged by this follow-up.
