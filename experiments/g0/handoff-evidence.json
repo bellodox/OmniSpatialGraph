@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-10-13T13:00:26.589Z",
+  "scope": "Isolated G0 runtime feasibility only; production G1 is not implemented or authorized.",
+  "finalCommands": [
+    { "command": "npm --prefix experiments/g0 run install:locked", "exitCode": 0, "observedOutput": "added 34 packages in 22s" },
+    { "command": "npm --prefix experiments/g0 run verify", "exitCode": 0, "results": "TypeScript check, 3 invariant tests, SDK/native load, two mixed batch merges, current/historical reopen checks, successful child control, interrupted native-write recovery, cleanup all passed. Exact per-command output and timing are in runtime-evidence.json." },
+    { "command": "git status --short", "exitCode": 0, "observedOutput": ["?? .gitignore", "?? AGENTS.md", "?? CHANGELOG.md", "?? CLAUDE.md", "?? README.md", "?? docs/", "?? experiments/", "?? tasks/"], "note": "The same pre-existing untracked root entries remain; only experiments/ was added by this task. No commits or pushes." },
+    { "command": "git ls-files --others --exclude-standard experiments/g0", "exitCode": 0, "result": "All durable TypeScript probes, manifest, lockfile, configuration and JSON evidence were visible; dependencies were ignored." },
+    { "command": "git check-ignore experiments/g0/node_modules experiments/g0/.generated experiments/g0/test-probe.ts", "exitCode": 0, "observedOutput": ["experiments/g0/node_modules", "experiments/g0/test-probe.ts"], "note": "Root *test* hides test-named files; durable assertions are in invariant-probe.ts. The removed .generated directory was not listed by the actual command. Local experiment ignore contains .generated/." },
+    { "command": "if exist package.json (echo ERROR_ROOT_MANIFEST_EXISTS & exit /b 1) else (echo ROOT_PRODUCTION_MANIFEST_ABSENT)", "exitCode": 0, "observedOutput": "ROOT_PRODUCTION_MANIFEST_ABSENT" },
+    { "command": "if exist experiments\\g0\\.generated (echo ERROR_GENERATED_ARTIFACTS_REMAIN & exit /b 1) else (echo GENERATED_DATABASES_AND_BACKUPS_REMOVED)", "exitCode": 0, "observedOutput": "GENERATED_DATABASES_AND_BACKUPS_REMOVED" },
+    { "command": "tasklist /FI \"PID eq 6736\"", "exitCode": 0, "observedOutput": "INFO: No tasks are running which match the specified criteria." },
+    { "command": "tasklist /FI \"PID eq 3944\"", "exitCode": 0, "observedOutput": "INFO: No tasks are running which match the specified criteria." }
+  ],
+  "measuredProofs": {
+    "nativeVersions": [1, 2, 3],
+    "reopenedHistoricalRowCounts": [3, 5, 7],
+    "mixedBatchElapsedMs": [134.2058, 180.9272],
+    "control": { "dataRows": 100000, "batchMarkers": 1, "totalRows": 100004, "version": 2, "exactDataRowsChecked": 100000, "writerPid": 3944, "exitCode": 0 },
+    "interrupted": { "expectedDataRows": 200000, "writerPid": 6736, "preparedAt": "2026-10-13T12:59:35.245Z", "beforeSdkInvocationAt": "2026-10-13T12:59:35.277Z", "promiseReturnedAt": "2026-10-13T12:59:35.280Z", "nativeFileObservedAt": "2026-10-13T12:59:39.103Z", "newNativeFileBytes": 35189344, "killRequestedAt": "2026-10-13T12:59:39.103Z", "killAcknowledgedAt": "2026-10-13T12:59:39.104Z", "writerExitedAt": "2026-10-13T12:59:39.351Z", "writerExitCode": 1, "completionAcknowledgment": false, "recoveredDataRows": 0, "recoveredBatchMarkers": 0, "recoveredTotalRows": 3, "recoveredVersion": 1 }
+  },
+  "retainedFailuresAndLimits": [
+    "Initial RED invariant run failed because rows.ts did not exist; retained with duration and exit code.",
+    "Initial verification failed because omitted optional packages excluded TypeScript 7's native compiler. Explicit Windows compiler pin resolved the issue; original output is retained in runtime-evidence.json runs.",
+    "Both original taskkill attempts were inconclusive and recovered complete batches. Original outer record status indicated probe execution success, not crash feasibility; their nested outcomes remain inconclusive. The revised recorder returns an inconclusive status and nonzero exit for future timing misses.",
+    "Exact native instruction at termination cannot be observed. Native disk-write evidence plus absent publication after abrupt termination proves interruption after native work began, not power-loss durability or every crash placement.",
+    "Dependency integrity comes from lockfile SHA-512 metadata and successful npm ci verification; native binary SHA-256 was measured. Registry signature/attestation verification and a vulnerability audit were not run.",
+    "Windows x64 only; other architectures/runtimes were not executed. Node runtime is recorded, not installed by this experiment.",
+    "Single-writer feasibility does not prove concurrency, retention, scale, branching, provider swaps, embeddings or GraphRAG.",
+    "Ignored node_modules remains as the installed dependency environment; generated databases, closed-baseline backups and build directories were removed. No writer/server remains."
+  ],
+  "parentDocumentationSpecialistRequest": "Persist the experiment findings, failures, API source links, reproducibility commands and pending G1 human gate into parent-owned G0 documentation/tasks/memory. This task made no Markdown edits and does not authorize any G1 implementation. Independent final code/security review belongs to the parent workflow."
+}

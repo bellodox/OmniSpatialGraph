@@ -1,0 +1,137 @@
+{
+  "fixture": "crash-control-100000-1791899008722",
+  "count": 100000,
+  "payloadBytesPerRow": 1024,
+  "before": 1,
+  "pid": 1400,
+  "backupCreatedWhileClosed": true,
+  "events": [
+    {
+      "phase": "prepared",
+      "at": "2026-10-13T13:43:37.185Z",
+      "epochMs": 1791899017189,
+      "pid": 1400,
+      "count": 100000,
+      "marker": {
+        "id": "[\"crash-crash-control-100000-1791899008722\",\"marker\",\"0\"]",
+        "branch": "main",
+        "kind": "marker",
+        "qualifiedName": "crash-crash-control-100000-1791899008722",
+        "disambiguator": "0",
+        "payload": "",
+        "commitId": "crash-crash-control-100000-1791899008722",
+        "parents": "[\"baseline\"]",
+        "deltaHash": "657b4ef11907d790b25c8638dfb5cae8d9c647f8803bc86d4e738fc1cfab4eb5",
+        "actor": "g0-single-writer"
+      },
+      "arrowRows": 100001,
+      "receivedAt": "2026-10-13T13:43:37.192Z"
+    },
+    {
+      "phase": "before-sdk-invocation",
+      "at": "2026-10-13T13:43:37.203Z",
+      "epochMs": 1791899017203,
+      "pid": 1400,
+      "receivedAt": "2026-10-13T13:43:37.204Z"
+    },
+    {
+      "phase": "sdk-promise-returned",
+      "at": "2026-10-13T13:43:37.204Z",
+      "epochMs": 1791899017204,
+      "pid": 1400,
+      "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed.",
+      "receivedAt": "2026-10-13T13:43:37.205Z"
+    },
+    {
+      "phase": "completed",
+      "at": "2026-10-13T13:43:39.403Z",
+      "epochMs": 1791899019403,
+      "pid": 1400,
+      "result": {
+        "version": 2,
+        "numInsertedRows": 100001,
+        "numUpdatedRows": 0,
+        "numDeletedRows": 0,
+        "numAttempts": 1,
+        "numRows": 100001
+      },
+      "versionAfterPublication": 2,
+      "receivedAt": "2026-10-13T13:43:39.404Z"
+    }
+  ],
+  "journal": [
+    {
+      "phase": "prepared",
+      "at": "2026-10-13T13:43:37.185Z",
+      "epochMs": 1791899017189,
+      "pid": 1400,
+      "count": 100000,
+      "marker": {
+        "id": "[\"crash-crash-control-100000-1791899008722\",\"marker\",\"0\"]",
+        "branch": "main",
+        "kind": "marker",
+        "qualifiedName": "crash-crash-control-100000-1791899008722",
+        "disambiguator": "0",
+        "payload": "",
+        "commitId": "crash-crash-control-100000-1791899008722",
+        "parents": "[\"baseline\"]",
+        "deltaHash": "657b4ef11907d790b25c8638dfb5cae8d9c647f8803bc86d4e738fc1cfab4eb5",
+        "actor": "g0-single-writer"
+      },
+      "arrowRows": 100001
+    },
+    {
+      "phase": "before-sdk-invocation",
+      "at": "2026-10-13T13:43:37.203Z",
+      "epochMs": 1791899017203,
+      "pid": 1400
+    },
+    {
+      "phase": "sdk-promise-returned",
+      "at": "2026-10-13T13:43:37.204Z",
+      "epochMs": 1791899017204,
+      "pid": 1400,
+      "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed."
+    },
+    {
+      "phase": "completed",
+      "at": "2026-10-13T13:43:39.403Z",
+      "epochMs": 1791899019403,
+      "pid": 1400,
+      "result": {
+        "version": 2,
+        "numInsertedRows": 100001,
+        "numUpdatedRows": 0,
+        "numDeletedRows": 0,
+        "numAttempts": 1,
+        "numRows": 100001
+      },
+      "versionAfterPublication": 2
+    }
+  ],
+  "exit": {
+    "code": 0,
+    "signal": null,
+    "at": "2026-10-13T13:43:39.682Z"
+  },
+  "writerStillExists": false,
+  "stderr": "",
+  "recoveryCommand": "node recovery-probe.ts crash-control-100000-1791899008722 100000 crash-crash-control-100000-1791899008722",
+  "recovery": {
+    "version": 2,
+    "rows": 100000,
+    "markers": 1,
+    "totalRows": 100004,
+    "expectedCount": 100000,
+    "checkedRows": 100000,
+    "baselineHistoricalRows": 3,
+    "baselinePreserved": true,
+    "externalMapping": {
+      "crash-crash-control-100000-1791899008722": 2
+    },
+    "atomic": true
+  },
+  "outcome": "passed",
+  "midOperationProven": false,
+  "placementLimitations": "5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive."
+}

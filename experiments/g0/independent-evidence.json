@@ -1,0 +1,304 @@
+﻿{
+    "checks":  {
+                   "sourceHashesUnchanged":  true,
+                   "historicalRunsPreserved":  3,
+                   "durableArtifactsIgnored":  [
+
+                                               ],
+                   "invariantTestsPassed":  3,
+                   "skipped":  0,
+                   "manifestInstalledLockPinsMatch":  true,
+                   "priorEvidenceHashesUnchanged":  true,
+                   "failed":  0,
+                   "nativeDiskBeforeKillWithoutCompletion":  true
+               },
+    "cleanup":  {
+                    "taskPidsAbsent":  [
+                                           9312,
+                                           6404,
+                                           1400,
+                                           14012
+                                       ],
+                    "installedIgnoredDependenciesRetained":  true,
+                    "temporaryOutputDirectoryRemoved":  true,
+                    "generatedBackupsBuildDistAbsent":  true,
+                    "serversStarted":  0,
+                    "reruns":  0
+                },
+    "environment":  {
+                        "node":  "v24.14.1",
+                        "npm":  "11.11.0",
+                        "platform":  "win32",
+                        "arch":  "x64",
+                        "os":  "Microsoft Windows [Version 10.0.19045.6466]",
+                        "nativeSha256":  "b3fa98d78809286da9ab71a206535fe6696df40faab6cbe523574a55ef4a0b3a",
+                        "lockSha256":  "9332e0d49c65d455399e41162c7ec69d5c7191ade4b8df6648efebbf0859fb3d",
+                        "nativeLoad":  true,
+                        "installed":  {
+                                          "@lancedb/lancedb":  {
+                                                                   "version":  "0.40.0",
+                                                                   "integrity":  "sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==",
+                                                                   "resolved":  "https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz"
+                                                               },
+                                          "@lancedb/lancedb-win32-x64-msvc":  {
+                                                                                  "version":  "0.40.0",
+                                                                                  "integrity":  "sha512-DZxho/MhnGJCQc98CN3yY8qWlDCATLTjGUNqD58Fx1sNMctmkbdAf4F1fTRahz0aojfnM9aoUNaSXdY0qaPhbQ==",
+                                                                                  "resolved":  "https://registry.npmjs.org/@lancedb/lancedb-win32-x64-msvc/-/lancedb-win32-x64-msvc-0.40.0.tgz"
+                                                                              },
+                                          "apache-arrow":  {
+                                                               "version":  "18.1.0",
+                                                               "integrity":  "sha512-v/ShMp57iBnBp4lDgV8Jx3d3Q5/Hac25FWmQ98eMahUiHPXcvwIMKJD0hBIgclm/FCG+LwPkAKtkRO1O/W0YGg==",
+                                                               "resolved":  "https://registry.npmjs.org/apache-arrow/-/apache-arrow-18.1.0.tgz"
+                                                           },
+                                          "typescript":  {
+                                                             "version":  "7.0.2",
+                                                             "integrity":  "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+                                                             "resolved":  "https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz"
+                                                         },
+                                          "@typescript/typescript-win32-x64":  {
+                                                                                   "version":  "7.0.2",
+                                                                                   "integrity":  "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==",
+                                                                                   "resolved":  "https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz"
+                                                                               },
+                                          "@types/node":  {
+                                                              "version":  "22.20.5",
+                                                              "integrity":  "sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==",
+                                                              "resolved":  "https://registry.npmjs.org/@types/node/-/node-22.20.5.tgz"
+                                                          }
+                                      }
+                    },
+    "measurements":  {
+                         "control":  {
+                                         "recovery":  {
+                                                          "version":  2,
+                                                          "rows":  100000,
+                                                          "markers":  1,
+                                                          "totalRows":  100004,
+                                                          "expectedCount":  100000,
+                                                          "checkedRows":  100000,
+                                                          "baselineHistoricalRows":  3,
+                                                          "baselinePreserved":  true,
+                                                          "externalMapping":  {
+                                                                                  "crash-crash-control-100000-1791899008722":  2
+                                                                              },
+                                                          "atomic":  true
+                                                      },
+                                         "pid":  1400,
+                                         "file":  "crash-control-100000-1791899008722-evidence.json",
+                                         "exit":  {
+                                                      "code":  0,
+                                                      "signal":  null,
+                                                      "at":  "2026-10-13T13:43:39.682Z"
+                                                  }
+                                     },
+                         "interrupted":  {
+                                             "exit":  {
+                                                          "code":  1,
+                                                          "signal":  null,
+                                                          "at":  "2026-10-13T13:44:01.180Z"
+                                                      },
+                                             "diskObservation":  {
+                                                                     "at":  "2026-10-13T13:44:00.775Z",
+                                                                     "epochMs":  1791899040775,
+                                                                     "newFiles":  [
+                                                                                      [
+                                                                                          "graph_elements.lance\\data\\000000100000101100101000dba02045b9aa969fd84893e5cb.lance",
+                                                                                          35880544
+                                                                                      ]
+                                                                                  ],
+                                                                     "meaning":  "Nonzero new Lance data files observed after SDK invocation; native storage work has begun."
+                                                                 },
+                                             "newNativeBytes":  35880544,
+                                             "recovery":  {
+                                                              "version":  1,
+                                                              "rows":  0,
+                                                              "markers":  0,
+                                                              "totalRows":  3,
+                                                              "expectedCount":  200000,
+                                                              "checkedRows":  0,
+                                                              "baselineHistoricalRows":  3,
+                                                              "baselinePreserved":  true,
+                                                              "externalMapping":  {
+
+                                                                                  },
+                                                              "atomic":  true
+                                                          },
+                                             "completionAcknowledged":  false,
+                                             "killResult":  {
+                                                                "command":  "process.kill(14012, \u0027SIGKILL\u0027)",
+                                                                "requestedAt":  "2026-10-13T13:44:00.776Z",
+                                                                "finishedAt":  "2026-10-13T13:44:00.776Z",
+                                                                "exitCode":  0,
+                                                                "output":  "Windows unconditional PID termination acknowledged: true"
+                                                            },
+                                             "count":  200000,
+                                             "pid":  14012,
+                                             "file":  "crash-kill-200000-1791899025865-evidence.json"
+                                         },
+                         "mixedBatches":  [
+                                              {
+                                                  "commitId":  "commit-1",
+                                                  "before":  1,
+                                                  "after":  2,
+                                                  "elapsedMs":  53.577400000000125,
+                                                  "mergeResult":  {
+                                                                      "version":  2,
+                                                                      "numInsertedRows":  2,
+                                                                      "numUpdatedRows":  1,
+                                                                      "numDeletedRows":  0,
+                                                                      "numAttempts":  1,
+                                                                      "numRows":  3
+                                                                  }
+                                              },
+                                              {
+                                                  "commitId":  "commit-2",
+                                                  "before":  2,
+                                                  "after":  3,
+                                                  "elapsedMs":  46.62519999999995,
+                                                  "mergeResult":  {
+                                                                      "version":  3,
+                                                                      "numInsertedRows":  2,
+                                                                      "numUpdatedRows":  1,
+                                                                      "numDeletedRows":  0,
+                                                                      "numAttempts":  1,
+                                                                      "numRows":  3
+                                                                  }
+                                              }
+                                          ],
+                         "reopenedSnapshots":  [
+                                                   {
+                                                       "version":  1,
+                                                       "rowCount":  3,
+                                                       "exactContentsMatch":  true,
+                                                       "unmatchedRowPreserved":  true
+                                                   },
+                                                   {
+                                                       "version":  2,
+                                                       "rowCount":  5,
+                                                       "exactContentsMatch":  true,
+                                                       "unmatchedRowPreserved":  true
+                                                   },
+                                                   {
+                                                       "version":  3,
+                                                       "rowCount":  7,
+                                                       "exactContentsMatch":  true,
+                                                       "unmatchedRowPreserved":  true
+                                                   }
+                                               ]
+                     },
+    "command":  {
+                    "requested":  "npm --prefix experiments/g0 run verify",
+                    "subcommands":  [
+                                        {
+                                            "command":  "npm run typecheck",
+                                            "exitCode":  0,
+                                            "startedAt":  "2026-10-13T13:43:11.087Z",
+                                            "finishedAt":  "2026-10-13T13:43:13.966Z",
+                                            "elapsedMs":  2875.7429
+                                        },
+                                        {
+                                            "command":  "npm run unit",
+                                            "exitCode":  0,
+                                            "startedAt":  "2026-10-13T13:43:13.967Z",
+                                            "finishedAt":  "2026-10-13T13:43:15.704Z",
+                                            "elapsedMs":  1737.7651999999998
+                                        },
+                                        {
+                                            "command":  "npm run sdk",
+                                            "exitCode":  0,
+                                            "startedAt":  "2026-10-13T13:43:15.705Z",
+                                            "finishedAt":  "2026-10-13T13:43:23.986Z",
+                                            "elapsedMs":  8281.871299999999
+                                        },
+                                        {
+                                            "command":  "npm run batch",
+                                            "exitCode":  0,
+                                            "startedAt":  "2026-10-13T13:43:23.987Z",
+                                            "finishedAt":  "2026-10-13T13:43:26.798Z",
+                                            "elapsedMs":  2811.4916999999987
+                                        },
+                                        {
+                                            "command":  "npm run crash",
+                                            "exitCode":  0,
+                                            "startedAt":  "2026-10-13T13:43:26.798Z",
+                                            "finishedAt":  "2026-10-13T13:44:11.998Z",
+                                            "elapsedMs":  45200.504199999996
+                                        },
+                                        {
+                                            "command":  "npm run clean",
+                                            "exitCode":  0,
+                                            "startedAt":  "2026-10-13T13:44:11.998Z",
+                                            "finishedAt":  "2026-10-13T13:44:16.131Z",
+                                            "elapsedMs":  4132.142800000001
+                                        }
+                                    ],
+                    "subcommandSpanMs":  65044,
+                    "actualOutputs":  "runtime-evidence.json runs[3].commands",
+                    "lockedInstallPerformed":  false,
+                    "outerExitCode":  null,
+                    "unitOutput":  "\n\u003e omnispatialgraph-g0-experiment@0.0.0 unit\n\u003e node --test invariant-probe.ts\n\n✔ qualified keys reject duplicate id/branch pairs but distinguish branches (3.2093ms)\n✔ atomic visibility accepts only none or all with exactly one marker (1.9436ms)\n✔ batch contains semantic marker and deterministic delta hash only (2.292ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 957.8543\n",
+                    "terminalStdoutSha256":  "14043b6066dcc3ccf48406167627d175c6ba3620c0f2e1c864a3f0aa50c0f2db",
+                    "terminalStderr":  null
+                },
+    "result":  "Scoped G0 checks passed; outer wrapper deadline failed",
+    "recordedAt":  "2026-10-13T14:14:40.4955856Z",
+    "scope":  "Independent G0 only; no source, Markdown, contract, harness or G1 edits",
+    "failuresAndDistinctions":  {
+                                    "deadlineFailure":  {
+                                                            "advice":  "Use a separate watchdog covering process launch, execution and output collection; save task PID before waiting, poll independently, terminate only identity-validated task children. An in-wrapper process wait is not an end-to-end deadline.",
+                                                            "outerExitCodeCaptured":  false,
+                                                            "configuredSeconds":  300,
+                                                            "stoppedTaskWrapperPid":  9312,
+                                                            "observed":  "Probes finished at 13:44:16 UTC after 65.044s subcommand span; wrapper remained alive at 14:11:10 UTC",
+                                                            "diagnosis":  "Wrapper hang confirmed, exact blocking call not established; no probe process found"
+                                                        },
+                                    "independentReportingFailure":  "First report-generation command exceeded Windows command-line length; rejected before execution; split into shorter commands",
+                                    "historicalTimingMisses":  [
+                                                                   "crash-100000-evidence.json",
+                                                                   "crash-200000-evidence.json"
+                                                               ],
+                                    "freshTimingMisses":  [
+
+                                                          ],
+                                    "freshProbeFailures":  [
+
+                                                           ],
+                                    "historicalFailure":  "Initial typecheck exit 1 and prior runs remain intact; RED baseline is historical author metadata, not rerun"
+                                },
+    "files":  [
+                  "experiments/g0/independent-evidence.json",
+                  "experiments/g0/prior-independent-evidence-backup.json",
+                  "experiments/g0/runtime-evidence.json",
+                  "experiments/g0/crash-control-100000-1791899008722-evidence.json",
+                  "experiments/g0/crash-kill-200000-1791899025865-evidence.json"
+              ],
+    "testAudit":  {
+                      "accepted":  [
+                                       "0 rows and 0 markers",
+                                       "all rows and exactly 1 marker"
+                                   ],
+                      "rejected":  [
+                                       "partial rows without marker",
+                                       "partial rows with marker",
+                                       "all rows without marker",
+                                       "marker without rows",
+                                       "duplicate markers with full rows"
+                                   ],
+                      "recovery":  "Fresh process counts visible baseline and batch rows, checks version 1 or 2 and total rows, validates all control row payloads/kinds/keys/branch and marker, then historical baseline count and keep sentinel",
+                      "references":  [
+                                         "invariant-probe.ts:13-18",
+                                         "rows.ts:49-52",
+                                         "recovery-probe.ts:18-48"
+                                     ]
+                  },
+    "limitations":  [
+                        "Single writer Windows x64 Node 24.14.1 only; abrupt process kill is not POSIX execution or power-loss/fsync durability",
+                        "One crash placement; 5ms polling and OS scheduling cannot identify exact native instruction",
+                        "New nonzero Lance file proves native storage work, not durable publication",
+                        "Recovery checks baseline counts and historical keep sentinel, not byte-for-byte directory restoration or backup restore",
+                        "No concurrency, retention, branching, scale guarantees, provider swaps, GraphRAG or G1 acceptance proven",
+                        "Existing dependencies used: pins and native binary checked; no fresh npm ci integrity verification",
+                        "verify.ts installation and RED metadata are hard-coded historical claims, not independently observed commands",
+                        "No registry signature/attestation, security check or code review performed"
+                    ]
+}

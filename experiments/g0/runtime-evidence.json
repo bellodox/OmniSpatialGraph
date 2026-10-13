@@ -1,0 +1,854 @@
+{
+  "cleanup": {
+    "status": "passed",
+    "startedAt": "2026-10-13T13:44:14.814Z",
+    "finishedAt": "2026-10-13T13:44:16.032Z",
+    "elapsedMs": 1213.3292,
+    "result": {
+      "removed": [
+        ".generated",
+        "dist",
+        "build"
+      ],
+      "generatedDatabasesAndBackupsRemoved": true,
+      "durableSourcesAndEvidencePreserved": true
+    }
+  },
+  "runs": [
+    {
+      "command": "npm --prefix experiments/g0 run verify",
+      "commands": [
+        {
+          "command": "npm run typecheck",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:51:14.909Z",
+          "finishedAt": "2026-10-13T12:51:16.073Z",
+          "elapsedMs": 1153.7563000000005,
+          "exitCode": 1,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 typecheck\n> tsc --noEmit\n\n",
+          "stderr": "file:///C:/Users/VSCode/source/repos/OmniSpatialGraph/experiments/g0/node_modules/typescript/lib/getExePath.js:53\r\n            throw new Error(\"Unable to resolve \" + platformPackageName + \". Either your platform is unsupported, or you are missing the package on disk.\");\r\n                  ^\r\n\r\nError: Unable to resolve @typescript/typescript-win32-x64. Either your platform is unsupported, or you are missing the package on disk.\r\n    at getExePath (file:///C:/Users/VSCode/source/repos/OmniSpatialGraph/experiments/g0/node_modules/typescript/lib/getExePath.js:53:19)\r\n    at file:///C:/Users/VSCode/source/repos/OmniSpatialGraph/experiments/g0/node_modules/typescript/lib/tsc.js:6:13\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)\r\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v24.14.1\r\n"
+        },
+        {
+          "command": "npm run clean",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:51:16.074Z",
+          "finishedAt": "2026-10-13T12:51:18.609Z",
+          "elapsedMs": 2535.020299999999,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 clean\n> node cleanup.ts\n\n{\n  \"cleanup\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:51:18.519Z\",\n    \"finishedAt\": \"2026-10-13T12:51:18.530Z\",\n    \"elapsedMs\": 6.251800000000003,\n    \"result\": {\n      \"removed\": [\n        \".generated\",\n        \"dist\",\n        \"build\"\n      ],\n      \"generatedDatabasesAndBackupsRemoved\": true,\n      \"durableSourcesAndEvidencePreserved\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "command": "npm --prefix experiments/g0 run verify",
+      "commands": [
+        {
+          "command": "npm run typecheck",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:52:19.792Z",
+          "finishedAt": "2026-10-13T12:52:24.244Z",
+          "elapsedMs": 4439.9653,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 typecheck\n> tsc --noEmit\n\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run unit",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:52:24.244Z",
+          "finishedAt": "2026-10-13T12:52:26.520Z",
+          "elapsedMs": 2275.7331999999997,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 unit\n> node --test invariant-probe.ts\n\n✔ qualified keys reject duplicate id/branch pairs but distinguish branches (7.7193ms)\n✔ atomic visibility accepts only none or all with exactly one marker (1.9491ms)\n✔ batch contains semantic marker and deterministic delta hash only (2.9676ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1377.2594\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run sdk",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:52:26.520Z",
+          "finishedAt": "2026-10-13T12:52:34.097Z",
+          "elapsedMs": 7576.9913,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 sdk\n> node sdk-probe.ts\n\n{\n  \"sdk\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:52:28.296Z\",\n    \"finishedAt\": \"2026-10-13T12:52:34.000Z\",\n    \"elapsedMs\": 5673.1304,\n    \"result\": {\n      \"node\": \"v24.14.1\",\n      \"npm\": \"11.11.0\",\n      \"platform\": \"win32\",\n      \"arch\": \"x64\",\n      \"os\": \"Microsoft Windows [Version 10.0.19045.6466]\",\n      \"registryCommand\": \"npm view @lancedb/lancedb@0.40.0 version gitHead engines peerDependencies optionalDependencies dist --json\",\n      \"registry\": {\n        \"version\": \"0.40.0\",\n        \"gitHead\": \"b1b080b97c3edd2fd9f2aae8a3b71ff19487b1f8\",\n        \"engines\": {\n          \"node\": \">= 22\"\n        },\n        \"peerDependencies\": {\n          \"@types/node\": \">=22\",\n          \"apache-arrow\": \">=15.0.0 <=18.1.0\"\n        },\n        \"optionalDependencies\": {\n          \"openai\": \"4.29.2\",\n          \"@huggingface/transformers\": \"3.0.2\",\n          \"@lancedb/lancedb-darwin-arm64\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-x64-gnu\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-x64-musl\": \"0.40.0\",\n          \"@lancedb/lancedb-win32-x64-msvc\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-arm64-gnu\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-arm64-musl\": \"0.40.0\",\n          \"@lancedb/lancedb-win32-arm64-msvc\": \"0.40.0\"\n        },\n        \"dist\": {\n          \"shasum\": \"f368b4c02b3d91692c100dea64626c462df404a8\",\n          \"tarball\": \"https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz\",\n          \"fileCount\": 66,\n          \"integrity\": \"sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==\",\n          \"signatures\": [\n            {\n              \"sig\": \"MEUCIQDxMKnbTq6txcjs9fqIDC4yAoJ31ERkIBHph2/kFv+JsAIgL+IGA+yRWvAoQyAri2D+DZOOPaFnxcUrPSSHpPBjXkI=\",\n              \"keyid\": \"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U\"\n            },\n            {\n              \"sig\": \"MEYCIQDfgswU3swr5JAgq3i921tZ/RurReAnBsThKlpcxwTSjQIhAKSFwfaXfkkO+SoIEDm/XLF9piItrqxMgxyOGnpM4LJS\",\n              \"keyid\": \"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U\"\n            }\n          ],\n          \"attestations\": {\n            \"url\": \"https://registry.npmjs.org/-/npm/v1/attestations/@lancedb%2flancedb@0.40.0\",\n            \"provenance\": {\n              \"predicateType\": \"https://slsa.dev/provenance/v1\"\n            }\n          },\n          \"unpackedSize\": 1480653\n        }\n      },\n      \"installed\": {\n        \"@lancedb/lancedb\": {\n          \"version\": \"0.40.0\",\n          \"integrity\": \"sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==\",\n          \"resolved\": \"https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz\"\n        },\n        \"@lancedb/lancedb-win32-x64-msvc\": {\n          \"version\": \"0.40.0\",\n          \"integrity\": \"sha512-DZxho/MhnGJCQc98CN3yY8qWlDCATLTjGUNqD58Fx1sNMctmkbdAf4F1fTRahz0aojfnM9aoUNaSXdY0qaPhbQ==\",\n          \"resolved\": \"https://registry.npmjs.org/@lancedb/lancedb-win32-x64-msvc/-/lancedb-win32-x64-msvc-0.40.0.tgz\"\n        },\n        \"apache-arrow\": {\n          \"version\": \"18.1.0\",\n          \"integrity\": \"sha512-v/ShMp57iBnBp4lDgV8Jx3d3Q5/Hac25FWmQ98eMahUiHPXcvwIMKJD0hBIgclm/FCG+LwPkAKtkRO1O/W0YGg==\",\n          \"resolved\": \"https://registry.npmjs.org/apache-arrow/-/apache-arrow-18.1.0.tgz\"\n        },\n        \"typescript\": {\n          \"version\": \"7.0.2\",\n          \"integrity\": \"sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==\",\n          \"resolved\": \"https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz\"\n        },\n        \"@types/node\": {\n          \"version\": \"22.20.5\",\n          \"integrity\": \"sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==\",\n          \"resolved\": \"https://registry.npmjs.org/@types/node/-/node-22.20.5.tgz\"\n        }\n      },\n      \"lockSha256\": \"9332e0d49c65d455399e41162c7ec69d5c7191ade4b8df6648efebbf0859fb3d\",\n      \"nativeEntry\": \"node_modules/@lancedb/lancedb-win32-x64-msvc/lancedb.win32-x64-msvc.node\",\n      \"nativeSha256\": \"b3fa98d78809286da9ab71a206535fe6696df40faab6cbe523574a55ef4a0b3a\",\n      \"nativeLoad\": true,\n      \"baselineVersion\": 1,\n      \"reopenedRows\": 3,\n      \"fields\": [\n        {\n          \"name\": \"id\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"branch\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"kind\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"qualifiedName\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"disambiguator\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"payload\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"commitId\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"parents\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        },\n        {\n          \"name\": \"deltaHash\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        },\n        {\n          \"name\": \"actor\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        }\n      ]\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run batch",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:52:34.097Z",
+          "finishedAt": "2026-10-13T12:52:36.875Z",
+          "elapsedMs": 2778.0355999999992,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 batch\n> node batch-probe.ts\n\n{\n  \"batch\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:52:36.388Z\",\n    \"finishedAt\": \"2026-10-13T12:52:36.754Z\",\n    \"elapsedMs\": 362.69330000000014,\n    \"result\": {\n      \"baselineVersion\": 1,\n      \"currentVersion\": 3,\n      \"publications\": [\n        {\n          \"commitId\": \"commit-1\",\n          \"before\": 1,\n          \"after\": 2,\n          \"versionsBefore\": [\n            1\n          ],\n          \"versionsAfter\": [\n            1,\n            2\n          ],\n          \"mergeResult\": {\n            \"version\": 2,\n            \"numInsertedRows\": 2,\n            \"numUpdatedRows\": 1,\n            \"numDeletedRows\": 0,\n            \"numAttempts\": 1,\n            \"numRows\": 3\n          },\n          \"startedAt\": \"2026-10-13T12:52:36.516Z\",\n          \"elapsedMs\": 63.70749999999998,\n          \"expectedRows\": 5,\n          \"marker\": {\n            \"id\": \"[\\\"commit-1\\\",\\\"marker\\\",\\\"0\\\"]\",\n            \"branch\": \"main\",\n            \"kind\": \"marker\",\n            \"qualifiedName\": \"commit-1\",\n            \"disambiguator\": \"0\",\n            \"payload\": \"\",\n            \"commitId\": \"commit-1\",\n            \"parents\": \"[\\\"baseline\\\"]\",\n            \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n            \"actor\": \"g0-single-writer\"\n          },\n          \"externalMapping\": {\n            \"commit-1\": 2\n          }\n        },\n        {\n          \"commitId\": \"commit-2\",\n          \"before\": 2,\n          \"after\": 3,\n          \"versionsBefore\": [\n            1,\n            2\n          ],\n          \"versionsAfter\": [\n            1,\n            2,\n            3\n          ],\n          \"mergeResult\": {\n            \"version\": 3,\n            \"numInsertedRows\": 2,\n            \"numUpdatedRows\": 1,\n            \"numDeletedRows\": 0,\n            \"numAttempts\": 1,\n            \"numRows\": 3\n          },\n          \"startedAt\": \"2026-10-13T12:52:36.635Z\",\n          \"elapsedMs\": 39.794999999999845,\n          \"expectedRows\": 7,\n          \"marker\": {\n            \"id\": \"[\\\"commit-2\\\",\\\"marker\\\",\\\"0\\\"]\",\n            \"branch\": \"main\",\n            \"kind\": \"marker\",\n            \"qualifiedName\": \"commit-2\",\n            \"disambiguator\": \"0\",\n            \"payload\": \"\",\n            \"commitId\": \"commit-2\",\n            \"parents\": \"[\\\"commit-1\\\"]\",\n            \"deltaHash\": \"e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d\",\n            \"actor\": \"g0-single-writer\"\n          },\n          \"externalMapping\": {\n            \"commit-2\": 3\n          }\n        }\n      ],\n      \"reopenedCurrentAndHistorical\": [\n        {\n          \"version\": 1,\n          \"rowCount\": 3,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        },\n        {\n          \"version\": 2,\n          \"rowCount\": 5,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-1\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        },\n        {\n          \"version\": 3,\n          \"rowCount\": 7,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-1\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-2\",\n              \"parents\": \"[\\\"commit-1\\\"]\",\n              \"deltaHash\": \"e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        }\n      ],\n      \"schema\": \"Explicit Utf8 fields, nullable semantic marker fields; no embeddings or native version field\",\n      \"singleWriter\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run crash",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:52:36.875Z",
+          "finishedAt": "2026-10-13T12:53:54.898Z",
+          "elapsedMs": 78023.1173,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 crash\n> node crash-probe.ts\n\n{\n  \"crash\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:52:39.523Z\",\n    \"finishedAt\": \"2026-10-13T12:53:54.792Z\",\n    \"elapsedMs\": 75264.6806,\n    \"result\": {\n      \"control\": {\n        \"fixture\": \"crash-control-100000-1791895959527\",\n        \"count\": 100000,\n        \"payloadBytesPerRow\": 1024,\n        \"before\": 1,\n        \"pid\": 9812,\n        \"backupCreatedWhileClosed\": true,\n        \"events\": [\n          {\n            \"phase\": \"prepared\",\n            \"at\": \"2026-10-13T12:52:48.843Z\",\n            \"epochMs\": 1791895968847,\n            \"pid\": 9812,\n            \"count\": 100000,\n            \"marker\": {\n              \"id\": \"[\\\"crash-crash-control-100000-1791895959527\\\",\\\"marker\\\",\\\"0\\\"]\",\n              \"branch\": \"main\",\n              \"kind\": \"marker\",\n              \"qualifiedName\": \"crash-crash-control-100000-1791895959527\",\n              \"disambiguator\": \"0\",\n              \"payload\": \"\",\n              \"commitId\": \"crash-crash-control-100000-1791895959527\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"fee0b73ba6973d72108ead70f7f2d66a8e100bab6eddaf1bd1117fdb82806e9e\",\n              \"actor\": \"g0-single-writer\"\n            },\n            \"arrowRows\": 100001,\n            \"receivedAt\": \"2026-10-13T12:52:48.854Z\"\n          },\n          {\n            \"phase\": \"before-sdk-invocation\",\n            \"at\": \"2026-10-13T12:52:48.864Z\",\n            \"epochMs\": 1791895968864,\n            \"pid\": 9812,\n            \"receivedAt\": \"2026-10-13T12:52:48.867Z\"\n          },\n          {\n            \"phase\": \"sdk-promise-returned\",\n            \"at\": \"2026-10-13T12:52:48.868Z\",\n            \"epochMs\": 1791895968868,\n            \"pid\": 9812,\n            \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\",\n            \"receivedAt\": \"2026-10-13T12:52:48.868Z\"\n          },\n          {\n            \"phase\": \"completed\",\n            \"at\": \"2026-10-13T12:52:51.770Z\",\n            \"epochMs\": 1791895971770,\n            \"pid\": 9812,\n            \"result\": {\n              \"version\": 2,\n              \"numInsertedRows\": 100001,\n              \"numUpdatedRows\": 0,\n              \"numDeletedRows\": 0,\n              \"numAttempts\": 1,\n              \"numRows\": 100001\n            },\n            \"versionAfterPublication\": 2,\n            \"receivedAt\": \"2026-10-13T12:52:51.770Z\"\n          }\n        ],\n        \"journal\": [\n          {\n            \"phase\": \"prepared\",\n            \"at\": \"2026-10-13T12:52:48.843Z\",\n            \"epochMs\": 1791895968847,\n            \"pid\": 9812,\n            \"count\": 100000,\n            \"marker\": {\n              \"id\": \"[\\\"crash-crash-control-100000-1791895959527\\\",\\\"marker\\\",\\\"0\\\"]\",\n              \"branch\": \"main\",\n              \"kind\": \"marker\",\n              \"qualifiedName\": \"crash-crash-control-100000-1791895959527\",\n              \"disambiguator\": \"0\",\n              \"payload\": \"\",\n              \"commitId\": \"crash-crash-control-100000-1791895959527\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"fee0b73ba6973d72108ead70f7f2d66a8e100bab6eddaf1bd1117fdb82806e9e\",\n              \"actor\": \"g0-single-writer\"\n            },\n            \"arrowRows\": 100001\n          },\n          {\n            \"phase\": \"before-sdk-invocation\",\n            \"at\": \"2026-10-13T12:52:48.864Z\",\n            \"epochMs\": 1791895968864,\n            \"pid\": 9812\n          },\n          {\n            \"phase\": \"sdk-promise-returned\",\n            \"at\": \"2026-10-13T12:52:48.868Z\",\n            \"epochMs\": 1791895968868,\n            \"pid\": 9812,\n            \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\"\n          },\n          {\n            \"phase\": \"completed\",\n            \"at\": \"2026-10-13T12:52:51.770Z\",\n            \"epochMs\": 1791895971770,\n            \"pid\": 9812,\n            \"result\": {\n              \"version\": 2,\n              \"numInsertedRows\": 100001,\n              \"numUpdatedRows\": 0,\n              \"numDeletedRows\": 0,\n              \"numAttempts\": 1,\n              \"numRows\": 100001\n            },\n            \"versionAfterPublication\": 2\n          }\n        ],\n        \"exit\": {\n          \"code\": 0,\n          \"signal\": null,\n          \"at\": \"2026-10-13T12:52:52.208Z\"\n        },\n        \"stderr\": \"\",\n        \"recoveryCommand\": \"node recovery-probe.ts crash-control-100000-1791895959527 100000 crash-crash-control-100000-1791895959527\",\n        \"recovery\": {\n          \"version\": 2,\n          \"rows\": 100000,\n          \"markers\": 1,\n          \"totalRows\": 100004,\n          \"expectedCount\": 100000,\n          \"checkedRows\": 100000,\n          \"baselineHistoricalRows\": 3,\n          \"baselinePreserved\": true,\n          \"externalMapping\": {\n            \"crash-crash-control-100000-1791895959527\": 2\n          },\n          \"atomic\": true\n        },\n        \"outcome\": \"passed\",\n        \"midOperationProven\": false,\n        \"placementLimitations\": \"5ms polling and taskkill scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive.\"\n      },\n      \"attempts\": [\n        {\n          \"fixture\": \"crash-kill-100000-1791895977687\",\n          \"count\": 100000,\n          \"payloadBytesPerRow\": 1024,\n          \"before\": 1,\n          \"pid\": 13160,\n          \"backupCreatedWhileClosed\": true,\n          \"events\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T12:53:03.550Z\",\n              \"epochMs\": 1791895983552,\n              \"pid\": 13160,\n              \"count\": 100000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-100000-1791895977687\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-100000-1791895977687\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-100000-1791895977687\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"ba07e30e69b2544872277ff5a5e5d0b6039f334384624eeed20de3ad77fc57bb\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 100001,\n              \"receivedAt\": \"2026-10-13T12:53:03.553Z\"\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T12:53:03.559Z\",\n              \"epochMs\": 1791895983559,\n              \"pid\": 13160,\n              \"receivedAt\": \"2026-10-13T12:53:03.560Z\"\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T12:53:03.561Z\",\n              \"epochMs\": 1791895983561,\n              \"pid\": 13160,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\",\n              \"receivedAt\": \"2026-10-13T12:53:03.561Z\"\n            },\n            {\n              \"phase\": \"completed\",\n              \"at\": \"2026-10-13T12:53:05.138Z\",\n              \"epochMs\": 1791895985138,\n              \"pid\": 13160,\n              \"result\": {\n                \"version\": 2,\n                \"numInsertedRows\": 100001,\n                \"numUpdatedRows\": 0,\n                \"numDeletedRows\": 0,\n                \"numAttempts\": 1,\n                \"numRows\": 100001\n              },\n              \"versionAfterPublication\": 2,\n              \"receivedAt\": \"2026-10-13T12:53:05.139Z\"\n            }\n          ],\n          \"journal\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T12:53:03.550Z\",\n              \"epochMs\": 1791895983552,\n              \"pid\": 13160,\n              \"count\": 100000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-100000-1791895977687\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-100000-1791895977687\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-100000-1791895977687\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"ba07e30e69b2544872277ff5a5e5d0b6039f334384624eeed20de3ad77fc57bb\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 100001\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T12:53:03.559Z\",\n              \"epochMs\": 1791895983559,\n              \"pid\": 13160\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T12:53:03.561Z\",\n              \"epochMs\": 1791895983561,\n              \"pid\": 13160,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\"\n            },\n            {\n              \"phase\": \"completed\",\n              \"at\": \"2026-10-13T12:53:05.138Z\",\n              \"epochMs\": 1791895985138,\n              \"pid\": 13160,\n              \"result\": {\n                \"version\": 2,\n                \"numInsertedRows\": 100001,\n                \"numUpdatedRows\": 0,\n                \"numDeletedRows\": 0,\n                \"numAttempts\": 1,\n                \"numRows\": 100001\n              },\n              \"versionAfterPublication\": 2\n            }\n          ],\n          \"diskObservation\": {\n            \"at\": \"2026-10-13T12:53:05.110Z\",\n            \"epochMs\": 1791895985110,\n            \"newFiles\": [\n              [\n                \"graph_elements.lance\\\\data\\\\0100011001010001001101001197604f79b8449b2f0e86d491.lance\",\n                17467421\n              ]\n            ],\n            \"meaning\": \"Nonzero new Lance data files observed after SDK invocation; native storage work has begun.\"\n          },\n          \"killResult\": {\n            \"command\": \"taskkill.exe /PID 13160 /F\",\n            \"requestedAt\": \"2026-10-13T12:53:05.110Z\",\n            \"finishedAt\": \"2026-10-13T12:53:05.494Z\",\n            \"exitCode\": 1,\n            \"output\": \"ERROR: The process with PID 13160 could not be terminated.\\r\\nReason: The operation attempted is not supported.\\r\\r\\n\"\n          },\n          \"exit\": {\n            \"code\": 0,\n            \"signal\": null,\n            \"at\": \"2026-10-13T12:53:05.480Z\"\n          },\n          \"stderr\": \"\",\n          \"recoveryCommand\": \"node recovery-probe.ts crash-kill-100000-1791895977687 100000 crash-crash-kill-100000-1791895977687\",\n          \"recovery\": {\n            \"version\": 2,\n            \"rows\": 100000,\n            \"markers\": 1,\n            \"totalRows\": 100004,\n            \"expectedCount\": 100000,\n            \"checkedRows\": 100000,\n            \"baselineHistoricalRows\": 3,\n            \"baselinePreserved\": true,\n            \"externalMapping\": {\n              \"crash-crash-kill-100000-1791895977687\": 2\n            },\n            \"atomic\": true\n          },\n          \"outcome\": \"inconclusive\",\n          \"midOperationProven\": false,\n          \"placementLimitations\": \"5ms polling and taskkill scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive.\"\n        },\n        {\n          \"fixture\": \"crash-kill-200000-1791895989475\",\n          \"count\": 200000,\n          \"payloadBytesPerRow\": 1024,\n          \"before\": 1,\n          \"pid\": 15164,\n          \"backupCreatedWhileClosed\": true,\n          \"events\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T12:53:20.238Z\",\n              \"epochMs\": 1791896000241,\n              \"pid\": 15164,\n              \"count\": 200000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-200000-1791895989475\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-200000-1791895989475\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-200000-1791895989475\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"fbb2261d5d47abcb6459ccf2c2536ff14e1192e568ad633076bb9c74f53af9b3\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 200001,\n              \"receivedAt\": \"2026-10-13T12:53:20.243Z\"\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T12:53:20.252Z\",\n              \"epochMs\": 1791896000252,\n              \"pid\": 15164,\n              \"receivedAt\": \"2026-10-13T12:53:20.252Z\"\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T12:53:20.253Z\",\n              \"epochMs\": 1791896000253,\n              \"pid\": 15164,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\",\n              \"receivedAt\": \"2026-10-13T12:53:20.253Z\"\n            },\n            {\n              \"phase\": \"completed\",\n              \"at\": \"2026-10-13T12:53:46.101Z\",\n              \"epochMs\": 1791896026101,\n              \"pid\": 15164,\n              \"result\": {\n                \"version\": 2,\n                \"numInsertedRows\": 200001,\n                \"numUpdatedRows\": 0,\n                \"numDeletedRows\": 0,\n                \"numAttempts\": 1,\n                \"numRows\": 200001\n              },\n              \"versionAfterPublication\": 2,\n              \"receivedAt\": \"2026-10-13T12:53:46.103Z\"\n            }\n          ],\n          \"journal\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T12:53:20.238Z\",\n              \"epochMs\": 1791896000241,\n              \"pid\": 15164,\n              \"count\": 200000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-200000-1791895989475\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-200000-1791895989475\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-200000-1791895989475\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"fbb2261d5d47abcb6459ccf2c2536ff14e1192e568ad633076bb9c74f53af9b3\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 200001\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T12:53:20.252Z\",\n              \"epochMs\": 1791896000252,\n              \"pid\": 15164\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T12:53:20.253Z\",\n              \"epochMs\": 1791896000253,\n              \"pid\": 15164,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\"\n            },\n            {\n              \"phase\": \"completed\",\n              \"at\": \"2026-10-13T12:53:46.101Z\",\n              \"epochMs\": 1791896026101,\n              \"pid\": 15164,\n              \"result\": {\n                \"version\": 2,\n                \"numInsertedRows\": 200001,\n                \"numUpdatedRows\": 0,\n                \"numDeletedRows\": 0,\n                \"numAttempts\": 1,\n                \"numRows\": 200001\n              },\n              \"versionAfterPublication\": 2\n            }\n          ],\n          \"diskObservation\": {\n            \"at\": \"2026-10-13T12:53:42.148Z\",\n            \"epochMs\": 1791896022148,\n            \"newFiles\": [\n              [\n                \"graph_elements.lance\\\\data\\\\0111011100001101010010018470344f72bae6430739c4b674.lance\",\n                35159776\n              ]\n            ],\n            \"meaning\": \"Nonzero new Lance data files observed after SDK invocation; native storage work has begun.\"\n          },\n          \"killResult\": {\n            \"command\": \"taskkill.exe /PID 15164 /F\",\n            \"requestedAt\": \"2026-10-13T12:53:42.148Z\",\n            \"finishedAt\": \"2026-10-13T12:53:46.198Z\",\n            \"exitCode\": 0,\n            \"output\": \"SUCCESS: The process with PID 15164 has been terminated.\\r\\n\"\n          },\n          \"exit\": {\n            \"code\": 1,\n            \"signal\": null,\n            \"at\": \"2026-10-13T12:53:46.330Z\"\n          },\n          \"stderr\": \"\",\n          \"recoveryCommand\": \"node recovery-probe.ts crash-kill-200000-1791895989475 200000 crash-crash-kill-200000-1791895989475\",\n          \"recovery\": {\n            \"version\": 2,\n            \"rows\": 200000,\n            \"markers\": 1,\n            \"totalRows\": 200004,\n            \"expectedCount\": 200000,\n            \"checkedRows\": 200000,\n            \"baselineHistoricalRows\": 3,\n            \"baselinePreserved\": true,\n            \"externalMapping\": {\n              \"crash-crash-kill-200000-1791895989475\": 2\n            },\n            \"atomic\": true\n          },\n          \"outcome\": \"inconclusive\",\n          \"midOperationProven\": false,\n          \"placementLimitations\": \"5ms polling and taskkill scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive.\"\n        }\n      ],\n      \"outcome\": \"inconclusive\",\n      \"singleWriter\": true,\n      \"noLiveWriter\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run clean",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:53:54.898Z",
+          "finishedAt": "2026-10-13T12:53:57.406Z",
+          "elapsedMs": 2508.2069000000047,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 clean\n> node cleanup.ts\n\n{\n  \"cleanup\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:53:57.098Z\",\n    \"finishedAt\": \"2026-10-13T12:53:57.193Z\",\n    \"elapsedMs\": 89.12830000000008,\n    \"result\": {\n      \"removed\": [\n        \".generated\",\n        \"dist\",\n        \"build\"\n      ],\n      \"generatedDatabasesAndBackupsRemoved\": true,\n      \"durableSourcesAndEvidencePreserved\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "command": "npm --prefix experiments/g0 run verify",
+      "commands": [
+        {
+          "command": "npm run typecheck",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:58:49.706Z",
+          "finishedAt": "2026-10-13T12:58:53.564Z",
+          "elapsedMs": 3851.6013000000003,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 typecheck\n> tsc --noEmit\n\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run unit",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:58:53.564Z",
+          "finishedAt": "2026-10-13T12:58:55.533Z",
+          "elapsedMs": 1969.1579000000002,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 unit\n> node --test invariant-probe.ts\n\n✔ qualified keys reject duplicate id/branch pairs but distinguish branches (3.5785ms)\n✔ atomic visibility accepts only none or all with exactly one marker (1.4961ms)\n✔ batch contains semantic marker and deterministic delta hash only (2.2743ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1056.1484\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run sdk",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:58:55.533Z",
+          "finishedAt": "2026-10-13T12:59:01.598Z",
+          "elapsedMs": 6065.090699999999,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 sdk\n> node sdk-probe.ts\n\n{\n  \"sdk\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:58:57.112Z\",\n    \"finishedAt\": \"2026-10-13T12:59:01.503Z\",\n    \"elapsedMs\": 4386.2565,\n    \"result\": {\n      \"node\": \"v24.14.1\",\n      \"npm\": \"11.11.0\",\n      \"platform\": \"win32\",\n      \"arch\": \"x64\",\n      \"os\": \"Microsoft Windows [Version 10.0.19045.6466]\",\n      \"registryCommand\": \"npm view @lancedb/lancedb@0.40.0 version gitHead engines peerDependencies optionalDependencies dist --json\",\n      \"registry\": {\n        \"version\": \"0.40.0\",\n        \"gitHead\": \"b1b080b97c3edd2fd9f2aae8a3b71ff19487b1f8\",\n        \"engines\": {\n          \"node\": \">= 22\"\n        },\n        \"peerDependencies\": {\n          \"@types/node\": \">=22\",\n          \"apache-arrow\": \">=15.0.0 <=18.1.0\"\n        },\n        \"optionalDependencies\": {\n          \"openai\": \"4.29.2\",\n          \"@huggingface/transformers\": \"3.0.2\",\n          \"@lancedb/lancedb-darwin-arm64\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-x64-gnu\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-x64-musl\": \"0.40.0\",\n          \"@lancedb/lancedb-win32-x64-msvc\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-arm64-gnu\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-arm64-musl\": \"0.40.0\",\n          \"@lancedb/lancedb-win32-arm64-msvc\": \"0.40.0\"\n        },\n        \"dist\": {\n          \"shasum\": \"f368b4c02b3d91692c100dea64626c462df404a8\",\n          \"tarball\": \"https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz\",\n          \"fileCount\": 66,\n          \"integrity\": \"sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==\",\n          \"signatures\": [\n            {\n              \"sig\": \"MEUCIQDxMKnbTq6txcjs9fqIDC4yAoJ31ERkIBHph2/kFv+JsAIgL+IGA+yRWvAoQyAri2D+DZOOPaFnxcUrPSSHpPBjXkI=\",\n              \"keyid\": \"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U\"\n            },\n            {\n              \"sig\": \"MEYCIQDfgswU3swr5JAgq3i921tZ/RurReAnBsThKlpcxwTSjQIhAKSFwfaXfkkO+SoIEDm/XLF9piItrqxMgxyOGnpM4LJS\",\n              \"keyid\": \"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U\"\n            }\n          ],\n          \"attestations\": {\n            \"url\": \"https://registry.npmjs.org/-/npm/v1/attestations/@lancedb%2flancedb@0.40.0\",\n            \"provenance\": {\n              \"predicateType\": \"https://slsa.dev/provenance/v1\"\n            }\n          },\n          \"unpackedSize\": 1480653\n        }\n      },\n      \"installed\": {\n        \"@lancedb/lancedb\": {\n          \"version\": \"0.40.0\",\n          \"integrity\": \"sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==\",\n          \"resolved\": \"https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz\"\n        },\n        \"@lancedb/lancedb-win32-x64-msvc\": {\n          \"version\": \"0.40.0\",\n          \"integrity\": \"sha512-DZxho/MhnGJCQc98CN3yY8qWlDCATLTjGUNqD58Fx1sNMctmkbdAf4F1fTRahz0aojfnM9aoUNaSXdY0qaPhbQ==\",\n          \"resolved\": \"https://registry.npmjs.org/@lancedb/lancedb-win32-x64-msvc/-/lancedb-win32-x64-msvc-0.40.0.tgz\"\n        },\n        \"apache-arrow\": {\n          \"version\": \"18.1.0\",\n          \"integrity\": \"sha512-v/ShMp57iBnBp4lDgV8Jx3d3Q5/Hac25FWmQ98eMahUiHPXcvwIMKJD0hBIgclm/FCG+LwPkAKtkRO1O/W0YGg==\",\n          \"resolved\": \"https://registry.npmjs.org/apache-arrow/-/apache-arrow-18.1.0.tgz\"\n        },\n        \"typescript\": {\n          \"version\": \"7.0.2\",\n          \"integrity\": \"sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==\",\n          \"resolved\": \"https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz\"\n        },\n        \"@typescript/typescript-win32-x64\": {\n          \"version\": \"7.0.2\",\n          \"integrity\": \"sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==\",\n          \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz\"\n        },\n        \"@types/node\": {\n          \"version\": \"22.20.5\",\n          \"integrity\": \"sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==\",\n          \"resolved\": \"https://registry.npmjs.org/@types/node/-/node-22.20.5.tgz\"\n        }\n      },\n      \"lockSha256\": \"9332e0d49c65d455399e41162c7ec69d5c7191ade4b8df6648efebbf0859fb3d\",\n      \"nativeEntry\": \"node_modules/@lancedb/lancedb-win32-x64-msvc/lancedb.win32-x64-msvc.node\",\n      \"nativeSha256\": \"b3fa98d78809286da9ab71a206535fe6696df40faab6cbe523574a55ef4a0b3a\",\n      \"nativeLoad\": true,\n      \"baselineVersion\": 1,\n      \"reopenedRows\": 3,\n      \"fields\": [\n        {\n          \"name\": \"id\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"branch\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"kind\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"qualifiedName\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"disambiguator\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"payload\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"commitId\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"parents\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        },\n        {\n          \"name\": \"deltaHash\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        },\n        {\n          \"name\": \"actor\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        }\n      ]\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run batch",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:59:01.599Z",
+          "finishedAt": "2026-10-13T12:59:04.109Z",
+          "elapsedMs": 2510.1985999999997,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 batch\n> node batch-probe.ts\n\n{\n  \"batch\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:59:03.455Z\",\n    \"finishedAt\": \"2026-10-13T12:59:04.019Z\",\n    \"elapsedMs\": 560.8385000000001,\n    \"result\": {\n      \"baselineVersion\": 1,\n      \"currentVersion\": 3,\n      \"publications\": [\n        {\n          \"commitId\": \"commit-1\",\n          \"before\": 1,\n          \"after\": 2,\n          \"versionsBefore\": [\n            1\n          ],\n          \"versionsAfter\": [\n            1,\n            2\n          ],\n          \"mergeResult\": {\n            \"version\": 2,\n            \"numInsertedRows\": 2,\n            \"numUpdatedRows\": 1,\n            \"numDeletedRows\": 0,\n            \"numAttempts\": 1,\n            \"numRows\": 3\n          },\n          \"startedAt\": \"2026-10-13T12:59:03.585Z\",\n          \"elapsedMs\": 134.20579999999995,\n          \"expectedRows\": 5,\n          \"marker\": {\n            \"id\": \"[\\\"commit-1\\\",\\\"marker\\\",\\\"0\\\"]\",\n            \"branch\": \"main\",\n            \"kind\": \"marker\",\n            \"qualifiedName\": \"commit-1\",\n            \"disambiguator\": \"0\",\n            \"payload\": \"\",\n            \"commitId\": \"commit-1\",\n            \"parents\": \"[\\\"baseline\\\"]\",\n            \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n            \"actor\": \"g0-single-writer\"\n          },\n          \"externalMapping\": {\n            \"commit-1\": 2\n          }\n        },\n        {\n          \"commitId\": \"commit-2\",\n          \"before\": 2,\n          \"after\": 3,\n          \"versionsBefore\": [\n            1,\n            2\n          ],\n          \"versionsAfter\": [\n            1,\n            2,\n            3\n          ],\n          \"mergeResult\": {\n            \"version\": 3,\n            \"numInsertedRows\": 2,\n            \"numUpdatedRows\": 1,\n            \"numDeletedRows\": 0,\n            \"numAttempts\": 1,\n            \"numRows\": 3\n          },\n          \"startedAt\": \"2026-10-13T12:59:03.775Z\",\n          \"elapsedMs\": 180.92720000000008,\n          \"expectedRows\": 7,\n          \"marker\": {\n            \"id\": \"[\\\"commit-2\\\",\\\"marker\\\",\\\"0\\\"]\",\n            \"branch\": \"main\",\n            \"kind\": \"marker\",\n            \"qualifiedName\": \"commit-2\",\n            \"disambiguator\": \"0\",\n            \"payload\": \"\",\n            \"commitId\": \"commit-2\",\n            \"parents\": \"[\\\"commit-1\\\"]\",\n            \"deltaHash\": \"e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d\",\n            \"actor\": \"g0-single-writer\"\n          },\n          \"externalMapping\": {\n            \"commit-2\": 3\n          }\n        }\n      ],\n      \"reopenedCurrentAndHistorical\": [\n        {\n          \"version\": 1,\n          \"rowCount\": 3,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        },\n        {\n          \"version\": 2,\n          \"rowCount\": 5,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-1\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        },\n        {\n          \"version\": 3,\n          \"rowCount\": 7,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-1\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-2\",\n              \"parents\": \"[\\\"commit-1\\\"]\",\n              \"deltaHash\": \"e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        }\n      ],\n      \"schema\": \"Explicit Utf8 fields, nullable semantic marker fields; no embeddings or native version field\",\n      \"singleWriter\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run crash",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:59:04.109Z",
+          "finishedAt": "2026-10-13T12:59:40.605Z",
+          "elapsedMs": 36495.937900000004,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 crash\n> node crash-probe.ts\n\n{\n  \"crash\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:59:05.798Z\",\n    \"finishedAt\": \"2026-10-13T12:59:40.529Z\",\n    \"elapsedMs\": 34726.971,\n    \"result\": {\n      \"control\": {\n        \"fixture\": \"crash-control-100000-1791896345803\",\n        \"count\": 100000,\n        \"payloadBytesPerRow\": 1024,\n        \"before\": 1,\n        \"pid\": 3944,\n        \"backupCreatedWhileClosed\": true,\n        \"events\": [\n          {\n            \"phase\": \"prepared\",\n            \"at\": \"2026-10-13T12:59:12.843Z\",\n            \"epochMs\": 1791896352846,\n            \"pid\": 3944,\n            \"count\": 100000,\n            \"marker\": {\n              \"id\": \"[\\\"crash-crash-control-100000-1791896345803\\\",\\\"marker\\\",\\\"0\\\"]\",\n              \"branch\": \"main\",\n              \"kind\": \"marker\",\n              \"qualifiedName\": \"crash-crash-control-100000-1791896345803\",\n              \"disambiguator\": \"0\",\n              \"payload\": \"\",\n              \"commitId\": \"crash-crash-control-100000-1791896345803\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"40bd48937d074575f6b08c7229ffe563edfba550891afb09fc4e7f8f895f3a67\",\n              \"actor\": \"g0-single-writer\"\n            },\n            \"arrowRows\": 100001,\n            \"receivedAt\": \"2026-10-13T12:59:12.849Z\"\n          },\n          {\n            \"phase\": \"before-sdk-invocation\",\n            \"at\": \"2026-10-13T12:59:12.856Z\",\n            \"epochMs\": 1791896352856,\n            \"pid\": 3944,\n            \"receivedAt\": \"2026-10-13T12:59:12.857Z\"\n          },\n          {\n            \"phase\": \"sdk-promise-returned\",\n            \"at\": \"2026-10-13T12:59:12.857Z\",\n            \"epochMs\": 1791896352857,\n            \"pid\": 3944,\n            \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\",\n            \"receivedAt\": \"2026-10-13T12:59:12.858Z\"\n          },\n          {\n            \"phase\": \"completed\",\n            \"at\": \"2026-10-13T12:59:14.661Z\",\n            \"epochMs\": 1791896354661,\n            \"pid\": 3944,\n            \"result\": {\n              \"version\": 2,\n              \"numInsertedRows\": 100001,\n              \"numUpdatedRows\": 0,\n              \"numDeletedRows\": 0,\n              \"numAttempts\": 1,\n              \"numRows\": 100001\n            },\n            \"versionAfterPublication\": 2,\n            \"receivedAt\": \"2026-10-13T12:59:14.662Z\"\n          }\n        ],\n        \"journal\": [\n          {\n            \"phase\": \"prepared\",\n            \"at\": \"2026-10-13T12:59:12.843Z\",\n            \"epochMs\": 1791896352846,\n            \"pid\": 3944,\n            \"count\": 100000,\n            \"marker\": {\n              \"id\": \"[\\\"crash-crash-control-100000-1791896345803\\\",\\\"marker\\\",\\\"0\\\"]\",\n              \"branch\": \"main\",\n              \"kind\": \"marker\",\n              \"qualifiedName\": \"crash-crash-control-100000-1791896345803\",\n              \"disambiguator\": \"0\",\n              \"payload\": \"\",\n              \"commitId\": \"crash-crash-control-100000-1791896345803\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"40bd48937d074575f6b08c7229ffe563edfba550891afb09fc4e7f8f895f3a67\",\n              \"actor\": \"g0-single-writer\"\n            },\n            \"arrowRows\": 100001\n          },\n          {\n            \"phase\": \"before-sdk-invocation\",\n            \"at\": \"2026-10-13T12:59:12.856Z\",\n            \"epochMs\": 1791896352856,\n            \"pid\": 3944\n          },\n          {\n            \"phase\": \"sdk-promise-returned\",\n            \"at\": \"2026-10-13T12:59:12.857Z\",\n            \"epochMs\": 1791896352857,\n            \"pid\": 3944,\n            \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\"\n          },\n          {\n            \"phase\": \"completed\",\n            \"at\": \"2026-10-13T12:59:14.661Z\",\n            \"epochMs\": 1791896354661,\n            \"pid\": 3944,\n            \"result\": {\n              \"version\": 2,\n              \"numInsertedRows\": 100001,\n              \"numUpdatedRows\": 0,\n              \"numDeletedRows\": 0,\n              \"numAttempts\": 1,\n              \"numRows\": 100001\n            },\n            \"versionAfterPublication\": 2\n          }\n        ],\n        \"exit\": {\n          \"code\": 0,\n          \"signal\": null,\n          \"at\": \"2026-10-13T12:59:14.852Z\"\n        },\n        \"writerStillExists\": false,\n        \"stderr\": \"\",\n        \"recoveryCommand\": \"node recovery-probe.ts crash-control-100000-1791896345803 100000 crash-crash-control-100000-1791896345803\",\n        \"recovery\": {\n          \"version\": 2,\n          \"rows\": 100000,\n          \"markers\": 1,\n          \"totalRows\": 100004,\n          \"expectedCount\": 100000,\n          \"checkedRows\": 100000,\n          \"baselineHistoricalRows\": 3,\n          \"baselinePreserved\": true,\n          \"externalMapping\": {\n            \"crash-crash-control-100000-1791896345803\": 2\n          },\n          \"atomic\": true\n        },\n        \"outcome\": \"passed\",\n        \"midOperationProven\": false,\n        \"placementLimitations\": \"5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive.\"\n      },\n      \"attempts\": [\n        {\n          \"fixture\": \"crash-kill-200000-1791896361623\",\n          \"count\": 200000,\n          \"payloadBytesPerRow\": 1024,\n          \"before\": 1,\n          \"pid\": 6736,\n          \"backupCreatedWhileClosed\": true,\n          \"events\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T12:59:35.245Z\",\n              \"epochMs\": 1791896375247,\n              \"pid\": 6736,\n              \"count\": 200000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-200000-1791896361623\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-200000-1791896361623\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-200000-1791896361623\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"e683d50a19be623bd12dfe1c9aaf4acc4d12a51c18ac9ecdc7a89b2702100b9c\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 200001,\n              \"receivedAt\": \"2026-10-13T12:59:35.252Z\"\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T12:59:35.277Z\",\n              \"epochMs\": 1791896375277,\n              \"pid\": 6736,\n              \"receivedAt\": \"2026-10-13T12:59:35.279Z\"\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T12:59:35.280Z\",\n              \"epochMs\": 1791896375280,\n              \"pid\": 6736,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\",\n              \"receivedAt\": \"2026-10-13T12:59:35.281Z\"\n            }\n          ],\n          \"journal\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T12:59:35.245Z\",\n              \"epochMs\": 1791896375247,\n              \"pid\": 6736,\n              \"count\": 200000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-200000-1791896361623\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-200000-1791896361623\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-200000-1791896361623\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"e683d50a19be623bd12dfe1c9aaf4acc4d12a51c18ac9ecdc7a89b2702100b9c\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 200001\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T12:59:35.277Z\",\n              \"epochMs\": 1791896375277,\n              \"pid\": 6736\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T12:59:35.280Z\",\n              \"epochMs\": 1791896375280,\n              \"pid\": 6736,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\"\n            }\n          ],\n          \"diskObservation\": {\n            \"at\": \"2026-10-13T12:59:39.103Z\",\n            \"epochMs\": 1791896379103,\n            \"newFiles\": [\n              [\n                \"graph_elements.lance\\\\data\\\\101110000110000111110011d5f6dd4b6f92967ba0357310b7.lance\",\n                35189344\n              ]\n            ],\n            \"meaning\": \"Nonzero new Lance data files observed after SDK invocation; native storage work has begun.\"\n          },\n          \"killResult\": {\n            \"command\": \"process.kill(6736, 'SIGKILL')\",\n            \"requestedAt\": \"2026-10-13T12:59:39.103Z\",\n            \"finishedAt\": \"2026-10-13T12:59:39.104Z\",\n            \"exitCode\": 0,\n            \"output\": \"Windows unconditional PID termination acknowledged: true\"\n          },\n          \"exit\": {\n            \"code\": 1,\n            \"signal\": null,\n            \"at\": \"2026-10-13T12:59:39.351Z\"\n          },\n          \"writerStillExists\": false,\n          \"stderr\": \"\",\n          \"recoveryCommand\": \"node recovery-probe.ts crash-kill-200000-1791896361623 200000 crash-crash-kill-200000-1791896361623\",\n          \"recovery\": {\n            \"version\": 1,\n            \"rows\": 0,\n            \"markers\": 0,\n            \"totalRows\": 3,\n            \"expectedCount\": 200000,\n            \"checkedRows\": 0,\n            \"baselineHistoricalRows\": 3,\n            \"baselinePreserved\": true,\n            \"externalMapping\": {},\n            \"atomic\": true\n          },\n          \"outcome\": \"passed\",\n          \"midOperationProven\": true,\n          \"placementLimitations\": \"5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive.\"\n        }\n      ],\n      \"outcome\": \"passed\",\n      \"singleWriter\": true,\n      \"noLiveWriter\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run clean",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T12:59:40.605Z",
+          "finishedAt": "2026-10-13T12:59:42.869Z",
+          "elapsedMs": 2263.981200000002,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 clean\n> node cleanup.ts\n\n{\n  \"cleanup\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T12:59:42.739Z\",\n    \"finishedAt\": \"2026-10-13T12:59:42.791Z\",\n    \"elapsedMs\": 46.677400000000034,\n    \"result\": {\n      \"removed\": [\n        \".generated\",\n        \"dist\",\n        \"build\"\n      ],\n      \"generatedDatabasesAndBackupsRemoved\": true,\n      \"durableSourcesAndEvidencePreserved\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "command": "npm --prefix experiments/g0 run verify",
+      "commands": [
+        {
+          "command": "npm run typecheck",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T13:43:11.087Z",
+          "finishedAt": "2026-10-13T13:43:13.966Z",
+          "elapsedMs": 2875.7429,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 typecheck\n> tsc --noEmit\n\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run unit",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T13:43:13.967Z",
+          "finishedAt": "2026-10-13T13:43:15.704Z",
+          "elapsedMs": 1737.7651999999998,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 unit\n> node --test invariant-probe.ts\n\n✔ qualified keys reject duplicate id/branch pairs but distinguish branches (3.2093ms)\n✔ atomic visibility accepts only none or all with exactly one marker (1.9436ms)\n✔ batch contains semantic marker and deterministic delta hash only (2.292ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 957.8543\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run sdk",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T13:43:15.705Z",
+          "finishedAt": "2026-10-13T13:43:23.986Z",
+          "elapsedMs": 8281.871299999999,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 sdk\n> node sdk-probe.ts\n\n{\n  \"sdk\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T13:43:17.636Z\",\n    \"finishedAt\": \"2026-10-13T13:43:23.638Z\",\n    \"elapsedMs\": 5999.4097,\n    \"result\": {\n      \"node\": \"v24.14.1\",\n      \"npm\": \"11.11.0\",\n      \"platform\": \"win32\",\n      \"arch\": \"x64\",\n      \"os\": \"Microsoft Windows [Version 10.0.19045.6466]\",\n      \"registryCommand\": \"npm view @lancedb/lancedb@0.40.0 version gitHead engines peerDependencies optionalDependencies dist --json\",\n      \"registry\": {\n        \"version\": \"0.40.0\",\n        \"gitHead\": \"b1b080b97c3edd2fd9f2aae8a3b71ff19487b1f8\",\n        \"engines\": {\n          \"node\": \">= 22\"\n        },\n        \"peerDependencies\": {\n          \"@types/node\": \">=22\",\n          \"apache-arrow\": \">=15.0.0 <=18.1.0\"\n        },\n        \"optionalDependencies\": {\n          \"openai\": \"4.29.2\",\n          \"@huggingface/transformers\": \"3.0.2\",\n          \"@lancedb/lancedb-darwin-arm64\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-x64-gnu\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-x64-musl\": \"0.40.0\",\n          \"@lancedb/lancedb-win32-x64-msvc\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-arm64-gnu\": \"0.40.0\",\n          \"@lancedb/lancedb-linux-arm64-musl\": \"0.40.0\",\n          \"@lancedb/lancedb-win32-arm64-msvc\": \"0.40.0\"\n        },\n        \"dist\": {\n          \"shasum\": \"f368b4c02b3d91692c100dea64626c462df404a8\",\n          \"tarball\": \"https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz\",\n          \"fileCount\": 66,\n          \"integrity\": \"sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==\",\n          \"signatures\": [\n            {\n              \"sig\": \"MEUCIQDxMKnbTq6txcjs9fqIDC4yAoJ31ERkIBHph2/kFv+JsAIgL+IGA+yRWvAoQyAri2D+DZOOPaFnxcUrPSSHpPBjXkI=\",\n              \"keyid\": \"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U\"\n            },\n            {\n              \"sig\": \"MEYCIQDfgswU3swr5JAgq3i921tZ/RurReAnBsThKlpcxwTSjQIhAKSFwfaXfkkO+SoIEDm/XLF9piItrqxMgxyOGnpM4LJS\",\n              \"keyid\": \"SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U\"\n            }\n          ],\n          \"attestations\": {\n            \"url\": \"https://registry.npmjs.org/-/npm/v1/attestations/@lancedb%2flancedb@0.40.0\",\n            \"provenance\": {\n              \"predicateType\": \"https://slsa.dev/provenance/v1\"\n            }\n          },\n          \"unpackedSize\": 1480653\n        }\n      },\n      \"installed\": {\n        \"@lancedb/lancedb\": {\n          \"version\": \"0.40.0\",\n          \"integrity\": \"sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==\",\n          \"resolved\": \"https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz\"\n        },\n        \"@lancedb/lancedb-win32-x64-msvc\": {\n          \"version\": \"0.40.0\",\n          \"integrity\": \"sha512-DZxho/MhnGJCQc98CN3yY8qWlDCATLTjGUNqD58Fx1sNMctmkbdAf4F1fTRahz0aojfnM9aoUNaSXdY0qaPhbQ==\",\n          \"resolved\": \"https://registry.npmjs.org/@lancedb/lancedb-win32-x64-msvc/-/lancedb-win32-x64-msvc-0.40.0.tgz\"\n        },\n        \"apache-arrow\": {\n          \"version\": \"18.1.0\",\n          \"integrity\": \"sha512-v/ShMp57iBnBp4lDgV8Jx3d3Q5/Hac25FWmQ98eMahUiHPXcvwIMKJD0hBIgclm/FCG+LwPkAKtkRO1O/W0YGg==\",\n          \"resolved\": \"https://registry.npmjs.org/apache-arrow/-/apache-arrow-18.1.0.tgz\"\n        },\n        \"typescript\": {\n          \"version\": \"7.0.2\",\n          \"integrity\": \"sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==\",\n          \"resolved\": \"https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz\"\n        },\n        \"@typescript/typescript-win32-x64\": {\n          \"version\": \"7.0.2\",\n          \"integrity\": \"sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==\",\n          \"resolved\": \"https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz\"\n        },\n        \"@types/node\": {\n          \"version\": \"22.20.5\",\n          \"integrity\": \"sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==\",\n          \"resolved\": \"https://registry.npmjs.org/@types/node/-/node-22.20.5.tgz\"\n        }\n      },\n      \"lockSha256\": \"9332e0d49c65d455399e41162c7ec69d5c7191ade4b8df6648efebbf0859fb3d\",\n      \"nativeEntry\": \"node_modules/@lancedb/lancedb-win32-x64-msvc/lancedb.win32-x64-msvc.node\",\n      \"nativeSha256\": \"b3fa98d78809286da9ab71a206535fe6696df40faab6cbe523574a55ef4a0b3a\",\n      \"nativeLoad\": true,\n      \"baselineVersion\": 1,\n      \"reopenedRows\": 3,\n      \"fields\": [\n        {\n          \"name\": \"id\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"branch\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"kind\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"qualifiedName\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"disambiguator\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"payload\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"commitId\",\n          \"type\": \"Utf8\",\n          \"nullable\": false\n        },\n        {\n          \"name\": \"parents\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        },\n        {\n          \"name\": \"deltaHash\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        },\n        {\n          \"name\": \"actor\",\n          \"type\": \"Utf8\",\n          \"nullable\": true\n        }\n      ]\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run batch",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T13:43:23.987Z",
+          "finishedAt": "2026-10-13T13:43:26.798Z",
+          "elapsedMs": 2811.4916999999987,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 batch\n> node batch-probe.ts\n\n{\n  \"batch\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T13:43:26.395Z\",\n    \"finishedAt\": \"2026-10-13T13:43:26.704Z\",\n    \"elapsedMs\": 305.31680000000006,\n    \"result\": {\n      \"baselineVersion\": 1,\n      \"currentVersion\": 3,\n      \"publications\": [\n        {\n          \"commitId\": \"commit-1\",\n          \"before\": 1,\n          \"after\": 2,\n          \"versionsBefore\": [\n            1\n          ],\n          \"versionsAfter\": [\n            1,\n            2\n          ],\n          \"mergeResult\": {\n            \"version\": 2,\n            \"numInsertedRows\": 2,\n            \"numUpdatedRows\": 1,\n            \"numDeletedRows\": 0,\n            \"numAttempts\": 1,\n            \"numRows\": 3\n          },\n          \"startedAt\": \"2026-10-13T13:43:26.493Z\",\n          \"elapsedMs\": 53.577400000000125,\n          \"expectedRows\": 5,\n          \"marker\": {\n            \"id\": \"[\\\"commit-1\\\",\\\"marker\\\",\\\"0\\\"]\",\n            \"branch\": \"main\",\n            \"kind\": \"marker\",\n            \"qualifiedName\": \"commit-1\",\n            \"disambiguator\": \"0\",\n            \"payload\": \"\",\n            \"commitId\": \"commit-1\",\n            \"parents\": \"[\\\"baseline\\\"]\",\n            \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n            \"actor\": \"g0-single-writer\"\n          },\n          \"externalMapping\": {\n            \"commit-1\": 2\n          }\n        },\n        {\n          \"commitId\": \"commit-2\",\n          \"before\": 2,\n          \"after\": 3,\n          \"versionsBefore\": [\n            1,\n            2\n          ],\n          \"versionsAfter\": [\n            1,\n            2,\n            3\n          ],\n          \"mergeResult\": {\n            \"version\": 3,\n            \"numInsertedRows\": 2,\n            \"numUpdatedRows\": 1,\n            \"numDeletedRows\": 0,\n            \"numAttempts\": 1,\n            \"numRows\": 3\n          },\n          \"startedAt\": \"2026-10-13T13:43:26.593Z\",\n          \"elapsedMs\": 46.62519999999995,\n          \"expectedRows\": 7,\n          \"marker\": {\n            \"id\": \"[\\\"commit-2\\\",\\\"marker\\\",\\\"0\\\"]\",\n            \"branch\": \"main\",\n            \"kind\": \"marker\",\n            \"qualifiedName\": \"commit-2\",\n            \"disambiguator\": \"0\",\n            \"payload\": \"\",\n            \"commitId\": \"commit-2\",\n            \"parents\": \"[\\\"commit-1\\\"]\",\n            \"deltaHash\": \"e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d\",\n            \"actor\": \"g0-single-writer\"\n          },\n          \"externalMapping\": {\n            \"commit-2\": 3\n          }\n        }\n      ],\n      \"reopenedCurrentAndHistorical\": [\n        {\n          \"version\": 1,\n          \"rowCount\": 3,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        },\n        {\n          \"version\": 2,\n          \"rowCount\": 5,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-1\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        },\n        {\n          \"version\": 3,\n          \"rowCount\": 7,\n          \"markers\": [\n            {\n              \"id\": \"baseline\",\n              \"parents\": \"[]\",\n              \"deltaHash\": \"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-1\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f\",\n              \"actor\": \"g0-single-writer\"\n            },\n            {\n              \"id\": \"commit-2\",\n              \"parents\": \"[\\\"commit-1\\\"]\",\n              \"deltaHash\": \"e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d\",\n              \"actor\": \"g0-single-writer\"\n            }\n          ],\n          \"exactContentsMatch\": true,\n          \"unmatchedRowPreserved\": true\n        }\n      ],\n      \"schema\": \"Explicit Utf8 fields, nullable semantic marker fields; no embeddings or native version field\",\n      \"singleWriter\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run crash",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T13:43:26.798Z",
+          "finishedAt": "2026-10-13T13:44:11.998Z",
+          "elapsedMs": 45200.504199999996,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 crash\n> node crash-probe.ts\n\n{\n  \"crash\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T13:43:28.716Z\",\n    \"finishedAt\": \"2026-10-13T13:44:11.891Z\",\n    \"elapsedMs\": 43170.114499999996,\n    \"result\": {\n      \"control\": {\n        \"fixture\": \"crash-control-100000-1791899008722\",\n        \"count\": 100000,\n        \"payloadBytesPerRow\": 1024,\n        \"before\": 1,\n        \"pid\": 1400,\n        \"backupCreatedWhileClosed\": true,\n        \"events\": [\n          {\n            \"phase\": \"prepared\",\n            \"at\": \"2026-10-13T13:43:37.185Z\",\n            \"epochMs\": 1791899017189,\n            \"pid\": 1400,\n            \"count\": 100000,\n            \"marker\": {\n              \"id\": \"[\\\"crash-crash-control-100000-1791899008722\\\",\\\"marker\\\",\\\"0\\\"]\",\n              \"branch\": \"main\",\n              \"kind\": \"marker\",\n              \"qualifiedName\": \"crash-crash-control-100000-1791899008722\",\n              \"disambiguator\": \"0\",\n              \"payload\": \"\",\n              \"commitId\": \"crash-crash-control-100000-1791899008722\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"657b4ef11907d790b25c8638dfb5cae8d9c647f8803bc86d4e738fc1cfab4eb5\",\n              \"actor\": \"g0-single-writer\"\n            },\n            \"arrowRows\": 100001,\n            \"receivedAt\": \"2026-10-13T13:43:37.192Z\"\n          },\n          {\n            \"phase\": \"before-sdk-invocation\",\n            \"at\": \"2026-10-13T13:43:37.203Z\",\n            \"epochMs\": 1791899017203,\n            \"pid\": 1400,\n            \"receivedAt\": \"2026-10-13T13:43:37.204Z\"\n          },\n          {\n            \"phase\": \"sdk-promise-returned\",\n            \"at\": \"2026-10-13T13:43:37.204Z\",\n            \"epochMs\": 1791899017204,\n            \"pid\": 1400,\n            \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\",\n            \"receivedAt\": \"2026-10-13T13:43:37.205Z\"\n          },\n          {\n            \"phase\": \"completed\",\n            \"at\": \"2026-10-13T13:43:39.403Z\",\n            \"epochMs\": 1791899019403,\n            \"pid\": 1400,\n            \"result\": {\n              \"version\": 2,\n              \"numInsertedRows\": 100001,\n              \"numUpdatedRows\": 0,\n              \"numDeletedRows\": 0,\n              \"numAttempts\": 1,\n              \"numRows\": 100001\n            },\n            \"versionAfterPublication\": 2,\n            \"receivedAt\": \"2026-10-13T13:43:39.404Z\"\n          }\n        ],\n        \"journal\": [\n          {\n            \"phase\": \"prepared\",\n            \"at\": \"2026-10-13T13:43:37.185Z\",\n            \"epochMs\": 1791899017189,\n            \"pid\": 1400,\n            \"count\": 100000,\n            \"marker\": {\n              \"id\": \"[\\\"crash-crash-control-100000-1791899008722\\\",\\\"marker\\\",\\\"0\\\"]\",\n              \"branch\": \"main\",\n              \"kind\": \"marker\",\n              \"qualifiedName\": \"crash-crash-control-100000-1791899008722\",\n              \"disambiguator\": \"0\",\n              \"payload\": \"\",\n              \"commitId\": \"crash-crash-control-100000-1791899008722\",\n              \"parents\": \"[\\\"baseline\\\"]\",\n              \"deltaHash\": \"657b4ef11907d790b25c8638dfb5cae8d9c647f8803bc86d4e738fc1cfab4eb5\",\n              \"actor\": \"g0-single-writer\"\n            },\n            \"arrowRows\": 100001\n          },\n          {\n            \"phase\": \"before-sdk-invocation\",\n            \"at\": \"2026-10-13T13:43:37.203Z\",\n            \"epochMs\": 1791899017203,\n            \"pid\": 1400\n          },\n          {\n            \"phase\": \"sdk-promise-returned\",\n            \"at\": \"2026-10-13T13:43:37.204Z\",\n            \"epochMs\": 1791899017204,\n            \"pid\": 1400,\n            \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\"\n          },\n          {\n            \"phase\": \"completed\",\n            \"at\": \"2026-10-13T13:43:39.403Z\",\n            \"epochMs\": 1791899019403,\n            \"pid\": 1400,\n            \"result\": {\n              \"version\": 2,\n              \"numInsertedRows\": 100001,\n              \"numUpdatedRows\": 0,\n              \"numDeletedRows\": 0,\n              \"numAttempts\": 1,\n              \"numRows\": 100001\n            },\n            \"versionAfterPublication\": 2\n          }\n        ],\n        \"exit\": {\n          \"code\": 0,\n          \"signal\": null,\n          \"at\": \"2026-10-13T13:43:39.682Z\"\n        },\n        \"writerStillExists\": false,\n        \"stderr\": \"\",\n        \"recoveryCommand\": \"node recovery-probe.ts crash-control-100000-1791899008722 100000 crash-crash-control-100000-1791899008722\",\n        \"recovery\": {\n          \"version\": 2,\n          \"rows\": 100000,\n          \"markers\": 1,\n          \"totalRows\": 100004,\n          \"expectedCount\": 100000,\n          \"checkedRows\": 100000,\n          \"baselineHistoricalRows\": 3,\n          \"baselinePreserved\": true,\n          \"externalMapping\": {\n            \"crash-crash-control-100000-1791899008722\": 2\n          },\n          \"atomic\": true\n        },\n        \"outcome\": \"passed\",\n        \"midOperationProven\": false,\n        \"placementLimitations\": \"5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive.\"\n      },\n      \"attempts\": [\n        {\n          \"fixture\": \"crash-kill-200000-1791899025865\",\n          \"count\": 200000,\n          \"payloadBytesPerRow\": 1024,\n          \"before\": 1,\n          \"pid\": 14012,\n          \"backupCreatedWhileClosed\": true,\n          \"events\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T13:43:56.029Z\",\n              \"epochMs\": 1791899036032,\n              \"pid\": 14012,\n              \"count\": 200000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-200000-1791899025865\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-200000-1791899025865\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-200000-1791899025865\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"9f521965eddee37f91322c1a4cba7160e0b60bd42d43e613cebb34926678609f\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 200001,\n              \"receivedAt\": \"2026-10-13T13:43:56.035Z\"\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T13:43:56.049Z\",\n              \"epochMs\": 1791899036049,\n              \"pid\": 14012,\n              \"receivedAt\": \"2026-10-13T13:43:56.050Z\"\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T13:43:56.050Z\",\n              \"epochMs\": 1791899036050,\n              \"pid\": 14012,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\",\n              \"receivedAt\": \"2026-10-13T13:43:56.050Z\"\n            }\n          ],\n          \"journal\": [\n            {\n              \"phase\": \"prepared\",\n              \"at\": \"2026-10-13T13:43:56.029Z\",\n              \"epochMs\": 1791899036032,\n              \"pid\": 14012,\n              \"count\": 200000,\n              \"marker\": {\n                \"id\": \"[\\\"crash-crash-kill-200000-1791899025865\\\",\\\"marker\\\",\\\"0\\\"]\",\n                \"branch\": \"main\",\n                \"kind\": \"marker\",\n                \"qualifiedName\": \"crash-crash-kill-200000-1791899025865\",\n                \"disambiguator\": \"0\",\n                \"payload\": \"\",\n                \"commitId\": \"crash-crash-kill-200000-1791899025865\",\n                \"parents\": \"[\\\"baseline\\\"]\",\n                \"deltaHash\": \"9f521965eddee37f91322c1a4cba7160e0b60bd42d43e613cebb34926678609f\",\n                \"actor\": \"g0-single-writer\"\n              },\n              \"arrowRows\": 200001\n            },\n            {\n              \"phase\": \"before-sdk-invocation\",\n              \"at\": \"2026-10-13T13:43:56.049Z\",\n              \"epochMs\": 1791899036049,\n              \"pid\": 14012\n            },\n            {\n              \"phase\": \"sdk-promise-returned\",\n              \"at\": \"2026-10-13T13:43:56.050Z\",\n              \"epochMs\": 1791899036050,\n              \"pid\": 14012,\n              \"limitation\": \"Public execute includes IPC serialization before native dispatch; disk observations are needed.\"\n            }\n          ],\n          \"diskObservation\": {\n            \"at\": \"2026-10-13T13:44:00.775Z\",\n            \"epochMs\": 1791899040775,\n            \"newFiles\": [\n              [\n                \"graph_elements.lance\\\\data\\\\000000100000101100101000dba02045b9aa969fd84893e5cb.lance\",\n                35880544\n              ]\n            ],\n            \"meaning\": \"Nonzero new Lance data files observed after SDK invocation; native storage work has begun.\"\n          },\n          \"killResult\": {\n            \"command\": \"process.kill(14012, 'SIGKILL')\",\n            \"requestedAt\": \"2026-10-13T13:44:00.776Z\",\n            \"finishedAt\": \"2026-10-13T13:44:00.776Z\",\n            \"exitCode\": 0,\n            \"output\": \"Windows unconditional PID termination acknowledged: true\"\n          },\n          \"exit\": {\n            \"code\": 1,\n            \"signal\": null,\n            \"at\": \"2026-10-13T13:44:01.180Z\"\n          },\n          \"writerStillExists\": false,\n          \"stderr\": \"\",\n          \"recoveryCommand\": \"node recovery-probe.ts crash-kill-200000-1791899025865 200000 crash-crash-kill-200000-1791899025865\",\n          \"recovery\": {\n            \"version\": 1,\n            \"rows\": 0,\n            \"markers\": 0,\n            \"totalRows\": 3,\n            \"expectedCount\": 200000,\n            \"checkedRows\": 0,\n            \"baselineHistoricalRows\": 3,\n            \"baselinePreserved\": true,\n            \"externalMapping\": {},\n            \"atomic\": true\n          },\n          \"outcome\": \"passed\",\n          \"midOperationProven\": true,\n          \"placementLimitations\": \"5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive.\"\n        }\n      ],\n      \"outcome\": \"passed\",\n      \"singleWriter\": true,\n      \"noLiveWriter\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        },
+        {
+          "command": "npm run clean",
+          "cwd": "experiments/g0",
+          "startedAt": "2026-10-13T13:44:11.998Z",
+          "finishedAt": "2026-10-13T13:44:16.131Z",
+          "elapsedMs": 4132.142800000001,
+          "exitCode": 0,
+          "stdout": "\n> omnispatialgraph-g0-experiment@0.0.0 clean\n> node cleanup.ts\n\n{\n  \"cleanup\": {\n    \"status\": \"passed\",\n    \"startedAt\": \"2026-10-13T13:44:14.814Z\",\n    \"finishedAt\": \"2026-10-13T13:44:16.032Z\",\n    \"elapsedMs\": 1213.3292,\n    \"result\": {\n      \"removed\": [\n        \".generated\",\n        \"dist\",\n        \"build\"\n      ],\n      \"generatedDatabasesAndBackupsRemoved\": true,\n      \"durableSourcesAndEvidencePreserved\": true\n    }\n  }\n}\n",
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "installation": {
+    "commands": [
+      "npm install --prefix experiments/g0 --omit=optional --ignore-scripts --no-audit --no-fund",
+      "npm ci --prefix experiments/g0 --omit=optional --ignore-scripts --no-audit --no-fund",
+      "npm ls --prefix experiments/g0 --depth=0",
+      "npm install --prefix experiments/g0 --save-dev --save-exact @typescript/typescript-win32-x64@7.0.2 --omit=optional --ignore-scripts --no-audit --no-fund"
+    ],
+    "observedExitCode": 0,
+    "installedPackages": 34,
+    "lockedReinstall": true,
+    "reason": "Optional AI providers excluded; Windows native package is explicitly pinned as a required dependency. Lifecycle scripts disabled."
+  },
+  "redBaseline": {
+    "command": "npm --prefix experiments/g0 run unit",
+    "exitCode": 1,
+    "failure": "ERR_MODULE_NOT_FOUND rows.ts before helper implementation",
+    "durationMs": 320.3896
+  },
+  "sources": [
+    "https://nodejs.org/docs/latest-v24.x/api/process.html#signal-events",
+    "https://nodejs.org/docs/latest-v24.x/api/child_process.html#subprocesskillsignal",
+    "https://raw.githubusercontent.com/lancedb/lancedb/b1b080b97c3edd2fd9f2aae8a3b71ff19487b1f8/nodejs/lancedb/merge.ts",
+    "https://raw.githubusercontent.com/lancedb/lancedb/b1b080b97c3edd2fd9f2aae8a3b71ff19487b1f8/nodejs/lancedb/table.ts",
+    "https://raw.githubusercontent.com/lancedb/lancedb/b1b080b97c3edd2fd9f2aae8a3b71ff19487b1f8/nodejs/lancedb/connection.ts"
+  ],
+  "scope": {
+    "isolatedG0Only": true,
+    "G1Authorized": false,
+    "singleWriterOnly": true,
+    "upstreamIndexingImported": false,
+    "productionRootManifestCreated": false,
+    "humanAcceptance": "pending before G1",
+    "prohibitedFeaturesUsed": [],
+    "documentationHandoff": "Parent Documentation Specialist must persist report/memory/task updates; no markdown writes in this experiment.",
+    "ignoreLimitation": "Root *test* rule hides test-named files. Durable tests use invariant-probe.ts; root ignore unchanged."
+  },
+  "sdk": {
+    "status": "passed",
+    "startedAt": "2026-10-13T13:43:17.636Z",
+    "finishedAt": "2026-10-13T13:43:23.638Z",
+    "elapsedMs": 5999.4097,
+    "result": {
+      "node": "v24.14.1",
+      "npm": "11.11.0",
+      "platform": "win32",
+      "arch": "x64",
+      "os": "Microsoft Windows [Version 10.0.19045.6466]",
+      "registryCommand": "npm view @lancedb/lancedb@0.40.0 version gitHead engines peerDependencies optionalDependencies dist --json",
+      "registry": {
+        "version": "0.40.0",
+        "gitHead": "b1b080b97c3edd2fd9f2aae8a3b71ff19487b1f8",
+        "engines": {
+          "node": ">= 22"
+        },
+        "peerDependencies": {
+          "@types/node": ">=22",
+          "apache-arrow": ">=15.0.0 <=18.1.0"
+        },
+        "optionalDependencies": {
+          "openai": "4.29.2",
+          "@huggingface/transformers": "3.0.2",
+          "@lancedb/lancedb-darwin-arm64": "0.40.0",
+          "@lancedb/lancedb-linux-x64-gnu": "0.40.0",
+          "@lancedb/lancedb-linux-x64-musl": "0.40.0",
+          "@lancedb/lancedb-win32-x64-msvc": "0.40.0",
+          "@lancedb/lancedb-linux-arm64-gnu": "0.40.0",
+          "@lancedb/lancedb-linux-arm64-musl": "0.40.0",
+          "@lancedb/lancedb-win32-arm64-msvc": "0.40.0"
+        },
+        "dist": {
+          "shasum": "f368b4c02b3d91692c100dea64626c462df404a8",
+          "tarball": "https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz",
+          "fileCount": 66,
+          "integrity": "sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==",
+          "signatures": [
+            {
+              "sig": "MEUCIQDxMKnbTq6txcjs9fqIDC4yAoJ31ERkIBHph2/kFv+JsAIgL+IGA+yRWvAoQyAri2D+DZOOPaFnxcUrPSSHpPBjXkI=",
+              "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+            },
+            {
+              "sig": "MEYCIQDfgswU3swr5JAgq3i921tZ/RurReAnBsThKlpcxwTSjQIhAKSFwfaXfkkO+SoIEDm/XLF9piItrqxMgxyOGnpM4LJS",
+              "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+            }
+          ],
+          "attestations": {
+            "url": "https://registry.npmjs.org/-/npm/v1/attestations/@lancedb%2flancedb@0.40.0",
+            "provenance": {
+              "predicateType": "https://slsa.dev/provenance/v1"
+            }
+          },
+          "unpackedSize": 1480653
+        }
+      },
+      "installed": {
+        "@lancedb/lancedb": {
+          "version": "0.40.0",
+          "integrity": "sha512-hCvk6y/gHARQ++NarvguEmX02Hm2zJAUJQgf1Sq8KznBKjI21xsK5YYzw2L0eUArDWxPjtLl4kD329ymLMqLew==",
+          "resolved": "https://registry.npmjs.org/@lancedb/lancedb/-/lancedb-0.40.0.tgz"
+        },
+        "@lancedb/lancedb-win32-x64-msvc": {
+          "version": "0.40.0",
+          "integrity": "sha512-DZxho/MhnGJCQc98CN3yY8qWlDCATLTjGUNqD58Fx1sNMctmkbdAf4F1fTRahz0aojfnM9aoUNaSXdY0qaPhbQ==",
+          "resolved": "https://registry.npmjs.org/@lancedb/lancedb-win32-x64-msvc/-/lancedb-win32-x64-msvc-0.40.0.tgz"
+        },
+        "apache-arrow": {
+          "version": "18.1.0",
+          "integrity": "sha512-v/ShMp57iBnBp4lDgV8Jx3d3Q5/Hac25FWmQ98eMahUiHPXcvwIMKJD0hBIgclm/FCG+LwPkAKtkRO1O/W0YGg==",
+          "resolved": "https://registry.npmjs.org/apache-arrow/-/apache-arrow-18.1.0.tgz"
+        },
+        "typescript": {
+          "version": "7.0.2",
+          "integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+          "resolved": "https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz"
+        },
+        "@typescript/typescript-win32-x64": {
+          "version": "7.0.2",
+          "integrity": "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==",
+          "resolved": "https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz"
+        },
+        "@types/node": {
+          "version": "22.20.5",
+          "integrity": "sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==",
+          "resolved": "https://registry.npmjs.org/@types/node/-/node-22.20.5.tgz"
+        }
+      },
+      "lockSha256": "9332e0d49c65d455399e41162c7ec69d5c7191ade4b8df6648efebbf0859fb3d",
+      "nativeEntry": "node_modules/@lancedb/lancedb-win32-x64-msvc/lancedb.win32-x64-msvc.node",
+      "nativeSha256": "b3fa98d78809286da9ab71a206535fe6696df40faab6cbe523574a55ef4a0b3a",
+      "nativeLoad": true,
+      "baselineVersion": 1,
+      "reopenedRows": 3,
+      "fields": [
+        {
+          "name": "id",
+          "type": "Utf8",
+          "nullable": false
+        },
+        {
+          "name": "branch",
+          "type": "Utf8",
+          "nullable": false
+        },
+        {
+          "name": "kind",
+          "type": "Utf8",
+          "nullable": false
+        },
+        {
+          "name": "qualifiedName",
+          "type": "Utf8",
+          "nullable": false
+        },
+        {
+          "name": "disambiguator",
+          "type": "Utf8",
+          "nullable": false
+        },
+        {
+          "name": "payload",
+          "type": "Utf8",
+          "nullable": false
+        },
+        {
+          "name": "commitId",
+          "type": "Utf8",
+          "nullable": false
+        },
+        {
+          "name": "parents",
+          "type": "Utf8",
+          "nullable": true
+        },
+        {
+          "name": "deltaHash",
+          "type": "Utf8",
+          "nullable": true
+        },
+        {
+          "name": "actor",
+          "type": "Utf8",
+          "nullable": true
+        }
+      ]
+    }
+  },
+  "batch": {
+    "status": "passed",
+    "startedAt": "2026-10-13T13:43:26.395Z",
+    "finishedAt": "2026-10-13T13:43:26.704Z",
+    "elapsedMs": 305.31680000000006,
+    "result": {
+      "baselineVersion": 1,
+      "currentVersion": 3,
+      "publications": [
+        {
+          "commitId": "commit-1",
+          "before": 1,
+          "after": 2,
+          "versionsBefore": [
+            1
+          ],
+          "versionsAfter": [
+            1,
+            2
+          ],
+          "mergeResult": {
+            "version": 2,
+            "numInsertedRows": 2,
+            "numUpdatedRows": 1,
+            "numDeletedRows": 0,
+            "numAttempts": 1,
+            "numRows": 3
+          },
+          "startedAt": "2026-10-13T13:43:26.493Z",
+          "elapsedMs": 53.577400000000125,
+          "expectedRows": 5,
+          "marker": {
+            "id": "[\"commit-1\",\"marker\",\"0\"]",
+            "branch": "main",
+            "kind": "marker",
+            "qualifiedName": "commit-1",
+            "disambiguator": "0",
+            "payload": "",
+            "commitId": "commit-1",
+            "parents": "[\"baseline\"]",
+            "deltaHash": "a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f",
+            "actor": "g0-single-writer"
+          },
+          "externalMapping": {
+            "commit-1": 2
+          }
+        },
+        {
+          "commitId": "commit-2",
+          "before": 2,
+          "after": 3,
+          "versionsBefore": [
+            1,
+            2
+          ],
+          "versionsAfter": [
+            1,
+            2,
+            3
+          ],
+          "mergeResult": {
+            "version": 3,
+            "numInsertedRows": 2,
+            "numUpdatedRows": 1,
+            "numDeletedRows": 0,
+            "numAttempts": 1,
+            "numRows": 3
+          },
+          "startedAt": "2026-10-13T13:43:26.593Z",
+          "elapsedMs": 46.62519999999995,
+          "expectedRows": 7,
+          "marker": {
+            "id": "[\"commit-2\",\"marker\",\"0\"]",
+            "branch": "main",
+            "kind": "marker",
+            "qualifiedName": "commit-2",
+            "disambiguator": "0",
+            "payload": "",
+            "commitId": "commit-2",
+            "parents": "[\"commit-1\"]",
+            "deltaHash": "e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d",
+            "actor": "g0-single-writer"
+          },
+          "externalMapping": {
+            "commit-2": 3
+          }
+        }
+      ],
+      "reopenedCurrentAndHistorical": [
+        {
+          "version": 1,
+          "rowCount": 3,
+          "markers": [
+            {
+              "id": "baseline",
+              "parents": "[]",
+              "deltaHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "actor": "g0-single-writer"
+            }
+          ],
+          "exactContentsMatch": true,
+          "unmatchedRowPreserved": true
+        },
+        {
+          "version": 2,
+          "rowCount": 5,
+          "markers": [
+            {
+              "id": "baseline",
+              "parents": "[]",
+              "deltaHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "actor": "g0-single-writer"
+            },
+            {
+              "id": "commit-1",
+              "parents": "[\"baseline\"]",
+              "deltaHash": "a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f",
+              "actor": "g0-single-writer"
+            }
+          ],
+          "exactContentsMatch": true,
+          "unmatchedRowPreserved": true
+        },
+        {
+          "version": 3,
+          "rowCount": 7,
+          "markers": [
+            {
+              "id": "baseline",
+              "parents": "[]",
+              "deltaHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "actor": "g0-single-writer"
+            },
+            {
+              "id": "commit-1",
+              "parents": "[\"baseline\"]",
+              "deltaHash": "a91747b7dfd7583f7d005b486676818bb8b696d166c5ec3330eab94543d2619f",
+              "actor": "g0-single-writer"
+            },
+            {
+              "id": "commit-2",
+              "parents": "[\"commit-1\"]",
+              "deltaHash": "e531b33bcea67b39b3841da2c350f3215d5cde92f489986cf2c882639914b05d",
+              "actor": "g0-single-writer"
+            }
+          ],
+          "exactContentsMatch": true,
+          "unmatchedRowPreserved": true
+        }
+      ],
+      "schema": "Explicit Utf8 fields, nullable semantic marker fields; no embeddings or native version field",
+      "singleWriter": true
+    }
+  },
+  "crash": {
+    "status": "passed",
+    "startedAt": "2026-10-13T13:43:28.716Z",
+    "finishedAt": "2026-10-13T13:44:11.891Z",
+    "elapsedMs": 43170.114499999996,
+    "result": {
+      "control": {
+        "fixture": "crash-control-100000-1791899008722",
+        "count": 100000,
+        "payloadBytesPerRow": 1024,
+        "before": 1,
+        "pid": 1400,
+        "backupCreatedWhileClosed": true,
+        "events": [
+          {
+            "phase": "prepared",
+            "at": "2026-10-13T13:43:37.185Z",
+            "epochMs": 1791899017189,
+            "pid": 1400,
+            "count": 100000,
+            "marker": {
+              "id": "[\"crash-crash-control-100000-1791899008722\",\"marker\",\"0\"]",
+              "branch": "main",
+              "kind": "marker",
+              "qualifiedName": "crash-crash-control-100000-1791899008722",
+              "disambiguator": "0",
+              "payload": "",
+              "commitId": "crash-crash-control-100000-1791899008722",
+              "parents": "[\"baseline\"]",
+              "deltaHash": "657b4ef11907d790b25c8638dfb5cae8d9c647f8803bc86d4e738fc1cfab4eb5",
+              "actor": "g0-single-writer"
+            },
+            "arrowRows": 100001,
+            "receivedAt": "2026-10-13T13:43:37.192Z"
+          },
+          {
+            "phase": "before-sdk-invocation",
+            "at": "2026-10-13T13:43:37.203Z",
+            "epochMs": 1791899017203,
+            "pid": 1400,
+            "receivedAt": "2026-10-13T13:43:37.204Z"
+          },
+          {
+            "phase": "sdk-promise-returned",
+            "at": "2026-10-13T13:43:37.204Z",
+            "epochMs": 1791899017204,
+            "pid": 1400,
+            "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed.",
+            "receivedAt": "2026-10-13T13:43:37.205Z"
+          },
+          {
+            "phase": "completed",
+            "at": "2026-10-13T13:43:39.403Z",
+            "epochMs": 1791899019403,
+            "pid": 1400,
+            "result": {
+              "version": 2,
+              "numInsertedRows": 100001,
+              "numUpdatedRows": 0,
+              "numDeletedRows": 0,
+              "numAttempts": 1,
+              "numRows": 100001
+            },
+            "versionAfterPublication": 2,
+            "receivedAt": "2026-10-13T13:43:39.404Z"
+          }
+        ],
+        "journal": [
+          {
+            "phase": "prepared",
+            "at": "2026-10-13T13:43:37.185Z",
+            "epochMs": 1791899017189,
+            "pid": 1400,
+            "count": 100000,
+            "marker": {
+              "id": "[\"crash-crash-control-100000-1791899008722\",\"marker\",\"0\"]",
+              "branch": "main",
+              "kind": "marker",
+              "qualifiedName": "crash-crash-control-100000-1791899008722",
+              "disambiguator": "0",
+              "payload": "",
+              "commitId": "crash-crash-control-100000-1791899008722",
+              "parents": "[\"baseline\"]",
+              "deltaHash": "657b4ef11907d790b25c8638dfb5cae8d9c647f8803bc86d4e738fc1cfab4eb5",
+              "actor": "g0-single-writer"
+            },
+            "arrowRows": 100001
+          },
+          {
+            "phase": "before-sdk-invocation",
+            "at": "2026-10-13T13:43:37.203Z",
+            "epochMs": 1791899017203,
+            "pid": 1400
+          },
+          {
+            "phase": "sdk-promise-returned",
+            "at": "2026-10-13T13:43:37.204Z",
+            "epochMs": 1791899017204,
+            "pid": 1400,
+            "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed."
+          },
+          {
+            "phase": "completed",
+            "at": "2026-10-13T13:43:39.403Z",
+            "epochMs": 1791899019403,
+            "pid": 1400,
+            "result": {
+              "version": 2,
+              "numInsertedRows": 100001,
+              "numUpdatedRows": 0,
+              "numDeletedRows": 0,
+              "numAttempts": 1,
+              "numRows": 100001
+            },
+            "versionAfterPublication": 2
+          }
+        ],
+        "exit": {
+          "code": 0,
+          "signal": null,
+          "at": "2026-10-13T13:43:39.682Z"
+        },
+        "writerStillExists": false,
+        "stderr": "",
+        "recoveryCommand": "node recovery-probe.ts crash-control-100000-1791899008722 100000 crash-crash-control-100000-1791899008722",
+        "recovery": {
+          "version": 2,
+          "rows": 100000,
+          "markers": 1,
+          "totalRows": 100004,
+          "expectedCount": 100000,
+          "checkedRows": 100000,
+          "baselineHistoricalRows": 3,
+          "baselinePreserved": true,
+          "externalMapping": {
+            "crash-crash-control-100000-1791899008722": 2
+          },
+          "atomic": true
+        },
+        "outcome": "passed",
+        "midOperationProven": false,
+        "placementLimitations": "5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive."
+      },
+      "attempts": [
+        {
+          "fixture": "crash-kill-200000-1791899025865",
+          "count": 200000,
+          "payloadBytesPerRow": 1024,
+          "before": 1,
+          "pid": 14012,
+          "backupCreatedWhileClosed": true,
+          "events": [
+            {
+              "phase": "prepared",
+              "at": "2026-10-13T13:43:56.029Z",
+              "epochMs": 1791899036032,
+              "pid": 14012,
+              "count": 200000,
+              "marker": {
+                "id": "[\"crash-crash-kill-200000-1791899025865\",\"marker\",\"0\"]",
+                "branch": "main",
+                "kind": "marker",
+                "qualifiedName": "crash-crash-kill-200000-1791899025865",
+                "disambiguator": "0",
+                "payload": "",
+                "commitId": "crash-crash-kill-200000-1791899025865",
+                "parents": "[\"baseline\"]",
+                "deltaHash": "9f521965eddee37f91322c1a4cba7160e0b60bd42d43e613cebb34926678609f",
+                "actor": "g0-single-writer"
+              },
+              "arrowRows": 200001,
+              "receivedAt": "2026-10-13T13:43:56.035Z"
+            },
+            {
+              "phase": "before-sdk-invocation",
+              "at": "2026-10-13T13:43:56.049Z",
+              "epochMs": 1791899036049,
+              "pid": 14012,
+              "receivedAt": "2026-10-13T13:43:56.050Z"
+            },
+            {
+              "phase": "sdk-promise-returned",
+              "at": "2026-10-13T13:43:56.050Z",
+              "epochMs": 1791899036050,
+              "pid": 14012,
+              "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed.",
+              "receivedAt": "2026-10-13T13:43:56.050Z"
+            }
+          ],
+          "journal": [
+            {
+              "phase": "prepared",
+              "at": "2026-10-13T13:43:56.029Z",
+              "epochMs": 1791899036032,
+              "pid": 14012,
+              "count": 200000,
+              "marker": {
+                "id": "[\"crash-crash-kill-200000-1791899025865\",\"marker\",\"0\"]",
+                "branch": "main",
+                "kind": "marker",
+                "qualifiedName": "crash-crash-kill-200000-1791899025865",
+                "disambiguator": "0",
+                "payload": "",
+                "commitId": "crash-crash-kill-200000-1791899025865",
+                "parents": "[\"baseline\"]",
+                "deltaHash": "9f521965eddee37f91322c1a4cba7160e0b60bd42d43e613cebb34926678609f",
+                "actor": "g0-single-writer"
+              },
+              "arrowRows": 200001
+            },
+            {
+              "phase": "before-sdk-invocation",
+              "at": "2026-10-13T13:43:56.049Z",
+              "epochMs": 1791899036049,
+              "pid": 14012
+            },
+            {
+              "phase": "sdk-promise-returned",
+              "at": "2026-10-13T13:43:56.050Z",
+              "epochMs": 1791899036050,
+              "pid": 14012,
+              "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed."
+            }
+          ],
+          "diskObservation": {
+            "at": "2026-10-13T13:44:00.775Z",
+            "epochMs": 1791899040775,
+            "newFiles": [
+              [
+                "graph_elements.lance\\data\\000000100000101100101000dba02045b9aa969fd84893e5cb.lance",
+                35880544
+              ]
+            ],
+            "meaning": "Nonzero new Lance data files observed after SDK invocation; native storage work has begun."
+          },
+          "killResult": {
+            "command": "process.kill(14012, 'SIGKILL')",
+            "requestedAt": "2026-10-13T13:44:00.776Z",
+            "finishedAt": "2026-10-13T13:44:00.776Z",
+            "exitCode": 0,
+            "output": "Windows unconditional PID termination acknowledged: true"
+          },
+          "exit": {
+            "code": 1,
+            "signal": null,
+            "at": "2026-10-13T13:44:01.180Z"
+          },
+          "writerStillExists": false,
+          "stderr": "",
+          "recoveryCommand": "node recovery-probe.ts crash-kill-200000-1791899025865 200000 crash-crash-kill-200000-1791899025865",
+          "recovery": {
+            "version": 1,
+            "rows": 0,
+            "markers": 0,
+            "totalRows": 3,
+            "expectedCount": 200000,
+            "checkedRows": 0,
+            "baselineHistoricalRows": 3,
+            "baselinePreserved": true,
+            "externalMapping": {},
+            "atomic": true
+          },
+          "outcome": "passed",
+          "midOperationProven": true,
+          "placementLimitations": "5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive."
+        }
+      ],
+      "outcome": "passed",
+      "singleWriter": true,
+      "noLiveWriter": true
+    }
+  },
+  "terminationSynchronizationRevision": {
+    "original": "Two taskkill trials missed native publication window; retained in prior run stdout and separate JSON evidence.",
+    "improvement": "One direct process.kill(pid, SIGKILL) trial after nonzero native data file observation, eliminating external taskkill startup latency."
+  }
+}

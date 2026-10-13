@@ -1,0 +1,122 @@
+{
+  "fixture": "crash-kill-200000-1791896361623",
+  "count": 200000,
+  "payloadBytesPerRow": 1024,
+  "before": 1,
+  "pid": 6736,
+  "backupCreatedWhileClosed": true,
+  "events": [
+    {
+      "phase": "prepared",
+      "at": "2026-10-13T12:59:35.245Z",
+      "epochMs": 1791896375247,
+      "pid": 6736,
+      "count": 200000,
+      "marker": {
+        "id": "[\"crash-crash-kill-200000-1791896361623\",\"marker\",\"0\"]",
+        "branch": "main",
+        "kind": "marker",
+        "qualifiedName": "crash-crash-kill-200000-1791896361623",
+        "disambiguator": "0",
+        "payload": "",
+        "commitId": "crash-crash-kill-200000-1791896361623",
+        "parents": "[\"baseline\"]",
+        "deltaHash": "e683d50a19be623bd12dfe1c9aaf4acc4d12a51c18ac9ecdc7a89b2702100b9c",
+        "actor": "g0-single-writer"
+      },
+      "arrowRows": 200001,
+      "receivedAt": "2026-10-13T12:59:35.252Z"
+    },
+    {
+      "phase": "before-sdk-invocation",
+      "at": "2026-10-13T12:59:35.277Z",
+      "epochMs": 1791896375277,
+      "pid": 6736,
+      "receivedAt": "2026-10-13T12:59:35.279Z"
+    },
+    {
+      "phase": "sdk-promise-returned",
+      "at": "2026-10-13T12:59:35.280Z",
+      "epochMs": 1791896375280,
+      "pid": 6736,
+      "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed.",
+      "receivedAt": "2026-10-13T12:59:35.281Z"
+    }
+  ],
+  "journal": [
+    {
+      "phase": "prepared",
+      "at": "2026-10-13T12:59:35.245Z",
+      "epochMs": 1791896375247,
+      "pid": 6736,
+      "count": 200000,
+      "marker": {
+        "id": "[\"crash-crash-kill-200000-1791896361623\",\"marker\",\"0\"]",
+        "branch": "main",
+        "kind": "marker",
+        "qualifiedName": "crash-crash-kill-200000-1791896361623",
+        "disambiguator": "0",
+        "payload": "",
+        "commitId": "crash-crash-kill-200000-1791896361623",
+        "parents": "[\"baseline\"]",
+        "deltaHash": "e683d50a19be623bd12dfe1c9aaf4acc4d12a51c18ac9ecdc7a89b2702100b9c",
+        "actor": "g0-single-writer"
+      },
+      "arrowRows": 200001
+    },
+    {
+      "phase": "before-sdk-invocation",
+      "at": "2026-10-13T12:59:35.277Z",
+      "epochMs": 1791896375277,
+      "pid": 6736
+    },
+    {
+      "phase": "sdk-promise-returned",
+      "at": "2026-10-13T12:59:35.280Z",
+      "epochMs": 1791896375280,
+      "pid": 6736,
+      "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed."
+    }
+  ],
+  "diskObservation": {
+    "at": "2026-10-13T12:59:39.103Z",
+    "epochMs": 1791896379103,
+    "newFiles": [
+      [
+        "graph_elements.lance\\data\\101110000110000111110011d5f6dd4b6f92967ba0357310b7.lance",
+        35189344
+      ]
+    ],
+    "meaning": "Nonzero new Lance data files observed after SDK invocation; native storage work has begun."
+  },
+  "killResult": {
+    "command": "process.kill(6736, 'SIGKILL')",
+    "requestedAt": "2026-10-13T12:59:39.103Z",
+    "finishedAt": "2026-10-13T12:59:39.104Z",
+    "exitCode": 0,
+    "output": "Windows unconditional PID termination acknowledged: true"
+  },
+  "exit": {
+    "code": 1,
+    "signal": null,
+    "at": "2026-10-13T12:59:39.351Z"
+  },
+  "writerStillExists": false,
+  "stderr": "",
+  "recoveryCommand": "node recovery-probe.ts crash-kill-200000-1791896361623 200000 crash-crash-kill-200000-1791896361623",
+  "recovery": {
+    "version": 1,
+    "rows": 0,
+    "markers": 0,
+    "totalRows": 3,
+    "expectedCount": 200000,
+    "checkedRows": 0,
+    "baselineHistoricalRows": 3,
+    "baselinePreserved": true,
+    "externalMapping": {},
+    "atomic": true
+  },
+  "outcome": "passed",
+  "midOperationProven": true,
+  "placementLimitations": "5ms polling and OS termination scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive."
+}

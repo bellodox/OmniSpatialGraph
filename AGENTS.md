@@ -1,0 +1,18 @@
+# AGENTS.md
+
+This file provides guidance to agents when working with code in this repository.
+
+- Root remains specification-stage with no production application, CLI or manifest. Isolated [G0 experiment scripts/configuration](experiments/g0/package.json:10) are runnable pinned probes, not production commands. Do not present proposed application commands as runnable.
+- The [concept-test scope](docs/OmniSpatialGraph_Concept_Test_Scope.md:11) overrides conflicting v0.5 requirements for the current single-developer, single-writer concept. Read both sources and the [wiki](docs/maintainer-wiki/index.md); neither proves implementation.
+- Three reduced G0 runtime checks have [measured Windows single-writer evidence and final dispositions](docs/g0/architecture-feasibility.md); security NO BLOCKING applies only to trusted single-developer/writer use and Code Reviewer APPROVE WITH SUGGESTIONS permits human review, not acceptance. Explicit human acceptance remains pending; G1 is blocked/unstarted and the [identity/contracts candidate](docs/g0/contracts-proposal.md) is not accepted/frozen. Independent inner checks passed but its outer exit was not captured.
+- The CLI is a thin consumer of the same importable application API used by future native integrations; it is not an MCP server or mandatory daemon ([source](docs/OmniSpatialGraph_Architecture_Development_Plan_v0.5.md:13)).
+- The core depends on contracts and narrow ports, never concrete storage/indexing/CLI adapters; only the storage adapter imports LanceDB ([dependency rules](docs/OmniSpatialGraph_Architecture_Development_Plan_v0.5.md:95)).
+- Approach A is standalone source reuse, not a harness patch. Keep its provider interface, but defer A→B migration proof and native integration ([scope](docs/OmniSpatialGraph_Concept_Test_Scope.md:24)).
+- Source locations and chunk hashes are evidence, not persistent entity identity. Separate observed facts, hypotheses, decisions, and source-owner policies ([source](docs/OmniSpatialGraph_Architecture_Development_Plan_v0.5.md:173)).
+- Atomically publish rows and a commit marker; look up the native version afterwards, never store the transaction's own version in its marker ([scope](docs/OmniSpatialGraph_Concept_Test_Scope.md:15)).
+- Use plain versioned rows, a branch column and commit-parent DAG; disable optimization/cleanup and back up the table directory. Document single-writer use or use a lock file; merge compatible facts and reject same-key conflicts ([scope](docs/OmniSpatialGraph_Concept_Test_Scope.md:24)).
+- Concept success is v0.5 tests 1, 2, 3, 4, 6, 7, 9; concurrency, retention/host-permission tests, provider swaps, and spatial extensions are deferred ([scope](docs/OmniSpatialGraph_Concept_Test_Scope.md:41)).
+- CLI errors are structured; diagnostics go to stderr, results to stdout. Caller-supplied mode flags are not authorization ([source](docs/OmniSpatialGraph_Architecture_Development_Plan_v0.5.md:203)).
+- Canonical durable knowledge belongs in the [wiki](docs/maintainer-wiki/index.md); local memory is noncanonical. Cite original evidence with line references; preserve uncertainty rather than inventing conventions.
+- Never read or store credentials, tokens, private keys, or restricted secret files. Upstream reuse requires pinned revisions and file-level attribution; a licensing goal is not a granted license ([source](docs/OmniSpatialGraph_Architecture_Development_Plan_v0.5.md:233)).
+- Follow the [documentation validation workflow](docs/maintainer-wiki/workflows.md); the local graph is navigation, not source truth. No shared Git hooks currently exist.

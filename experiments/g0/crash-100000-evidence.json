@@ -1,0 +1,154 @@
+{
+  "fixture": "crash-kill-100000-1791895977687",
+  "count": 100000,
+  "payloadBytesPerRow": 1024,
+  "before": 1,
+  "pid": 13160,
+  "backupCreatedWhileClosed": true,
+  "events": [
+    {
+      "phase": "prepared",
+      "at": "2026-10-13T12:53:03.550Z",
+      "epochMs": 1791895983552,
+      "pid": 13160,
+      "count": 100000,
+      "marker": {
+        "id": "[\"crash-crash-kill-100000-1791895977687\",\"marker\",\"0\"]",
+        "branch": "main",
+        "kind": "marker",
+        "qualifiedName": "crash-crash-kill-100000-1791895977687",
+        "disambiguator": "0",
+        "payload": "",
+        "commitId": "crash-crash-kill-100000-1791895977687",
+        "parents": "[\"baseline\"]",
+        "deltaHash": "ba07e30e69b2544872277ff5a5e5d0b6039f334384624eeed20de3ad77fc57bb",
+        "actor": "g0-single-writer"
+      },
+      "arrowRows": 100001,
+      "receivedAt": "2026-10-13T12:53:03.553Z"
+    },
+    {
+      "phase": "before-sdk-invocation",
+      "at": "2026-10-13T12:53:03.559Z",
+      "epochMs": 1791895983559,
+      "pid": 13160,
+      "receivedAt": "2026-10-13T12:53:03.560Z"
+    },
+    {
+      "phase": "sdk-promise-returned",
+      "at": "2026-10-13T12:53:03.561Z",
+      "epochMs": 1791895983561,
+      "pid": 13160,
+      "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed.",
+      "receivedAt": "2026-10-13T12:53:03.561Z"
+    },
+    {
+      "phase": "completed",
+      "at": "2026-10-13T12:53:05.138Z",
+      "epochMs": 1791895985138,
+      "pid": 13160,
+      "result": {
+        "version": 2,
+        "numInsertedRows": 100001,
+        "numUpdatedRows": 0,
+        "numDeletedRows": 0,
+        "numAttempts": 1,
+        "numRows": 100001
+      },
+      "versionAfterPublication": 2,
+      "receivedAt": "2026-10-13T12:53:05.139Z"
+    }
+  ],
+  "journal": [
+    {
+      "phase": "prepared",
+      "at": "2026-10-13T12:53:03.550Z",
+      "epochMs": 1791895983552,
+      "pid": 13160,
+      "count": 100000,
+      "marker": {
+        "id": "[\"crash-crash-kill-100000-1791895977687\",\"marker\",\"0\"]",
+        "branch": "main",
+        "kind": "marker",
+        "qualifiedName": "crash-crash-kill-100000-1791895977687",
+        "disambiguator": "0",
+        "payload": "",
+        "commitId": "crash-crash-kill-100000-1791895977687",
+        "parents": "[\"baseline\"]",
+        "deltaHash": "ba07e30e69b2544872277ff5a5e5d0b6039f334384624eeed20de3ad77fc57bb",
+        "actor": "g0-single-writer"
+      },
+      "arrowRows": 100001
+    },
+    {
+      "phase": "before-sdk-invocation",
+      "at": "2026-10-13T12:53:03.559Z",
+      "epochMs": 1791895983559,
+      "pid": 13160
+    },
+    {
+      "phase": "sdk-promise-returned",
+      "at": "2026-10-13T12:53:03.561Z",
+      "epochMs": 1791895983561,
+      "pid": 13160,
+      "limitation": "Public execute includes IPC serialization before native dispatch; disk observations are needed."
+    },
+    {
+      "phase": "completed",
+      "at": "2026-10-13T12:53:05.138Z",
+      "epochMs": 1791895985138,
+      "pid": 13160,
+      "result": {
+        "version": 2,
+        "numInsertedRows": 100001,
+        "numUpdatedRows": 0,
+        "numDeletedRows": 0,
+        "numAttempts": 1,
+        "numRows": 100001
+      },
+      "versionAfterPublication": 2
+    }
+  ],
+  "diskObservation": {
+    "at": "2026-10-13T12:53:05.110Z",
+    "epochMs": 1791895985110,
+    "newFiles": [
+      [
+        "graph_elements.lance\\data\\0100011001010001001101001197604f79b8449b2f0e86d491.lance",
+        17467421
+      ]
+    ],
+    "meaning": "Nonzero new Lance data files observed after SDK invocation; native storage work has begun."
+  },
+  "killResult": {
+    "command": "taskkill.exe /PID 13160 /F",
+    "requestedAt": "2026-10-13T12:53:05.110Z",
+    "finishedAt": "2026-10-13T12:53:05.494Z",
+    "exitCode": 1,
+    "output": "ERROR: The process with PID 13160 could not be terminated.\r\nReason: The operation attempted is not supported.\r\r\n"
+  },
+  "exit": {
+    "code": 0,
+    "signal": null,
+    "at": "2026-10-13T12:53:05.480Z"
+  },
+  "stderr": "",
+  "recoveryCommand": "node recovery-probe.ts crash-kill-100000-1791895977687 100000 crash-crash-kill-100000-1791895977687",
+  "recovery": {
+    "version": 2,
+    "rows": 100000,
+    "markers": 1,
+    "totalRows": 100004,
+    "expectedCount": 100000,
+    "checkedRows": 100000,
+    "baselineHistoricalRows": 3,
+    "baselinePreserved": true,
+    "externalMapping": {
+      "crash-crash-kill-100000-1791895977687": 2
+    },
+    "atomic": true
+  },
+  "outcome": "inconclusive",
+  "midOperationProven": false,
+  "placementLimitations": "5ms polling and taskkill scheduling do not identify the exact native instruction. No native completion hook exists. A passed interrupted trial additionally requires new nonzero storage files and an unpublished recovered batch; fully published trials remain timing-inconclusive."
+}

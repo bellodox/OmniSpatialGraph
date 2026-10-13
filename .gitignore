@@ -1,0 +1,8 @@
+# Local agent context, generated analysis, and temporary artifacts.
+*.~*
+*test*
+.understand-anything/
+.spexcode/
+
+# Requested local-only durable wiki; canonical does not imply tracked.
+docs/maintainer-wiki/

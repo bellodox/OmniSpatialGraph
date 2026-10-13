@@ -1,0 +1,30 @@
+{
+  "name": "omnispatialgraph-g0-experiment",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.1"
+  },
+  "packageManager": "npm@11.11.0",
+  "scripts": {
+    "install:locked": "npm ci --omit=optional --ignore-scripts --no-audit --no-fund",
+    "typecheck": "tsc --noEmit",
+    "unit": "node --test invariant-probe.ts",
+    "sdk": "node sdk-probe.ts",
+    "batch": "node batch-probe.ts",
+    "crash": "node crash-probe.ts",
+    "verify": "node verify.ts",
+    "clean": "node cleanup.ts"
+  },
+  "dependencies": {
+    "@lancedb/lancedb": "0.40.0",
+    "@lancedb/lancedb-win32-x64-msvc": "0.40.0",
+    "apache-arrow": "18.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@typescript/typescript-win32-x64": "7.0.2",
+    "typescript": "7.0.2"
+  }
+}
