@@ -1,0 +1,20 @@
+# User-required local harness and temporary patterns.
+*.~*
+*test*
+.understand-anything/
+.spexcode/
+#docs/maintainer-wiki/
+
+# The broad test-name pattern must not conceal the future legitimate suite.
+!tests/
+!tests/**
+# Future legitimate test fixtures outside tests/ need explicit exceptions.
+
+# Planned runtime data exclusions from specification section 6.2; no store created.
+.osg/store/
+.osg/backup/
+.osg/cache/
+.osg/logs/
+.osg/export/
+node_modules/
+dist/
