@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+test('public root API remains portable; package controls a single private compiled entry', async () => {
+  const manifest = JSON.parse(await readFile('package.json', 'utf8'));
+  assert.equal(manifest.name, 'omnispatialgraph');
+  assert.equal(manifest.private, true);
+  assert.equal(manifest.license, 'UNLICENSED');
+  assert.equal(manifest.bin.osg, 'dist/cli/src/public.js');
+  assert.deepEqual(manifest.files, ['dist/cli/src', 'dist/contracts/src', 'dist/core/src', 'dist/indexing-kilo/src', 'dist/storage-lance/src',
+    'tools/showcase.mjs', 'fixtures/showcase/package.json', 'fixtures/showcase/src/greet.js', 'fixtures/showcase/checks.mjs']);
+  assert.match(manifest.osgPrototype.compatibility, /npm ls exits 1/);
+  assert.match(manifest.osgPrototype.distribution, /Private evaluation only/);
+  assert.ok((await readFile('fixtures/showcase/checks.mjs', 'utf8')).includes('rejects blank names'));
+  for (const [name, expected] of [['@lancedb/lancedb', '0.40.0'], ['apache-arrow', '18.1.0'], ['sharp', '0.35.5']]) {
+    assert.equal(manifest.dependencies[name], expected);
+  }
+  const core = await import(pathToFileURL(path.resolve('dist/core/src/index.js')));
+  assert.equal(core.hash({ a: 1 }), '015abd7f5cc57a2dd94b7590f04ad8084273905ee33ec5cebeae62276a97f862');
+  for (const folder of ['cli', 'core', 'contracts', 'storage-lance', 'indexing-kilo']) {
+    const names = await readdir(path.join('dist', folder, 'src'));
+    assert.ok(names.includes('index.js'));
+    assert.ok(names.includes('index.d.ts'));
+  }
+  for (const folder of ['core', 'contracts']) for (const name of await readdir(path.join('packages', folder, 'src'))) {
+    if (name.endsWith('.ts')) assert.doesNotMatch(await readFile(path.join('packages', folder, 'src', name), 'utf8'), /(?:from|import\()\s*['"](?:node:|@lancedb\/)/);
+  }
+});

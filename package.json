@@ -1,11 +1,31 @@
 {
-  "name": "omnispatialgraph-experiment",
+  "name": "omnispatialgraph",
+  "version": "0.1.0-prototype.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "engines": { "node": "^22.0.0 || ^24.0.0" },
   "workspaces": ["packages/*"],
+  "bin": { "osg": "dist/cli/src/public.js" },
+  "main": "./dist/core/src/index.js",
+  "types": "./dist/core/src/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/core/src/index.d.ts", "default": "./dist/core/src/index.js" },
+    "./core": { "types": "./dist/core/src/index.d.ts", "default": "./dist/core/src/index.js" },
+    "./contracts": { "types": "./dist/contracts/src/index.d.ts", "default": "./dist/contracts/src/index.js" },
+    "./storage-lance": { "types": "./dist/storage-lance/src/index.d.ts", "default": "./dist/storage-lance/src/index.js" },
+    "./indexing-kilo": { "types": "./dist/indexing-kilo/src/index.d.ts", "default": "./dist/indexing-kilo/src/index.js" }
+  },
+  "files": ["dist/cli/src", "dist/contracts/src", "dist/core/src", "dist/indexing-kilo/src", "dist/storage-lance/src", "tools/showcase.mjs", "fixtures/showcase/package.json", "fixtures/showcase/src/greet.js", "fixtures/showcase/checks.mjs"],
+  "osgPrototype": {
+    "distribution": "Private evaluation only; UNLICENSED. No public distribution or automated release authorization.",
+    "compatibility": "Unresolved: LanceDB 0.40.0 pins optional Transformers 3.0.2, whose Sharp ^0.33.5 range excludes bundled 0.35.5. npm ls exits 1; zero audit findings do not establish compatibility. Image and embedding features are not enabled.",
+    "nativeClosure": "All seven LanceDB optional platform declarations retained; this Windows-built archive bundles the installed win32-x64-msvc binary, not all seven binaries. Large bundled artifact, not a minimal download. Other platform installs and native/LGPL notices and redistribution obligations remain unverified."
+  },
+  "bundleDependencies": ["@lancedb/lancedb", "apache-arrow", "@noble/hashes", "ignore", "typescript", "sharp"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepack": "node tools/pack.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --test tests/*.test.mjs"
   },
@@ -13,7 +33,10 @@
     "@lancedb/lancedb": "0.40.0",
     "apache-arrow": "18.1.0",
     "@noble/hashes": "2.0.1",
+    "ignore": "7.0.12",
+    "sharp": "0.35.5",
     "typescript": "5.9.3"
   },
-  "devDependencies": { "@types/node": "24.10.0" }
+  "devDependencies": { "@types/node": "24.10.0" },
+  "overrides": { "sharp": "0.35.5" }
 }

@@ -1,60 +1,50 @@
 # OmniSpatialGraph (osg)
 
-OmniSpatialGraph targets a standalone, CLI-first Node.js/TypeScript temporal knowledge graph and GraphRAG engine on embedded LanceDB. A human-authorized **experimental CLI** now provides persistent source facts, agent episodes, lexical context, history, verification and export recovery. The [MVP specification](docs/OSG_MVP_SPEC.md:43) remains the canonical product target, not a description of complete experimental coverage.
-
-
-Agreed experiment implementation/testing/documentation and final reviews complete. Final targeted Code Reviewer: **APPROVE WITH SUGGESTIONS**, no concrete blocker. Final Vulnerability Checker: **NO BLOCKING FINDINGS** within the Windows private-experiment scope; mandatory-case application BLOCK resolved, original hard-link/protected-state clearance carried forward. No clean-security verdict, distribution clearance or formal gate acceptance ([final evidence](docs/experiment-handoff.md)).
-
-Windows mandatory exclusions case-fold BEFORE traversal, nested ignore-file reads and content reads; attempted negations fail. Coverage includes mixed-case runtime, task, harness, Git, analysis, build/dependency directories, sensitive filenames, environment-file variants and declaration extensions. Original paths, logical IDs, hash case semantics and collision detection are unchanged. Fresh stores contain no excluded facts/rows/history/context; repeat sync adds no rows. ([provider](packages/indexing-kilo/src/index.ts:44), [fresh-store proof](tests/security.test.mjs:214)).
-
-**Affected-store privacy warning:** standard sync retracts previously leaked facts from current state/context only. Every original non-head row is preserved; append-only history and old-commit views remain accessible. Use a **fresh disposable workspace/store** for privacy, not a purge or historical-cleanup claim. ([affected-store proof](tests/security.test.mjs:284)).
-
-Known Low diagnostic-path disclosure remains. Image/embedding features remain disabled; no reachable exploit was identified. Dependency audit still has 3 High entries via sharp; human owner-reviewed disposition is required before enablement/distribution and by 2026-10-21. No Linux/macOS/crash/power-loss/TOCTOU/network-filesystem/large-store evidence is claimed.
+A standalone Node.js/TypeScript prototype for persistent repository facts and agent-memory episodes on embedded LanceDB. It provides lexical context with citations/staleness, append-only history, verification and episode export—not the complete GraphRAG/spatiotemporal MVP.
 
 ## Current status
 
-**Private runnable experiment; agreed work and final reviews complete, no formal G0–G6 acceptance or distribution clearance.** Prior verified Windows x64 Node 24.14.1 build/typecheck/full suite exits 0: 35 pass, 0 fail, 0 skip; not rerun by the final checker. Final focused security run: exit 0, 5 pass/0 fail/0 skip; in-memory compiler comparison matched seven existing outputs, zero temporary files, status unchanged. Earlier targeted 2-pass and 33 full/7 focused, 31 full/3 security, 28/20-pass results remain historical. Three additional concurrency rounds supplement historical 20-round stress. Previous fresh audit exit 1 retains 3 High package entries through LanceDB → Transformers → sharp 0.33.5; no reachable image-decoding application path established, image/embedding features disabled. Human owner-reviewed disposition is required before enablement/distribution and by **2026-10-21**; agents cannot approve it. Confirmed Low raw diagnostic local-path disclosure requires log redaction; future sanitization is not implemented. Linux/macOS/non-Windows case-insensitive filesystems/TOCTOU/crash/power-loss/network-filesystem/large-store/native-LGPL closure/independent clean install remain unverified. See [evidence, advisories and limitations](docs/experiment-handoff.md); documentation did not rerun application checks/audits.
+**0.1.0-prototype.0 · local functional showcase · private/UNLICENSED.** Implementation and independent Windows tests are complete; final prototype code/security reviews are **pending**. No public npm release, owner license grant, native/LGPL redistribution clearance or formal G0–G6 acceptance is claimed.
 
 ## Quick start from the project root
 
-Use Node 22/24 LTS and retain optional native packages. The [manifest scripts](package.json:7) support:
+Use Node 22/24 LTS and retain optional native dependencies. Recorded execution is Windows x64, Node 24.14.1.
 
-```bat
-npm.cmd ci --include=optional
-npm.cmd run build
-npm.cmd run typecheck
-npm.cmd test
-node dist/cli/src/index.js help --json
-```
-
-For runnable workspace, agent start/end and recovery examples, use the [experimental handoff](docs/experiment-handoff.md). Init writes runtime data and can amend the selected workspace's ignore file; use a disposable workspace. The [compiled memory API](packages/core/src/memory.ts:9) is available at dist/core/src/memory.js after build, with separate graph/hash modules and no barrel export.
-
-## Planned MVP
-
-- One temporal data model for repository elements with 1D file-line extents and a physical 4D moving-object fixture—not a production sensor platform.
-- Incremental repository indexing, history, branching and evidence-backed GraphRAG retrieval.
-- Source citations with staleness detection, content-addressed commits and provenance-labeled agent memory.
-- A thin CLI over an importable core, with storage and indexing behind separate interfaces.
-
-See [scope](docs/OSG_MVP_SPEC.md:43), [architecture boundaries](docs/OSG_MVP_SPEC.md:272) and [build gates](docs/OSG_MVP_SPEC.md:762). The MVP excludes a daemon, MCP server and VS Code dependency; sensor ingestion, distributed writers, signatures and tight host integration are outside the MVP.
-
-### Planned technology
-
-| Technology | Experiment pin / support |
+| Command | Purpose |
 | --- | --- |
-| Runtime | Node.js 22 or 24 LTS |
-| Language | TypeScript 5.9.3 |
-| Embedded storage | LanceDB 0.40.0 |
-| Columnar data | Apache Arrow 18.1.0 |
+| [`npm.cmd ci --include=optional`](package.json:32) | Install locked dependencies and optional natives. |
+| [`npm.cmd run build`](package.json:27) | Compile JavaScript and declarations. |
+| [`npm.cmd run typecheck`](package.json:29) | Check TypeScript without emitting. |
+| [`npm.cmd test`](package.json:30) | Run repository tests. |
+| [`node dist/cli/src/public.js --help`](packages/cli/src/public.ts:50) | Show the public CLI command set. |
+| [`node tools/showcase.mjs "%CD%/dist/cli/src/public.js"`](tools/showcase.mjs:9) | Run the disposable RED → GREEN → fresh retrieval showcase. |
 
-Pins are in the [manifest](package.json:12) and [lockfile](package-lock.json); reported Windows execution is distinct from Linux coverage. The independent compiler API provider is not Tree-sitter/Approach A; retrieval is lexical-only and rules hashes are unavailable. MIT licensing is intended by the specification; no license file is present yet.
+The showcase copies its fixture to a temporary workspace and removes it afterward; it does not use or delete your repository memory. It is deterministic process coordination, **not authenticated distinct LLM agents**.
 
-## Start here
+## Private installed evaluation
 
-1. Read the authoritative [MVP specification 2.0](docs/OSG_MVP_SPEC.md) and [root agent guidance](AGENTS.md). Current human instruction takes precedence; derived documentation does not override the specification.
-2. For this authorized experiment, use the [handoff](docs/experiment-handoff.md) and [checklist](docs/tasks/todo.md). Formal gate work still follows the human approval [kickoff procedure](docs/OSG_MVP_SPEC.md:1230); experiment success does not supply acceptance.
-3. Keep [Q1–Q9](docs/OSG_MVP_SPEC.md:153) human-only. Evidence reports and human approval are required for gate acceptance.
+From the checkout, [`npm.cmd pack --json --pack-destination "%TEMP%"`](tools/pack.mjs:5) runs the guarded prepack rebuild and creates the private tarball. In a **fresh disposable consumer directory**, run:
 
-The [maintainer wiki index](docs/maintainer-wiki/index.md) provides derived navigation when available. The wiki and local harness are locally maintained context, not guaranteed distributed documentation; the local memory bank is gitignored and noncanonical. Use the specification and root guidance if those local resources are absent.
+- [`npm.cmd install --ignore-scripts --no-fund --no-audit "%TEMP%/omnispatialgraph-0.1.0-prototype.0.tgz"`](tools/consumer-proof.mjs:21) — independent installation used these flags, with no consumer overrides.
+- [`node_modules\.bin\osg.cmd --help`](tools/consumer-proof.mjs:101) — exercise the installed public launcher.
+- [`node node_modules/omnispatialgraph/tools/showcase.mjs "%CD%/node_modules/omnispatialgraph/dist/cli/src/public.js"`](tools/showcase.mjs:9) — exercise the installed fixture and CLI.
 
-See [CHANGELOG.md](CHANGELOG.md) for unreleased experiment/documentation history. The current experiment authorization does not resolve Q7 generally, authorize third-party copying or grant gate acceptance.
+One package exposes five compiled entrypoints with declarations: root, core, contracts, storage-lance and indexing-kilo ([manifest](package.json:12)). The public bin uses an isolated worker ([launcher](packages/cli/src/public.ts:55)); direct internal-backend/API invocation does **not** inherit its diagnostic-privacy boundary.
+
+## Memory and evidence
+
+The public [help](packages/cli/src/public.ts:50) lists init, sync, remember, context, history, verify and episode export. All workspace commands accept an explicit workspace directory; use JSON output for automation. Init may amend that workspace's ignore file. Use a disposable workspace, never the host indexing store.
+
+Retrieve task context within 800 tokens, inspect entity history before edits, then sync and remember the outcome. Stored text is **untrusted hypothesis**, never policy, instructions, authenticated identity or approval. Reads do not refresh stale facts. History retains metadata, not old raw source; sync does not purge previously indexed history. Affected pre-fix stores require a fresh workspace/store for privacy.
+
+Independent recorded checks: build/typecheck exit 0; **44 pass, 0 fail, 0 skip**; installed boundary/recovery **8 pass**; fresh script-disabled installation, native/API loading and strict consumer types passed. Installed showcase: RED 4/4 → GREEN 8/0 → fresh C 8/0 (pass/fail), both private markers/provenance at 563 estimated tokens and 2,250 characters; verification 4 commits/10 elements, two episodes, history/stale-read/no-op checks passed. Documentation did not rerun these application tests.
+
+## Limits and distribution hold
+
+- The public launcher captures native worker stdout/stderr, returns one validated JSON envelope and fails closed on malformed results, startup/preload failures and output floods; exit/recovery metadata survives. This does not guarantee safety against hostile Node configuration executing **before** the launcher.
+- Exact pins: LanceDB 0.40.0, Arrow 18.1.0, ignore 7.0.12, Sharp 0.35.5. Bundling preserves the patched consumer closure. Recorded root/fresh/retained-consumer audits found zero vulnerabilities: the previous version-specific Sharp findings are resolved, not all security risk.
+- Dependency-tree checks still exit 1: Transformers 3.0.2 requests Sharp ^0.33.5, incompatible with bundled 0.35.5. Image/embedding features are disabled and unsupported; API compatibility is unproved.
+- Pre-documentation archive: 24 own files/5,556 total, about 232 MB compressed/746 MB unpacked. All seven Lance optional platform declarations remain pinned; only the Windows x64 Lance binary is bundled. Other dependencies also contain natives. This is not a minimal download or portable artifact.
+- Owner permission, native/LGPL notices and redistribution obligations remain unresolved. Linux/macOS, crash/power-loss, TOCTOU, network-filesystem and large-store production behavior are unverified.
+
+**Checkout-only references** (not packaged): [current handoff](docs/public-prototype.md), [acceptance checklist](docs/tasks/public-prototype.md), [changelog](CHANGELOG.md), [canonical specification](docs/OSG_MVP_SPEC.md:17). The whole specification, including §22, remains frozen; prototype success does not grant formal gate acceptance.

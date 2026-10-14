@@ -361,7 +361,7 @@ test('bounded ignore replacement sharing failures report actionable storage erro
         assert.match(failed.error.message, /initialized.*ignore/i);
         assert.ok(!JSON.stringify(failed.error).includes(root));
         assert.ok(!failed.error.message.includes(`injected ${code}`));
-      } else assert.match(failed.error.message, /injected EIO/);
+      } else assert.equal(failed.error.message, 'Internal error');
       assert.equal(failed.graphCommitId, 'ROOT', 'storage initialization may already have succeeded');
       assert.ok(failed.workspaceId);
       assert.deepEqual(await sentinelState(ignorePath), before);

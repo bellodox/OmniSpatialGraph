@@ -3,7 +3,6 @@ import { randomUUID, createHash } from 'node:crypto';
 import { link, lstat, mkdir, readFile, readdir, realpath, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { OsgError, type GraphRow } from '../../contracts/src/index.js';
-import { scan } from '../../indexing-kilo/src/index.js';
 import { context, history, remember, sync } from '../../core/src/memory.js';
 import { snapshot, verify } from '../../core/src/graph.js';
 
@@ -21,18 +20,58 @@ const exits: Record<string, number> = { USAGE: 2, STALE_HEAD: 3, STATE_CONFLICT:
   COMMIT_NOT_FOUND: 7, VERIFY_FAILED: 8, UNSUPPORTED_OPERATION: 9 };
 const categories: Record<number, string> = { 1: 'internal', 2: 'invalid', 3: 'conflict', 4: 'conflict', 5: 'invalid',
   6: 'storage', 7: 'notFound', 8: 'storage', 9: 'unsupported' };
+const safeMessages = new Set([
+  'Workspace must be an existing directory', 'Run init first', 'Runtime configuration is missing; run init first',
+  'Invalid runtime config JSON', 'Invalid runtime config', 'Runtime path is not a real directory',
+  'Runtime symlink rejected', 'Nonregular or linked runtime file rejected', 'Nonregular or linked ignore file rejected',
+  'Workspace storage initialized, but ignore-file update failed; release file locks or sharing restrictions and rerun init.',
+  'Episode committed; export failed. Run export episodes to recover.', 'Unable to load storage adapter',
+  'Graph is not initialized', 'Graph has no main head; initialization is incomplete. Preserve the store for recovery.',
+  'Invalid main head', 'Invalid head CAS', 'Head changed', 'Invalid token budget',
+  'Missing remember fields', 'Missing entity', 'Specify exactly one task or entity',
+  'Token budget too small for envelope', 'Expected export episodes',
+  'Commit selector must be a full ID or a prefix of at least 12 characters'
+]);
+const safeId = /^(?:ROOT|c[0-9a-f]{11,64})$/;
+
+function publicError(error: OsgError): { message: string; details: Record<string, unknown> } {
+  const message = safeMessages.has(error.message) ? error.message : {
+    USAGE: 'Invalid command arguments', INVALID_SCHEMA: 'Invalid input or stored schema',
+    INVALID_DELTA: 'Invalid graph change', VERIFY_FAILED: 'Graph verification failed',
+    COMMIT_NOT_FOUND: 'Commit not found', BRANCH_NOT_FOUND: 'Branch not found',
+    STATE_CONFLICT: 'Conflicting graph state', STALE_HEAD: 'Head changed',
+    STORAGE_UNAVAILABLE: 'Storage unavailable', UNSUPPORTED_OPERATION: 'Unsupported command'
+  }[error.code] ?? 'Internal error';
+  const details: Record<string, unknown> = {};
+  for (const key of ['commitId', 'expected', 'actual'] as const) {
+    if (typeof error.details[key] === 'string' && safeId.test(error.details[key])) details[key] = error.details[key];
+  }
+  return { message, details };
+}
+
+function publicWarnings(warnings: Warning[]): Warning[] {
+  const messages: Record<string, string> = {
+    AMBIGUOUS_DECLARATION: 'Ambiguous source declaration skipped',
+    SYMLINK_SKIPPED: 'Linked source path skipped',
+    UNRESOLVED_ENTITY: 'Entity could not be resolved',
+    POLICY_REFS_UNAVAILABLE: 'Host-loaded rules could not be verified; no rule hash was recorded.'
+  };
+  return warnings.map(({ code }) => ({ code: Object.hasOwn(messages, code) ? code : 'SOURCE_WARNING',
+    message: messages[code] ?? 'Source warning; check the workspace locally.' }));
+}
 
 function parse(argv: string[]): { command: string; options: Record<string, string> } {
-  const [command = 'help', ...args] = argv;
-  if (!supported.has(command)) throw new OsgError('UNSUPPORTED_OPERATION', `Unsupported command: ${command}`);
+  const [requested = 'help', ...args] = argv;
+  const command = requested === '--help' ? 'help' : requested;
+  if (!supported.has(command)) throw new OsgError('UNSUPPORTED_OPERATION', 'Unsupported command');
   const options: Record<string, string> = {};
   if (command === 'export' && args.shift() !== 'episodes') throw new OsgError('USAGE', 'Expected export episodes');
   for (let index = 0; index < args.length; index++) {
     const flag = args[index]!;
-    if (!flag.startsWith('--') || !choices[command]!.has(flag.slice(2)) || options[flag.slice(2)] !== undefined) throw new OsgError('USAGE', `Unknown or repeated argument ${flag}`);
+    if (!flag.startsWith('--') || !choices[command]!.has(flag.slice(2)) || options[flag.slice(2)] !== undefined) throw new OsgError('USAGE', 'Unknown or repeated argument');
     const name = flag.slice(2);
     if (name === 'json') { options[name] = 'true'; continue; }
-    if (!args[index + 1] || args[index + 1]!.startsWith('--')) throw new OsgError('USAGE', `Missing value for ${flag}`);
+    if (!args[index + 1] || args[index + 1]!.startsWith('--')) throw new OsgError('USAGE', 'Missing argument value');
     options[name] = args[++index]!;
   }
   if (command === 'remember' && (!options.task || !options.decision || !options.outcome || !options.entities)) throw new OsgError('USAGE', 'Missing remember fields');
@@ -204,7 +243,27 @@ async function exportEpisodes(run: string, rows: GraphRow[], head: string) {
   return { episodes: episodes.length, path: '.osg/export/episodes.jsonl' };
 }
 
+// The public launcher receives results separately from native stdout/stderr.
+async function emit(packet: unknown): Promise<void> {
+  if (process.send) {
+    await new Promise<void>((resolve, reject) => process.send!(packet as object, undefined, undefined, (error: Error | null) => error ? reject(error) : resolve()));
+    process.disconnect();
+  } else process.stdout.write(`${JSON.stringify(packet)}\n`);
+}
+
 async function main() {
+  // Direct backend callers retain JS redaction; public callers also isolate native fd writes.
+  const writeDiagnostic = process.stderr.write.bind(process.stderr);
+  let externalDiagnosticReported = false;
+  process.stderr.write = ((...args: Parameters<typeof process.stderr.write>) => {
+    if (!externalDiagnosticReported) {
+      externalDiagnosticReported = true;
+      writeDiagnostic('EXTERNAL_DIAGNOSTIC_REDACTED: Inspect the JSON result; raw third-party output was omitted.\n');
+    }
+    const callback = args.find((value) => typeof value === 'function');
+    if (callback) callback();
+    return true;
+  }) as typeof process.stderr.write;
   const requestId = randomUUID();
   let workspaceId: string | null = null;
   let branch: string | null = null;
@@ -220,12 +279,12 @@ async function main() {
       branch = 'main';
       let storage: typeof import('../../storage-lance/src/index.js');
       try { storage = await import('../../storage-lance/src/index.js'); }
-      catch (error) { throw new OsgError('STORAGE_UNAVAILABLE', 'Unable to load storage adapter', { cause: String(error) }); }
+      catch { throw new OsgError('STORAGE_UNAVAILABLE', 'Unable to load storage adapter'); }
       const store = await storage.openStore(scope.storePath, command === 'init');
       graphCommitId = await store.head('main');
       if (command === 'init') data = { initialized: true, noop: graphCommitId !== 'ROOT', ignoreUpdated: await ensureIgnored(scope.root) };
       if (command === 'sync') {
-        const result = await sync(store, () => scan(scope.root));
+        const result = await sync(store, async () => (await import('../../indexing-kilo/src/index.js')).scan(scope.root));
         graphCommitId = result.commitId;
         warnings = result.warnings;
         data = { commitId: result.commitId, noop: result.noop, idempotent: result.idempotent, changes: result.count, files: result.files };
@@ -236,7 +295,7 @@ async function main() {
         warnings = result.warnings;
         data = { episodeId: result.episodeId, commitId: result.commitId, resolved: result.count - 1 };
         try { await exportEpisodes(scope.run, await store.rows(), graphCommitId); }
-        catch (error) { throw new OsgError('STORAGE_UNAVAILABLE', 'Episode committed; export failed. Run export episodes to recover.', { commitId: graphCommitId, cause: String(error) }); }
+        catch { throw new OsgError('STORAGE_UNAVAILABLE', 'Episode committed; export failed. Run export episodes to recover.', { commitId: graphCommitId }); }
       }
       if (command === 'context') {
         const stale = async (relative: string, sourceHash: string | null) => {
@@ -264,14 +323,15 @@ async function main() {
       if (command === 'verify') data = verify(await store.rows(), options.commit);
       if (command === 'export') data = await exportEpisodes(scope.run, await store.rows(), graphCommitId!);
     }
-    process.stdout.write(`${JSON.stringify({ schemaVersion: 1, requestId, workspaceId, branch, graphCommitId, ok: true, data, error: null, warnings })}\n`);
+    await emit({ schemaVersion: 1, requestId, workspaceId, branch, graphCommitId, ok: true, data, error: null, warnings: publicWarnings(warnings) });
   } catch (cause) {
-    const error = cause instanceof OsgError ? cause : new OsgError('INTERNAL', String(cause));
+    const error = cause instanceof OsgError ? cause : new OsgError('INTERNAL', 'Internal error');
     const exit = exits[error.code] ?? 1;
     process.exitCode = exit;
-    process.stdout.write(`${JSON.stringify({ schemaVersion: 1, requestId, workspaceId, branch, graphCommitId, ok: false,
-      data: null, error: { code: error.code, category: categories[exit], message: error.message, details: error.details, retryable: error.code === 'STALE_HEAD' }, warnings })}\n`);
-    console.error(`${error.code}: ${error.message}`);
+    const safe = publicError(error);
+    await emit({ schemaVersion: 1, requestId, workspaceId, branch, graphCommitId, ok: false,
+      data: null, error: { code: error.code, category: categories[exit], ...safe, retryable: error.code === 'STALE_HEAD' }, warnings: publicWarnings(warnings) });
+    writeDiagnostic(`${error.code}: ${safe.message}\n`);
   }
 }
 
