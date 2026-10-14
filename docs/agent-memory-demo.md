@@ -34,7 +34,7 @@ c6bdf44fbd450936208eb02562754bd3c9c124eb5632092dc573cdd8e5b8496b9
 
 ## Repeat the scenario
 
-Use a new disposable workspace with the direct-interpolation greeting fixture and seven unchanged tests described above. Commands run from the project root using existing compiled output; [supported flags](../packages/cli/src/index.ts:12). This is a runnable command pattern, **not an additional executed transcript**; new runs produce different IDs.
+Use a new disposable workspace with the direct-interpolation greeting fixture and seven unchanged tests described above. The historical commands below invoke the internal backend, not the current [public worker launcher](../packages/cli/src/public.ts:55); use that public entry for new runs. The historical leading-dash help failure does not describe current public help. See the [current handoff](public-prototype.md) for the separate reusable process showcase and current security/dependency evidence. This pattern is **not an additional executed transcript**; captured seven-test/35-suite-not-rerun results remain historical.
 
 ```bat
 set "OSG_WORKSPACE=C:\path\to\disposable-workspace"

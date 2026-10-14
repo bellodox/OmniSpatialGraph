@@ -4,7 +4,7 @@ A standalone Node.js/TypeScript prototype for persistent repository facts and ag
 
 ## Current status
 
-**0.1.0-prototype.0 · local functional showcase · private/UNLICENSED.** Implementation and independent Windows tests are complete; final prototype code/security reviews are **pending**. No public npm release, owner license grant, native/LGPL redistribution clearance or formal G0–G6 acceptance is claimed.
+**0.1.0-prototype.0 · local functional showcase · private/UNLICENSED.** Implementation and independent Windows tests are complete. Final Code Reviewer: **APPROVE WITH SUGGESTIONS**; Vulnerability Checker: **NO BLOCKING FINDINGS**, bounded to the private Windows-local lexical prototype, not certification. No public npm release, owner license grant, native/LGPL redistribution clearance or formal G0–G6 acceptance is claimed.
 
 ## Quick start from the project root
 
@@ -12,7 +12,7 @@ Use Node 22/24 LTS and retain optional native dependencies. Recorded execution i
 
 | Command | Purpose |
 | --- | --- |
-| [`npm.cmd ci --include=optional`](package.json:32) | Install locked dependencies and optional natives. |
+| [`npm.cmd ci --ignore-scripts --include=optional`](package.json:32) | Install locked dependencies and optional natives without lifecycle scripts. |
 | [`npm.cmd run build`](package.json:27) | Compile JavaScript and declarations. |
 | [`npm.cmd run typecheck`](package.json:29) | Check TypeScript without emitting. |
 | [`npm.cmd test`](package.json:30) | Run repository tests. |

@@ -1,6 +1,6 @@
 # Standalone CLI experiment plan
 
-2026-10-14 · Original experiment plan, now followed by a [runnable handoff](../experiment-handoff.md). Agreed implementation/testing/simplification/documentation and final scoped reviews are complete; the [checklist](todo.md) retains unproved broader targets and the outstanding human dependency-risk decision. No formal acceptance claimed.
+2026-10-14 · **Historical original experiment plan.** Its authorizations, local-memory procedure and risk status below describe that stage, not current task instructions. The [current installable prototype handoff](../public-prototype.md) and [current checklist](public-prototype.md) supersede current CLI/API, audit, review and distribution status. Operational memory is now OSG only; legacy-bank updates are not authorized. The [earlier checklist](todo.md) retains unproved broader targets; no formal acceptance claimed.
 
 ## Scope and authority
 
@@ -33,7 +33,7 @@ After slices **2, 4 and 6**, run the cumulative focused suites and build, inspec
 
 ## Verification and risks
 
-Executable [manifest scripts](../../package.json:7) and direct CLI examples now exist; exact invocations, reported exits and trial counts are in the [handoff](../experiment-handoff.md). The [test catalogue](../OSG_MVP_SPEC.md:786) guides proofs, not a claim all MVP tests are implemented. Forced termination, Linux and other missing targets remain unproved; final scoped reviews are complete, not clean-security, distribution or formal gate clearance. Broader evidence requires separate authorization; the human dependency-risk decision remains outstanding.
+Executable [manifest scripts](../../package.json:26) and direct CLI examples now exist; exact invocations, reported exits and trial counts are in the [handoff](../experiment-handoff.md). The [test catalogue](../OSG_MVP_SPEC.md:786) guides proofs, not a claim all MVP tests are implemented. Forced termination, Linux and other missing targets remain unproved; final scoped reviews are complete, not clean-security, distribution or formal gate clearance. Broader evidence requires separate authorization; the human dependency-risk decision remains outstanding.
 
 - Native/CAS risk: prove installed pins, optional lock entries, null extent/list schema, canonical golden hashes, immutable historical rows, atomic publication and stale-loser invisibility early; strengthen with separate processes later.
 - Indexing risk: prove stable IDs independent of line numbers, overload reorder/ambiguity warnings, changed citations/source hashes, deletion/retraction with edge integrity, unchanged-file skips, return-to-prior-content and whole-sync no-op. Document unsupported extraction cases instead of inventing facts.

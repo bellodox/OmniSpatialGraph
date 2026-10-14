@@ -1,8 +1,8 @@
 # Runnable experiment handoff
 
-2026-10-14 · Documentation Specialist · Experimental engineering handoff, **not formal gate acceptance**.
+2026-10-14 · Documentation Specialist · **Historical experiment-stage evidence**, not formal gate acceptance. The [current installable prototype handoff](public-prototype.md) supersedes current package/CLI/API, audit and review status: worker launcher, five exports/types/core barrel, full 44-pass/fresh-consumer proof and completed private Windows-local reviews. Former three-High findings, raw-diagnostic limitation and no-clean-install claims below describe the earlier stage; recorded current audits are zero, with Sharp compatibility/license/native-LGPL conditions still blocking public distribution. Operational memory is OSG only, not the historical local-bank workflow.
 
-See the [actual cross-agent memory demonstration](agent-memory-demo.md) for the captured A → B → fresh C greeting task, observed IDs/results and scheduled parent cleanup.
+See the [actual cross-agent memory demonstration](agent-memory-demo.md) for the earlier captured A → B → fresh C task and completed parent cleanup. Its seven fixture tests and 35-suite-not-rerun record are distinct from the later reusable process showcase.
 
 Current human authorization covers the standalone experiment and these documentation updates. The entire [authoritative specification](OSG_MVP_SPEC.md), including §22, remains frozen. G0–G6 acceptance and Q1–Q9 remain human-only. Agreed implementation/testing/simplification/documentation and final reviews are complete. Outstanding High dependency risk means **no clean-security verdict or distribution clearance**.
 
@@ -17,7 +17,7 @@ Confirmed Low raw diagnostic local-path disclosure remains: redact shared logs; 
 
 ## Install and validation from the project root
 
-Windows CMD examples follow the actual [scripts](../package.json:7) and [output layout](../tsconfig.json:9). Node 22/24 LTS is supported by the manifest; the reported tested platform is Windows x64, Node 24.14.1. Use the lockfile and retain optional native dependencies; do not use an omit-optional install.
+The commands below preserve the experiment's internal-backend workflow, not the public native-diagnostic boundary. For new work use the [public launcher](../packages/cli/src/public.ts:55) and script-disabled optional-native install in the [current handoff](public-prototype.md:5). Node 22/24 LTS is supported; reported execution is Windows x64, Node 24.14.1. The historical scripts follow the current [manifest](../package.json:26) and [output layout](../tsconfig.json:9).
 
 ```bat
 npm.cmd ci --include=optional
@@ -31,11 +31,11 @@ node dist/cli/src/index.js help --json
 
 The focused test requires the preceding build. Its [source](../tests/independent.test.mjs:17) imports compiled modules. There is no lint or configured documentation-check script. These are reproducible examples, not a transcript newly executed by this documentation task.
 
-Pins: LanceDB 0.40.0, Arrow 18.1.0, TypeScript 5.9.3, noble hashes 2.0.1, Node types 24.10.0 ([manifest](../package.json:12), [lockfile](../package-lock.json)). Optional Windows x64 and Linux x64 native packages are retained; Linux runtime execution is not proved.
+Pins: LanceDB 0.40.0, Arrow 18.1.0, TypeScript 5.9.3, noble hashes 2.0.1, Node types 24.10.0 ([manifest](../package.json:32), [lockfile](../package-lock.json)). Optional Windows x64 and Linux x64 native packages are retained; Linux runtime execution is not proved.
 
 ## CLI smoke workflow
 
-Choose an existing disposable workspace containing source files. Set its absolute path below; the commands themselves run from the project root. Do not target the host index. Initialization creates runtime data and may add five runtime exclusions through atomic sibling replacement of that workspace's ignore file ([implementation](../packages/cli/src/index.ts:154)). It is therefore not a read-only command and should not be run on this repository merely to validate documentation.
+Choose an existing disposable workspace containing source files. Set its absolute path below; the commands themselves run from the project root. Do not target the host index. Initialization creates runtime data and may add five runtime exclusions through atomic sibling replacement of that workspace's ignore file ([implementation](../packages/cli/src/index.ts:193)). It is therefore not a read-only command and should not be run on this repository merely to validate documentation.
 
 ```bat
 set "OSG_WORKSPACE=C:\path\to\disposable-workspace"
@@ -55,7 +55,7 @@ node dist/cli/src/index.js verify --workspace "%OSG_WORKSPACE%" --json
 node dist/cli/src/index.js export episodes --workspace "%OSG_WORKSPACE%" --json
 ```
 
-Substitute an actual returned entity ID for other workspaces. Remember accepts comma-separated IDs or uniquely resolved names; unresolved references produce warnings rather than invented links. Episode text is untrusted hypothesis, not policy or approval. Rule hashes are unavailable and explicitly warned about ([memory implementation](../packages/core/src/memory.ts:37)). Context budgets use a deterministic character-count divided by four estimate for the entire JSON envelope, not a model tokenizer ([packing](../packages/cli/src/index.ts:251)).
+Substitute an actual returned entity ID for other workspaces. Remember accepts comma-separated IDs or uniquely resolved names; unresolved references produce warnings rather than invented links. Episode text is untrusted hypothesis, not policy or approval. Rule hashes are unavailable and explicitly warned about ([memory implementation](../packages/core/src/memory.ts:37)). Context budgets use a deterministic character-count divided by four estimate for the entire JSON envelope, not a model tokenizer ([packing](../packages/cli/src/index.ts:308)).
 
 ## Recovery and failure handling
 
@@ -63,9 +63,9 @@ Substitute an actual returned entity ID for other workspaces. Remember accepts c
 - Exit 3 means exhausted stale-head retries. Run sync and retry the original operation once; report persistent conflict. Sync and remember already have bounded retries ([sync](../packages/core/src/memory.ts:9), [remember](../packages/core/src/memory.ts:37)).
 - If remember reports that its commit succeeded but export failed (exit 6), retain the returned commit ID, repair the export-path problem, then run export episodes. Do **not** blindly remember again: that creates another episode. Export rebuilds from authoritative graph rows, not from the old export ([recovery test](../tests/integration.test.mjs:141)).
 - History and verify accept full commit IDs or unique prefixes of at least 12 characters including the leading c; short/ambiguous selectors fail with exit 5, missing commits with exit 7 ([selector tests](../tests/independent.test.mjs:306)). Supply a real returned ID, not the captured developer IDs below unless querying that same store.
-- Missing runtime config returns NOT_INITIALIZED, exit 6; unrelated config I/O failures are not misclassified as missing config ([regression](../tests/integration.test.mjs:42)). The adapter is [lazy-loaded](../packages/cli/src/index.ts:221): help does not require native storage, while adapter-load failure returns one JSON STORAGE_UNAVAILABLE envelope, exit 6. The [missing-native test](../tests/integration.test.mjs:59) injects an isolated module-resolution failure; it does not delete an installed binary.
-- Exhausted ignore-file replacement retries for EPERM/EACCES/EBUSY return STORAGE_UNAVAILABLE, exit 6, with a path-free message explaining storage may already be initialized: release locks/sharing restrictions and rerun init. Existing ignore bytes and workspace identity are preserved; unrelated I/O handling is unchanged (injected EIO remains INTERNAL, exit 1). [Regression coverage](../tests/security.test.mjs:332) injects failures, not real OS locks; [bounded handling](../packages/cli/src/index.ts:177) does not claim OS-lock proof.
-- Initialization creates ROOT in the table's initial data and publishes a complete private staging table without replacing a concurrent winner ([storage publication](../packages/storage-lance/src/index.ts:34)); config publication preserves the winning workspace identity ([config publication](../packages/cli/src/index.ts:129)). A legacy headless table fails with NOT_INITIALIZED without mutation: preserve it for recovery, rather than expecting init to repair it ([modeled failure](../tests/graph.test.mjs:47)).
+- Missing runtime config returns NOT_INITIALIZED, exit 6; unrelated config I/O failures are not misclassified as missing config ([regression](../tests/integration.test.mjs:42)). The adapter is [lazy-loaded](../packages/cli/src/index.ts:280): help does not require native storage, while adapter-load failure returns one JSON STORAGE_UNAVAILABLE envelope, exit 6. The [missing-native test](../tests/integration.test.mjs:59) injects an isolated module-resolution failure; it does not delete an installed binary.
+- Exhausted ignore-file replacement retries for EPERM/EACCES/EBUSY return STORAGE_UNAVAILABLE, exit 6, with a path-free message explaining storage may already be initialized: release locks/sharing restrictions and rerun init. Existing ignore bytes and workspace identity are preserved; unrelated I/O handling is unchanged (injected EIO remains INTERNAL, exit 1). [Regression coverage](../tests/security.test.mjs:332) injects failures, not real OS locks; [bounded handling](../packages/cli/src/index.ts:219) does not claim OS-lock proof.
+- Initialization creates ROOT in the table's initial data and publishes a complete private staging table without replacing a concurrent winner ([storage publication](../packages/storage-lance/src/index.ts:34)); config publication preserves the winning workspace identity ([config publication](../packages/cli/src/index.ts:161)). A legacy headless table fails with NOT_INITIALIZED without mutation: preserve it for recovery, rather than expecting init to repair it ([modeled failure](../tests/graph.test.mjs:47)).
 
 ```bat
 node dist/cli/src/index.js sync --workspace "%OSG_WORKSPACE%" --json
@@ -74,11 +74,11 @@ node dist/cli/src/index.js export episodes --workspace "%OSG_WORKSPACE%" --json
 node dist/cli/src/index.js verify --workspace "%OSG_WORKSPACE%" --json
 ```
 
-The [CLI contract actually implemented](../packages/cli/src/index.ts:19) always emits one JSON envelope to stdout; errors also emit a diagnostic to stderr. Exit meanings: 0 success, 1 internal error, 2 usage, 3 stale head, 4 state conflict, 5 invalid schema/delta, 6 storage/not initialized, 7 missing branch/commit, 8 verification failed, 9 unsupported. This mapping is not a claim every category has independent process coverage. Approval, watch, query, scan, status, branch, graph, diff, propose, commit, doctor, maintain, vectors and server commands are unsupported ([help](../packages/cli/src/index.ts:216)).
+The [CLI contract actually implemented](../packages/cli/src/index.ts:19) always emits one JSON envelope to stdout; errors also emit a diagnostic to stderr. Exit meanings: 0 success, 1 internal error, 2 usage, 3 stale head, 4 state conflict, 5 invalid schema/delta, 6 storage/not initialized, 7 missing branch/commit, 8 verification failed, 9 unsupported. This mapping is not a claim every category has independent process coverage. Approval, watch, query, scan, status, branch, graph, diff, propose, commit, doctor, maintain, vectors and server commands are unsupported ([help](../packages/cli/src/index.ts:275)).
 
 ## Importable core
 
-Build output exposes [memory functions](../packages/core/src/memory.ts:9) at dist/core/src/memory.js, [graph functions](../packages/core/src/graph.ts:143) at dist/core/src/graph.js and [hash functions](../packages/core/src/hash.ts:7) at dist/core/src/hash.js. There is no core index/barrel export or package-level exports map ([package](../packages/core/package.json:1)). The storage adapter is separate. A read-only export-discovery example from the root is:
+Build output exposes separate [memory](../packages/core/src/memory.ts:9), [graph](../packages/core/src/graph.ts:143) and [hash](../packages/core/src/hash.ts:7) modules. The later installable prototype adds a [core barrel](../packages/core/src/index.ts:1) and root [five-entry typed exports map](../package.json:12); the earlier no-barrel/no-exports description is superseded. Direct API calls do not inherit the public worker's native diagnostic boundary. The storage adapter remains separate. A read-only module-discovery example is:
 
 ```bat
 node --input-type=module -e "import('./dist/core/src/memory.js').then(m => console.log(Object.keys(m)))"
@@ -98,7 +98,7 @@ Its in-memory compiler comparison matched **seven existing outputs**, with **zer
 
 | Reported result | Reproducible source evidence |
 | --- | --- |
-| Latest mandatory mixed-case fix: Windows x64 Node 24.14.1; build, typecheck, full test each exit 0; 35 pass, 0 fail, 0 skip; targeted mandatory-exclusion/reconciliation tests 2 pass | [Scripts](../package.json:7), [fresh-store test](../tests/security.test.mjs:214), [affected-store test](../tests/security.test.mjs:284) |
+| Latest mandatory mixed-case fix: Windows x64 Node 24.14.1; build, typecheck, full test each exit 0; 35 pass, 0 fail, 0 skip; targeted mandatory-exclusion/reconciliation tests 2 pass | [Scripts](../package.json:26), [fresh-store test](../tests/security.test.mjs:214), [affected-store test](../tests/security.test.mjs:284) |
 | 22 literal canonical input/byte/hash triples, independently fixed | [Golden triples](../tests/independent.test.mjs:54); distinct from the additional encoder-based [contract fixtures](../tests/contract.test.mjs:22) |
 | Nested empty/all-null object-member omission retained, with explicit byte/hash goldens; array positions preserved | [Goldens](../tests/contract.test.mjs:11), [§9.1](OSG_MVP_SPEC.md:465), [Appendix A reference](OSG_MVP_SPEC.md:948); not a canonical-format change |
 | Null valid-from supersession/retraction closes prior rows at negative infinity, distinct from an absent end | [Snapshot semantics](../packages/core/src/graph.ts:75), [current/valid-time/history regression](../tests/graph.test.mjs:10) |
@@ -121,7 +121,7 @@ The earlier documentation-only checks passed local links/line bounds and wiki ca
 
 Supplied remediation evidence, not audits newly run by documentation:
 
-- [Static hard-link regressions](../tests/security.test.mjs:29) refuse linked ignore/config/export/store files and preserve outside sentinel bytes and mtime. Ordinary ignore rules are retained with [atomic sibling replacement](../packages/cli/src/index.ts:154), not in-place truncation. This is not hostile concurrent-TOCTOU proof.
+- [Static hard-link regressions](../tests/security.test.mjs:29) refuse linked ignore/config/export/store files and preserve outside sentinel bytes and mtime. Ordinary ignore rules are retained with [atomic sibling replacement](../packages/cli/src/index.ts:193), not in-place truncation. This is not hostile concurrent-TOCTOU proof.
 - [Nested privacy regressions](../tests/security.test.mjs:85) assert ignored files are not read and produce no graph facts, history or context in the tested fresh store; runtime/task-plan exclusions cannot be negated. Hierarchical matching uses exactly pinned ignore 7.0.12 ([provider manifest](../packages/indexing-kilo/package.json)).
 - [Mixed-case privacy regression](../tests/security.test.mjs:156) covers Windows case-insensitive nested ignore matching before reads, including pruned ancestors. [Provider matching](../packages/indexing-kilo/src/index.ts:38) is case-sensitive on other platforms, but that branch is untested; logical identity and hash case semantics are unchanged.
 - [Protected-state regressions](../tests/security.test.mjs:383) reject public replacement/retraction of approved/policy rows independently of caller actor label, before publication. Fixture authority is preloaded through low-level storage, not an agent approval path.

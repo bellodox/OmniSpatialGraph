@@ -41,3 +41,11 @@ These records document current task scope, not new binding product decisions. [S
 **Rationale and alternatives:** Direct compiled CLI examples match actual parsing/build output without assuming a global command shim. The independently written compiler API provider avoids upstream copying for this experiment; it is not a decision to replace the specified Tree-sitter Approach A. Claiming full MVP/gate coverage or a clean security verdict would exceed the evidence.
 
 **Consequences:** Windows results remain attributed reports, Linux/forced-crash/TOCTOU/large-store evidence is absent, rules hashes remain unavailable, and final parent code/security reviews including dependencies are pending. The [checklist](../tasks/todo.md) distinguishes completed supported implementation/proofs from unproved planned criteria. Historical decisions above remain intact.
+
+## 2026-10-14 — OSG-only operational memory and prototype reconciliation
+
+**Status:** Current human-authorized documentation scope, superseding earlier memory procedures, not a product-spec change or formal G5 acceptance.
+
+**Decision:** Use only the public OSG CLI for operational context/history/sync/remember, preserving the initialized repository store. Reconcile necessary wiki/root/historical-document statements as derived documentation only; no legacy-bank/NotebookLM/documentation-graph operations. Entire specification, source/toolchain/tests, harness/settings/hooks/index/ignore and Git index remain unchanged; no delegation, commits or pushes.
+
+**Rationale:** The installable private prototype now has a worker privacy boundary, core barrel/five typed exports, fresh consumer proof and completed scoped reviews. Earlier pending statuses, three-High audit results and no-clean-install claims must remain historical rather than current. Zero audit findings do not resolve the Sharp range mismatch, owner licensing or native/LGPL distribution conditions ([current evidence](../public-prototype.md)). Correcting the packaged README is necessary for accurate user instructions; retaining its stale pending status solely to avoid repack was rejected. The old archive is preserved, not silently rebuilt; parent-owned repack/new integrity evidence is required.
