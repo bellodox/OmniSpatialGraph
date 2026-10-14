@@ -2,6 +2,8 @@
 
 2026-10-14 · Documentation Specialist · Experimental engineering handoff, **not formal gate acceptance**.
 
+See the [actual cross-agent memory demonstration](agent-memory-demo.md) for the captured A → B → fresh C greeting task, observed IDs/results and scheduled parent cleanup.
+
 Current human authorization covers the standalone experiment and these documentation updates. The entire [authoritative specification](OSG_MVP_SPEC.md), including §22, remains frozen. G0–G6 acceptance and Q1–Q9 remain human-only. Agreed implementation/testing/simplification/documentation and final reviews are complete. Outstanding High dependency risk means **no clean-security verdict or distribution clearance**.
 
 
