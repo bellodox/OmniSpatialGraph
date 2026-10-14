@@ -1,0 +1,1 @@
+{"name":"@osg/cli","version":"0.0.0","private":true,"type":"module","bin":{"osg":"../../dist/cli/src/index.js"},"dependencies":{"@osg/core":"0.0.0","@osg/contracts":"0.0.0","@osg/storage-lance":"0.0.0","@osg/indexing-kilo":"0.0.0"}}

@@ -2,6 +2,6 @@
 
 Use the [catalog](index.md) to navigate derived documentation for OmniSpatialGraph. Read the [specification](../OSG_MVP_SPEC.md:17) first when deciding requirements.
 
-At initialization, the only project-content file reported was the specification. Validation also found existing Git metadata and standard sample hooks; no shared project hook directory was found or configured. There are no implemented packages, executable application commands, dependency manifests or tests. G0 remains unstarted ([status](../OSG_MVP_SPEC.md:926)).
+The human-authorized standalone experiment now has source packages, locked dependencies, build scripts and tests. Use the [runnable handoff](../experiment-handoff.md) for exact commands and attributed Windows proof results. Final parent code/security reviews are pending; no formal G0–G6 acceptance is claimed. The frozen [spec status](../OSG_MVP_SPEC.md:926) remains historical authority, not a current source inventory.
 
-This is the durable documentation layer of Carbon Memory, but it remains locally retained and ignored under current user rules—not committed or externally indexed. The volatile bank is noncanonical. See [Carbon Memory](concept-carbon-memory.md), [decisions](decisions.md), and [workflows](workflows.md).
+This wiki is durable derived navigation, not canonical product authority or proof of approval. Its former ignore exclusion is commented out; no claim of tracking/distribution is made. The volatile bank is local-only and noncanonical. See [Carbon Memory](concept-carbon-memory.md), [decisions](decisions.md), and [workflows](workflows.md). No graph generation, external index refresh or hook/ignore configuration is part of this handoff.

@@ -1,6 +1,15 @@
 # Changelog
 
-Notable changes to OmniSpatialGraph are recorded here in Keep a Changelog style. This repository is specification-only: **no application release exists, and G0 has not started**. Entries describe documentation, not shipped software.
+Notable changes to OmniSpatialGraph are recorded here in Keep a Changelog style. **No application release or formal G0–G6 acceptance is claimed.** Agreed human-authorized standalone experiment work and final scoped reviews are complete; human dependency-risk disposition remains outstanding.
+
+
+Final targeted Code Reviewer: **APPROVE WITH SUGGESTIONS**, no concrete blocker. Final Vulnerability Checker: **NO BLOCKING FINDINGS** within targeted Windows private-experiment scope; mandatory-case application BLOCK resolved, original hard-link/protected-state clearance carried forward. No clean-security verdict or distribution clearance ([closure evidence](docs/experiment-handoff.md)).
+
+Windows mandatory exclusions case-fold BEFORE traversal, nested ignore-file reads and content reads; attempted negations fail. Coverage includes mixed-case runtime, task, harness, Git, analysis, build/dependency directories, sensitive filenames, environment-file variants and declaration extensions. Original paths, logical IDs, hash case semantics and collision detection are unchanged. Fresh stores contain no excluded facts/rows/history/context; repeat sync adds no rows. ([provider](packages/indexing-kilo/src/index.ts:44), [fresh-store proof](tests/security.test.mjs:214)).
+
+**Affected-store privacy warning:** standard sync retracts previously leaked facts from current state/context only. Every original non-head row is preserved; append-only history and old-commit views remain accessible. Use a **fresh disposable workspace/store** for privacy, not a purge or historical-cleanup claim. ([affected-store proof](tests/security.test.mjs:284)).
+
+Known Low diagnostic-path disclosure remains. Image/embedding features remain disabled; no reachable exploit was identified. Dependency audit still has 3 High entries via sharp; human owner-reviewed disposition is required before enablement/distribution and by 2026-10-21. No Linux/macOS/crash/power-loss/TOCTOU/network-filesystem/large-store evidence is claimed.
 
 ## [Unreleased]
 
@@ -8,6 +17,8 @@ Documentation baseline and initialization: 2026-10-13. This date is not an appli
 
 ### Added
 
+- 2026-10-14: Runnable experimental CLI for init/sync/remember/context/history/verify/episode export, pinned LanceDB/Arrow storage and an independently written TypeScript compiler API provider; see [handoff and limitations](docs/experiment-handoff.md).
+- Latest reported Windows x64 Node 24.14.1 proof after the final two suggestion fixes: build/typecheck/full tests exit 0; 35 pass, 0 fail, 0 skip; targeted mandatory-exclusion/reconciliation tests 2 pass. Prior 33 full/7 focused, 31 full/3 security and earlier 28/20-pass evidence historical. Three extra genuine rounds of four fresh plus four repeated initializers passed beyond historical 20-round stress. [Handoff provenance](docs/experiment-handoff.md) distinguishes supplied results from inspected assertions. Linux/crash evidence absent; passing CAS access-denied version-hint warning retained.
 - [MVP specification 2.0](docs/OSG_MVP_SPEC.md), adopted by Bello as the authoritative baseline for the planned temporal knowledge graph and GraphRAG engine ([status record](docs/OSG_MVP_SPEC.md:926)). Prototype evidence in the specification is not repository test evidence.
 - [Root agent guidance](AGENTS.md) and an [alternate agent entrypoint](CLAUDE.md), with locally retained mode guidance deferring to the specification. Local mode documentation is not a shipped application capability.
 - Source-indexed local memory and a [derived maintainer wiki](docs/maintainer-wiki/index.md), initialized through reading and linked documentation only—without a knowledge graph. The gitignored local harness and locally maintained wiki are not guaranteed distributed artifacts ([initialization record](docs/maintainer-wiki/log.md)).
@@ -15,4 +26,16 @@ Documentation baseline and initialization: 2026-10-13. This date is not an appli
 
 ### Changed
 
-- Expanded [README.md](README.md) with a project introduction, planned MVP scope and technology targets, specification-only status, documentation navigation and the future G0 discovery-and-approval starting point. No runnable quickstart or unverified installation commands were added.
+- 2026-10-14: Final documentation/local-memory closure records completed agreed experiment work and targeted reviews, replacing stale pending statuses without another implementation/review cycle. Final focused security command exit 0: 5 pass/0 fail/0 skip; in-memory compiler comparison matched seven existing outputs, zero temporary files, status unchanged. Prior verified 35-pass full build/typecheck/test evidence was not rerun by checker or documentation. Entire specification and application preserved ([final evidence](docs/experiment-handoff.md)).
+- 2026-10-14: Historical onboarding refresh replaced spec-only descriptions; the subsequent suggestion-fix refresh recorded then-pending reviews and injection/headless-init/local-filesystem limitations. Those pending statuses are superseded by final scoped outcomes above, not erased historical evidence.
+- 2026-10-14: Historical security-remediation refresh recorded resolved hard-link **BLOCK** and then-pending mandatory-case reassessment; final checker now resolves that application BLOCK. Previous fresh audit exit 1/3 High package entries remains outstanding; no reachable image-decoding application path established, image/embedding disabled. Human owner-reviewed disposition needed before enablement/distribution and by 2026-10-21. Signature audit exit 0 (114 signatures/10 attestations) does not close vulnerability/native-LGPL risk; independent clean install unverified. Confirmed Low raw diagnostic local-path disclosure requires redaction; future sanitization not implemented ([details](docs/experiment-handoff.md)).
+- 2026-10-13: Expanded [README.md](README.md) with a project introduction, planned MVP scope and technology targets, then-specification-only status, documentation navigation and the future G0 discovery-and-approval starting point. That historical update added no runnable quickstart or unverified installation commands.
+
+### Fixed
+
+- Windows case-insensitive nested ignore privacy before reads, without changing logical identity/hash case semantics; non-Windows case-insensitive filesystems remain a limitation ([regression](tests/security.test.mjs:156)). Exhausted EPERM/EACCES/EBUSY ignore replacement retries now report STORAGE_UNAVAILABLE, exit 6, with path-free partial-init recovery guidance to release locks/sharing restrictions and rerun init; unrelated I/O unchanged. [Failure/recovery evidence](tests/security.test.mjs:332) is injection, not real OS-lock proof. Final targeted reviewer/security checks are complete within Windows private-experiment scope, not distribution clearance.
+- Experimental duplicate import edges, malformed stored JSON verification classification, commit-prefix resolution and malformed runtime config classification, retaining [regression assertions](tests/independent.test.mjs:266).
+- Static hard-link refusal and atomic sibling ignore replacement preserve outside bytes/mtime; exact ignore 7.0.12 hierarchical pre-read pruning with nonoverridable exclusions; public approved/policy replacement/retraction rejected before publication regardless of actor label ([security tests](tests/security.test.mjs:29)). Reported lock metadata restoration: 139 external entries/0 gaps, 113 restored, 0 existing-version/optional-flag drift; LanceDB/Arrow and all seven native packages retained. No code/pin edits in this documentation refresh.
+- Post-review fixes: null valid-from closing semantics; missing-config exit 6 and lazy adapter-load failure envelopes; initial-data ROOT/private staging publication with concurrent-init preservation and nonmutating headless-table failure; supported-code-only import resolution ([graph/init tests](tests/graph.test.mjs:10), [CLI failures/concurrency](tests/integration.test.mjs:16), [import tests](tests/provider.test.mjs:8)). Canonical nested empty/all-null omission is unchanged per the specification, with [explicit goldens](tests/contract.test.mjs:11).
+
+The earlier 2026-10-13 entries describe historical documentation initialization, not current implementation restrictions or test evidence.

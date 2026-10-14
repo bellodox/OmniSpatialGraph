@@ -1,16 +1,17 @@
 # Technology Inventory
 
-All technologies below are **planned**, not installed or configured repository facts.
+Manifest/lock facts and reported execution are distinguished below. See the [handoff](../experiment-handoff.md) for provenance and commands.
 
-| Area | Spec requirement | Evidence |
+| Area | Experiment fact / target distinction | Evidence |
 | --- | --- | --- |
-| Runtime | Node 22 or 24 LTS; Windows x64 and Linux x64 | [D3](../OSG_MVP_SPEC.md:132) |
-| Language | TypeScript; contracts also JSON Schema | [G0](../OSG_MVP_SPEC.md:773) |
-| Persistence | LanceDB exactly 0.40.0; Arrow exactly 18.1.0 | [D3](../OSG_MVP_SPEC.md:132) |
+| Runtime | Manifest supports Node 22/24 LTS; reported Windows x64 Node 24.14.1 | [Manifest](../../package.json:5), [reported evidence](../experiment-handoff.md) |
+| Language/build | TypeScript 5.9.3; strict NodeNext compilation to dist; Node types 24.10.0 | [Pins](../../package.json:12), [compiler configuration](../../tsconfig.json:2) |
+| Persistence | LanceDB exactly 0.40.0; Arrow exactly 18.1.0 | [Manifest](../../package.json:13), [adapter](../../packages/storage-lance/src/index.ts:1) |
 | Native packaging | Retain optional Windows/Linux native binaries at the exact pin; do not omit optional dependencies | [Appendix C](../OSG_MVP_SPEC.md:1239) |
-| Core hashing | Pure-JS SHA-256, avoiding Node-only core APIs | [R12](../OSG_MVP_SPEC.md:186), [hashing](../OSG_MVP_SPEC.md:474) |
-| Parsing | Approach A; Tree-sitter, with WASM preferred; adaptation requires verified provenance and human approval | [ingestion](../OSG_MVP_SPEC.md:609) |
+| Core hashing | noble hashes 2.0.1 | [Manifest](../../package.json:15), [hash source](../../packages/core/src/hash.ts:1) |
+| Parsing | Independently written TypeScript compiler API; explicitly experimental, not Approach A | [Provider](../../packages/indexing-kilo/src/index.ts:92), [target ingestion](../OSG_MVP_SPEC.md:609) |
+| Tests | Built-in Node test runner over five suites; build first | [Scripts](../../package.json:7), [independent suite](../../tests/independent.test.mjs:54) |
 
-No manifest, lockfile, build tool, test runner, lint configuration, deployment configuration or shared project hook directory was found. Git metadata and standard sample hooks were observed during validation; hook activation was not verified. TypeScript/tooling versions require justified future G0 proposals, not generic defaults ([kickoff](../OSG_MVP_SPEC.md:1246)).
+The [lockfile](../../package-lock.json) retains optional Windows/Linux x64 native packages. Do not omit optional dependencies. No lint/docs-check script exists in the manifest. Hook configuration is untouched. WSL Ubuntu 24.04 was reported present without Node; Linux tests were not run. No dependencies vulnerability assessment has been completed.
 
 The Linux prototype environment in [§18](../OSG_MVP_SPEC.md:846) is external historical evidence, not this workspace's runtime.

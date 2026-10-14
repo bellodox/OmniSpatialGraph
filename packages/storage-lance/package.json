@@ -1,0 +1,1 @@
+{"name":"@osg/storage-lance","version":"0.0.0","private":true,"type":"module","dependencies":{"@osg/contracts":"0.0.0","@lancedb/lancedb":"0.40.0","apache-arrow":"18.1.0"}}

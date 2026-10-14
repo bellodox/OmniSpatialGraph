@@ -29,3 +29,15 @@ These records document current task scope, not new binding product decisions. [S
 **Decision:** Improve the existing overview and create an unreleased documentation changelog. This supersedes the initialization-only choice not to create a root changelog, not the historical initialization record. The exception applies to these named documents only; Q7 remains unresolved generally, and no implementation, installation, graph operation or gate approval is authorized.
 
 **Evidence note:** The wiki exclusion in [ignore rules](../../.gitignore:6) is currently commented out. Earlier initialization ignore evidence is historical, not proof of current wiki ignore or distribution status. Ignore settings are unchanged by this follow-up.
+
+## 2026-10-14 — Bounded experiment and documentation handoff
+
+**Status:** Authorized by current human instruction; not a binding product-spec change or gate acceptance.
+
+**Context:** Implementation, independent testing and simplification are reported complete. Old spec-only descriptions no longer match actual manifests/source/tests. The entire specification, including §22, is frozen for this handoff.
+
+**Decision:** Publish [runnable commands, attributed proofs and limitations](../experiment-handoff.md), refresh derived navigation/status and short local memory, and record incomplete proof/review items honestly. Experiment authorization supersedes historical installation/implementation restrictions within scope; Q1–Q9 and formal G0–G6 approval remain human-only. No third-party copying, source/test changes, persona delegation, harness/mode/hook/index/ignore configuration or graph generation is authorized here.
+
+**Rationale and alternatives:** Direct compiled CLI examples match actual parsing/build output without assuming a global command shim. The independently written compiler API provider avoids upstream copying for this experiment; it is not a decision to replace the specified Tree-sitter Approach A. Claiming full MVP/gate coverage or a clean security verdict would exceed the evidence.
+
+**Consequences:** Windows results remain attributed reports, Linux/forced-crash/TOCTOU/large-store evidence is absent, rules hashes remain unavailable, and final parent code/security reviews including dependencies are pending. The [checklist](../tasks/todo.md) distinguishes completed supported implementation/proofs from unproved planned criteria. Historical decisions above remain intact.

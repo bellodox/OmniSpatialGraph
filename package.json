@@ -1,0 +1,19 @@
+{
+  "name": "omnispatialgraph-experiment",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "^22.0.0 || ^24.0.0" },
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@lancedb/lancedb": "0.40.0",
+    "apache-arrow": "18.1.0",
+    "@noble/hashes": "2.0.1",
+    "typescript": "5.9.3"
+  },
+  "devDependencies": { "@types/node": "24.10.0" }
+}

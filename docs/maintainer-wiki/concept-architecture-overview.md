@@ -1,20 +1,22 @@
-# Planned Architecture
+# Experimental Source Map and Target Architecture
 
-This page describes the [specified design](../OSG_MVP_SPEC.md:255), not implemented packages. The MVP is standalone, CLI-first and daemon-free; tight host integration and provider B are later revisions ([scope](../OSG_MVP_SPEC.md:43)).
+The [specified design](../OSG_MVP_SPEC.md:255) remains the canonical target. The bounded standalone experiment is CLI-first and daemon-free; it does not implement the full MVP. See the [handoff](../experiment-handoff.md) for tested behavior and gaps.
 
-| Boundary | Planned responsibility |
+| Boundary | Actual experimental source |
 | --- | --- |
-| Contracts | Types and schemas; no internal dependencies |
-| Core | Identity, canonical hashing, validation, temporal reads, commits, merge and retrieval; depends only on contracts/ports |
-| CLI | Thin transport and dependency wiring; no business logic |
-| Indexing provider A | Discovery/extraction through the ingestion contract; no host extension state |
-| Storage adapter | Persistence implementation; sole LanceDB/Arrow importer |
+| Contracts | [Types and graph port](../../packages/contracts/src/index.ts:1) |
+| Core | [Canonical hashing](../../packages/core/src/hash.ts:7), [commits/snapshots/verification](../../packages/core/src/graph.ts:143), [sync/memory/history](../../packages/core/src/memory.ts:9); no implemented merge CLI |
+| CLI | [Argument parsing, runtime confinement, envelope packing and export wiring](../../packages/cli/src/index.ts:12) |
+| Experimental provider | [Independent compiler API scan](../../packages/indexing-kilo/src/index.ts:23), not Tree-sitter/Approach A or a host-index adapter |
+| Storage adapter | [Pinned LanceDB/Arrow schema, initial-data ROOT/private staging publication and atomic head CAS](../../packages/storage-lance/src/index.ts:34) |
 
-Source: [dependency rules](../OSG_MVP_SPEC.md:272). No corresponding source directories are created by this task.
+Target boundaries: [dependency rules](../OSG_MVP_SPEC.md:272). Build exposes separate core modules, not a barrel export. No source directories are created or altered by this documentation task.
 
-## Planned data flow
+## Data flow and target differences
 
-Discovery → file hashing → parsing/extraction → core identity resolution → diff → one atomic commit per sync or watch batch ([pipeline](../OSG_MVP_SPEC.md:622)). Element and commit rows are append-only; the branch head is changed by CAS in the same batch. Reachable rows supply history and temporal state ([commit protocol](../OSG_MVP_SPEC.md:507)). Optional vectors are derived and written after a commit; lexical traversal must still work without them ([retrieval](../OSG_MVP_SPEC.md:641)).
+Experimental discovery → file hashing → compiler API extraction → sync reconciliation → atomic main-head CAS. Append-only element/commit rows and reachability supply history. Context uses lexical seeds and bounded traversal; no vectors or watch are implemented. Sync rescans source; no-op publication does not imply parse skipping. [Source evidence](../../packages/core/src/memory.ts:9) and [target pipeline](../OSG_MVP_SPEC.md:622) must not be conflated.
+
+The CLI [lazy-loads storage](../../packages/cli/src/index.ts:221), allowing help without native storage loading. [Import resolution](../../packages/indexing-kilo/src/index.ts:60) restricts targets to supported code extensions, not Markdown/unknown-extension guesses. Init publication relies on local table-directory rename and config hard-link behavior; crash cleanup/durability are not established ([limitations](../experiment-handoff.md)).
 
 Repository symbols use one-dimensional extents in the unified spatial model; moving-object fixtures exercise the same model ([purpose](../OSG_MVP_SPEC.md:51), [extent](../OSG_MVP_SPEC.md:444)). Development documentation stays separate from future runtime data ([layout](../OSG_MVP_SPEC.md:193)).
 

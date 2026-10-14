@@ -1,0 +1,1 @@
+{"name":"@osg/indexing-kilo","version":"0.0.0","private":true,"type":"module","dependencies":{"@osg/contracts":"0.0.0","@osg/core":"0.0.0","ignore":"7.0.12","typescript":"5.9.3"}}
