@@ -128,4 +128,13 @@ Layout: `packages/contracts` (types), `packages/core` (graph protocol, retrieval
 
 [Apache License 2.0](LICENSE); see [NOTICE](NOTICE). Dependencies keep their own licences. The C, Kotlin, Swift and Solidity grammars come from `tree-sitter-wasms` (Unlicense), whose upstream grammar licences are not yet reviewed. Bundled native binaries (LanceDB, sharp/libvips) carry their own notice obligations, which are not yet reviewed for redistribution.
 
-The [manifest](package.json:4) remains private and declares Apache-2.0. The frozen specification still describes MIT; that discrepancy requires human resolution, not an agent legal choice. Public distribution, third-party grammar/native/LGPL obligations and dependency compatibility require [human disposition](docs/maintainer-wiki/open-work.md#human-decisions). No gate or legal approval is asserted.
+The [manifest](package.json:4) remains private and declares Apache-2.0. The frozen specification still describes MIT; that discrepancy requires human resolution, not an agent legal choice. Public distribution, third-party grammar/native/LGPL obligations and dependency compatibility require [human disposition](docs/limitations.md#human-decisions). No gate or legal approval is asserted.
+
+## Durable documentation
+
+- [Architecture](docs/architecture.md) — boundaries, data flow and technology.
+- [Operations](docs/operations.md) — OSG-only memory workflow, safety and recovery.
+- [Decisions](docs/decisions.md) — attributed authorization, rationale and retained milestones.
+- [Limitations](docs/limitations.md) — human decisions and unverified evidence.
+
+These human-facing explanations are not operational memory or approval; use the [prototype handoff](docs/public-prototype.md) for attributed proof.
