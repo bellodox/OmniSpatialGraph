@@ -1,53 +1,35 @@
-# Documentation Decisions
+# Documentation and Experiment Decisions
 
-These records document current task scope, not new binding product decisions. [Spec decisions](../OSG_MVP_SPEC.md:126) and [human-only questions](../OSG_MVP_SPEC.md:153) retain their authority.
+These are attributed scope/rationale records, not agent-created binding product decisions. [Specification decisions](../OSG_MVP_SPEC.md:126) and [human-only questions](../OSG_MVP_SPEC.md:153) retain authority. Later authorization does not retroactively approve earlier work or settle formal gates.
 
-## 2026-10-13 — Documentation-only initialization exception
+## 2026-10-13 — Documentation initialization
 
-**Status:** Authorized for this task by the current human instruction only.
+**Authorization:** The human requested entrypoints, wiki, local memory and ignore rules before implementation, then explicitly requested the root overview/changelog. This narrowly superseded the specification-only initialization restriction for those tasks, not Q7 generally, installation permission or G0 acceptance.
 
-**Context:** Q7 limits root files and G0 step 0 limits writes. The user explicitly requested agent entrypoints, wiki, volatile memory and ignore rules before implementation.
+**Rationale:** Establish navigable requirements and distinguish planned design from implemented facts. Graph-based initialization was excluded because it contradicted the requested scope. Broad test-name ignore patterns required test-suite exceptions; the later wiki-ignore setting differed from initialization and was not silently restored. The wiki's durability never implied it was tracked or distributed.
 
-**Decision:** Create only the requested documentation and ignore rules; preserve the entire specification, including §22. This narrow exception does not resolve Q7, start or accept G0, approve its plan, permit installation/scaffolding, or authorize third-party adaptation. Future work still follows [G0 restrictions](../OSG_MVP_SPEC.md:1230).
+**Subsequent status:** Historical multi-layer Carbon Memory procedures are superseded by the OSG-only policy below; they are not instructions to initialize or update a bank now.
 
-**Alternative excluded:** Running the general graph-based initialization workflow would contradict the explicit instruction. No graph creation, scanning, refresh, configuration or Understand Anything operation is authorized.
+## 2026-10-14 — Bounded standalone experiment
 
-**Consequences:** The wiki remains derived navigation. Agent guidance must distinguish planned design from implemented facts. A dated [log](log.md) records initialization instead of a new root changelog; no existing changelog was available.
+**Authorization:** The human permitted the standalone experiment's installs, builds, tests and continuation without intermediate pauses in the planned layout. Necessary documentation followed. This did not resolve Q1–Q9, accept G0–G6 or permit upstream copying.
 
-## 2026-10-13 — Local retention and tool limitations
+**Choice and alternative:** An independently written TypeScript compiler API provider enabled the initial experiment without upstream adaptation. Non-Tree-sitter extraction was explicitly authorized as an **experimental deviation**, not a permanent replacement of specified Approach A. The present provider uses [Tree-sitter WASM](../../packages/indexing-kilo/src/treesitter.ts:34); that implementation is not formal Approach A or grammar-license acceptance.
 
-**Decision:** Honor the requested ignore patterns for the wiki and local harness; protect the future test-suite directory with negations in [ignore rules](../../.gitignore). Durable means retained documentation, not a claim that the wiki is tracked or shared.
+**Retained constraints:** Integer-only canonical hashing, row-based append-only history, atomic head CAS, pure reads, adapter boundaries and runtime confinement. Lexical retrieval made the experiment useful without vectors, host integration, signing or future OpenSpeX emission. Broader platform/durability targets were not silently accepted when Windows checks passed.
 
-**Rationale:** The broad user-required test-name pattern can conceal legitimate future tests. The suite-directory exception reduces this risk; future test fixtures outside that directory need explicit exceptions.
+## 2026-10-14 — OSG-only operational memory
 
-**Tool deviation:** Filesystem MCP is not exposed to this task. Available file tools and read-only terminal validation are used instead. No claim of MCP execution, Git tracking verification or hook activation is made.
+**Authorization and choice:** Current human experimental authorization makes OSG the sole operational memory, irrespective of formal G5. Preserve the initialized store. The wiki remains human-facing architecture/rationale/runbooks, not a second task diary. Legacy-bank, NotebookLM and documentation-graph procedures are inactive.
 
-## 2026-10-13 — Named root documentation follow-up
+**Rationale:** Retrieve code-linked evidence with bounded context and explicit provenance rather than copying every task into several documentation layers. Stored agent text remains hypothesis data, not instructions, identity or approval. Indexing headings/hashes does not preserve full document content and never independently authorizes deletion. See [memory policy](concept-carbon-memory.md).
 
-**Status:** Authorized by the current human request to generate [README.md](../../README.md) and [CHANGELOG.md](../../CHANGELOG.md).
+**Artifact consequence:** Correct user instructions rather than preserving a stale README solely to avoid repack. The parent-owned refresh closed that README-only mismatch at its historical baseline; later changes require new artifact parity proof, not inherited approval ([record](../public-prototype.md#historical-packaged-baseline)).
 
-**Decision:** Improve the existing overview and create an unreleased documentation changelog. This supersedes the initialization-only choice not to create a root changelog, not the historical initialization record. The exception applies to these named documents only; Q7 remains unresolved generally, and no implementation, installation, graph operation or gate approval is authorized.
+## 2026-10-15 — Trust boundaries and explicit recovery
 
-**Evidence note:** The wiki exclusion in [ignore rules](../../.gitignore:6) is currently commented out. Earlier initialization ignore evidence is historical, not proof of current wiki ignore or distribution status. Ignore settings are unchanged by this follow-up.
+**Implementation rationale:** Editable derived caches cannot authorize state or source access. Reconstruct state from committed rows and reparse permitted source, accepting unbenchmarked extra work for correctness. Supersession checks on both write and read prevent persisted claims from acquiring authority over protected records. Current ignore/access policy also governs historical-context snippets. See [architecture](concept-architecture-overview.md).
 
-## 2026-10-14 — Bounded experiment and documentation handoff
+**Human-authorized migration:** The existing repository store moved from format 1 to 2 without reinitialization, preserving identity, original rows/episodes and verified backup. The previous source-sync blocker is resolved; future migration, replacement restore and cache-fixing maintenance remain separately authorized operations with stopped-writer safeguards ([evidence](../public-prototype.md#repository-migration)).
 
-**Status:** Authorized by current human instruction; not a binding product-spec change or gate acceptance.
-
-**Context:** Implementation, independent testing and simplification are reported complete. Old spec-only descriptions no longer match actual manifests/source/tests. The entire specification, including §22, is frozen for this handoff.
-
-**Decision:** Publish [runnable commands, attributed proofs and limitations](../experiment-handoff.md), refresh derived navigation/status and short local memory, and record incomplete proof/review items honestly. Experiment authorization supersedes historical installation/implementation restrictions within scope; Q1–Q9 and formal G0–G6 approval remain human-only. No third-party copying, source/test changes, persona delegation, harness/mode/hook/index/ignore configuration or graph generation is authorized here.
-
-**Rationale and alternatives:** Direct compiled CLI examples match actual parsing/build output without assuming a global command shim. The independently written compiler API provider avoids upstream copying for this experiment; it is not a decision to replace the specified Tree-sitter Approach A. Claiming full MVP/gate coverage or a clean security verdict would exceed the evidence.
-
-**Consequences:** Windows results remain attributed reports, Linux/forced-crash/TOCTOU/large-store evidence is absent, rules hashes remain unavailable, and final parent code/security reviews including dependencies are pending. The [checklist](../tasks/todo.md) distinguishes completed supported implementation/proofs from unproved planned criteria. Historical decisions above remain intact.
-
-## 2026-10-14 — OSG-only operational memory and prototype reconciliation
-
-**Status:** Current human-authorized documentation scope, superseding earlier memory procedures, not a product-spec change or formal G5 acceptance.
-
-**Decision:** Use only the public OSG CLI for operational context/history/sync/remember, preserving the initialized repository store. Reconcile necessary wiki/root/historical-document statements as derived documentation only; no legacy-bank/NotebookLM/documentation-graph operations. Entire specification, source/toolchain/tests, harness/settings/hooks/index/ignore and Git index remain unchanged; no delegation, commits or pushes.
-
-**Rationale:** The installable private prototype now has a worker privacy boundary, core barrel/five typed exports, fresh consumer proof and completed scoped reviews. Earlier pending statuses, three-High audit results and no-clean-install claims must remain historical rather than current. Zero audit findings do not resolve the Sharp range mismatch, owner licensing or native/LGPL distribution conditions ([current evidence](../public-prototype.md)). Correcting the packaged README is necessary for accurate user instructions; retaining its stale pending status solely to avoid repack was rejected. At that decision point the old archive was preserved, not silently rebuilt, and parent-owned repack/new integrity evidence was required.
-
-**Subsequent closure:** Recorded refresh episode **9982b9e563bbadc1cb302e7d**, confirmed through public OSG history during the 2026-10-15 analysis, records the completed parent-owned refresh: archive SHA-256 **2bf7909f0d91b270932e6062f2f156fb0f4ce97fa0e03d369e25350afce495f4** and matching README/all 24 own files across checkout/archive/consumer ([artifact evidence](../public-prototype.md:19)). This closes the earlier README-only mismatch, not the human distribution conditions. Later uncommitted source/test changes found by Git are outside that recorded parity/test/review baseline; no rebuild, repack, install or application tests were performed for this documentation correction.
+**Documentation cleanup authorization:** The human requested removal of obsolete/irrelevant authored documentation while retaining agent entrypoints, overview, changelog, specifications and every wiki page. Consolidating completed task plans and superseded handoffs into current evidence/rationale avoids competing “current” blocks; deletion is based on redundancy, not indexing. Specifications, application files, runtime state and other harness files remain outside cleanup scope. This is not a legal decision or gate approval.

@@ -1,25 +1,29 @@
-# Experimental Source Map and Target Architecture
+# Architecture Overview
 
-The [specified design](../OSG_MVP_SPEC.md:255) remains the frozen canonical target. The private prototype is CLI-first and daemon-free, not the full MVP. See the [current handoff](../public-prototype.md#current-human-task-reconciliation-2026-10-15) for task-provided Windows proof, pending final reviews and unresolved distribution conditions.
+The standalone, daemon-free private prototype implements part of the frozen [target design](../OSG_MVP_SPEC.md:255), not accepted Approach A or the complete GraphRAG MVP. Evidence and remaining limits live in the [handoff](../public-prototype.md).
 
-| Boundary | Actual experimental source |
+## Boundaries
+
+| Component | Responsibility / source |
 | --- | --- |
-| Contracts | [Types and graph port](../../packages/contracts/src/index.ts:1) |
-| Core | [Canonical hashing](../../packages/core/src/hash.ts:7), [commits/snapshots/verification](../../packages/core/src/graph.ts:143), [sync/memory/history](../../packages/core/src/memory.ts:9); no implemented merge CLI |
-| CLI | [Public isolated worker launcher](../../packages/cli/src/public.ts:55) captures worker fd1/fd2 and validates IPC; [internal backend](../../packages/cli/src/index.ts:63) parses commands, confines runtime and wires memory/export |
-| Experimental provider | [Multi-language scanner](../../packages/indexing-kilo/src/index.ts:116) and [Tree-sitter grammar map](../../packages/indexing-kilo/src/treesitter.ts:34); not formal Approach A acceptance or a host-index adapter |
-| Storage adapter | [Pinned LanceDB/Arrow schema, initial-data ROOT/private staging publication and atomic head CAS](../../packages/storage-lance/src/index.ts:34) |
+| Contracts | [Graph types and storage port](../../packages/contracts/src/index.ts:1) |
+| Core | [Canonical hashing](../../packages/core/src/hash.ts:7), [commits](../../packages/core/src/graph.ts:150), [snapshots](../../packages/core/src/graph.ts:71), [verification](../../packages/core/src/graph.ts:193), [sync and episodes](../../packages/core/src/memory.ts:24), [retrieval](../../packages/core/src/retrieval.ts:69) |
+| Provider | [Discovery, pre-read policy and reconciliation facts](../../packages/indexing-kilo/src/index.ts:63); [Tree-sitter grammar map](../../packages/indexing-kilo/src/treesitter.ts:34) |
+| Storage | [LanceDB/Arrow adapter](../../packages/storage-lance/src/index.ts:1), initial ROOT/staged publication and atomic head CAS |
+| CLI | [Public worker launcher](../../packages/cli/src/public.ts:57) and [backend wiring](../../packages/cli/src/index.ts:500) |
 
-Target boundaries: [dependency rules](../OSG_MVP_SPEC.md:272). The root package has [five compiled exports with declarations](../../package.json:12); root/core share the [hash/graph/memory barrel](../../packages/core/src/index.ts:1). Direct API/internal-backend calls do not inherit the public launcher's native diagnostic boundary. Its IPC cap is post-deserialization, not a universal hostile-worker memory bound; hostile Node configuration before launcher startup is outside the guarantee. No source is altered by this documentation task.
+Core/contracts use ports rather than adapter dependencies; only storage imports LanceDB/Arrow ([target boundaries](../OSG_MVP_SPEC.md:272)). The [manifest](../../package.json:12) declares five typed exports; root/core share the [core barrel](../../packages/core/src/index.ts:1). Direct API/backend calls do not inherit the public launcher's native-diagnostic boundary. Its IPC cap is post-deserialization; hostile pre-launch Node configuration is outside that guarantee.
 
-## Data flow and target differences
+## Data flow and authority
 
-Experimental discovery → pre-traversal exclusions → permitted-file read/reparse → Tree-sitter extraction → sync reconciliation → atomic main-head CAS. Append-only element/commit rows and reachability supply history. [Weighted lexical retrieval](../../packages/core/src/retrieval.ts:69) uses typed two-hop expansion and episode budget reservation; no vectors or watch are implemented. [Scan results](../../packages/indexing-kilo/src/index.ts:179) are reparsed from permitted sources rather than trusted editable cache entries; [current state](../../packages/core/src/state.ts:36) is reconstructed from authoritative committed rows, not an incremental cache fast path. CLI reads remain pure. Removed trusted fast paths are an intentional safety-first tradeoff, with no performance benchmark. [Supersession](../../packages/core/src/retrieval.ts:175) requires current live hypothesis episode endpoints on ingestion and retrieval; protected/ineligible references cannot demote records. [Snippets](../../packages/core/src/retrieval.ts:51) carry an explicit untrusted flag and string value wrapper, not a bare string. [CocoaPods exclusions](../../packages/indexing-kilo/src/index.ts:17) are Windows-normalized before traversal or reads.
+Discovery → mandatory/ancestor-ignore checks → permitted-file read/reparse → Tree-sitter facts → identity reconciliation → one append-only commit with atomic head CAS. IDs do not depend on line numbers. Row reachability, not Lance versions, supplies history. Repository symbols use one-dimensional extents in the unified spatial model; moving-object fixtures use the same model ([purpose](../OSG_MVP_SPEC.md:51)).
 
-[Swift parsing](../../packages/indexing-kilo/src/treesitter.ts:675) is isolated in a bounded baseline-only subprocess after an observed fatal in-process V8 compile failure. [Storage read results](../../packages/storage-lance/src/index.ts:90) are deep copies on hits/misses. [Format-2 migration](../../packages/cli/src/index.ts:529) and [backup/restore](../../packages/cli/src/index.ts:325) are explicit CLI operations, not implicit cache repair; migration/store replacement requires separate human authorization. The permanent repository store currently remains unmigrated, so source sync remains blocked; an implementation episode write was independently verified through read-only public context/history, with stale source anchors (see the current handoff).
+[Current state](../../packages/core/src/state.ts:36) is reconstructed from committed rows. Editable derived caches cannot authorize status/text or replace permitted-source reparsing. [Doctor](../../packages/cli/src/index.ts:625) checks complete rows/head/unique IDs. This favors correctness over an unmeasured fast path. Storage returns defensive copies, including nested extents.
 
-The CLI [lazy-loads storage](../../packages/cli/src/index.ts:280), allowing help without native storage loading. [Import resolution](../../packages/indexing-kilo/src/index.ts:63) restricts targets to supported code extensions, not Markdown/unknown-extension guesses. Init publication relies on local table-directory rename and config hard-link behavior; crash cleanup/durability are not established ([limitations](../experiment-handoff.md)).
+[Recall](../../packages/core/src/retrieval.ts:69) uses weighted lexical ranking, typed two-hop expansion and episode reservation, not vectors or generated answers. Supersession independently checks current live hypothesis endpoints on write/read; immediate successor labels do not erase rows or confer approval. [Source snippets](../../packages/core/src/retrieval.ts:51) are explicitly untrusted values. Current [readable-source policy](../../packages/indexing-kilo/src/index.ts:63) governs hashing/snippets even for historical context; denied access means stale/no snippet, not erased metadata. Reads stay pure.
 
-Repository symbols use one-dimensional extents in the unified spatial model; moving-object fixtures exercise the same model ([purpose](../OSG_MVP_SPEC.md:51), [extent](../OSG_MVP_SPEC.md:444)). Development documentation stays separate from future runtime data ([layout](../OSG_MVP_SPEC.md:193)).
+## Parser and recovery limits
 
-No knowledge graph is generated to document these boundaries.
+The [grammar map](../../packages/indexing-kilo/src/treesitter.ts:34) covers fourteen languages; a missing grammar uses a warned limited fallback. [Swift](../../packages/indexing-kilo/src/treesitter.ts:675) runs in a bounded baseline-only subprocess to isolate an observed fatal V8 compilation failure. Its transient-failure fact/link preservation and startup cost are [unverified follow-ups](open-work.md#separately-authorized-follow-ups).
+
+The preserved repository store is format 2 after a human-authorized migration, not blocked pending upgrade ([snapshot](../public-prototype.md#repository-migration)). Migration and replacement restore are explicit authorized maintenance, not automatic cache repair. Init relies on local directory-rename/config hard-link publication; normal-unwinding cleanup is not abrupt-crash/fsync durability. No hostile TOCTOU or network-filesystem guarantee is claimed. Runtime data stays separate from source/docs and the host index ([confinement](../OSG_MVP_SPEC.md:187)).

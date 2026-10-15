@@ -1,9 +1,9 @@
 # Maintainer Wiki Index
 
-Derived documentation, not operational memory or approval. The frozen [specification](../OSG_MVP_SPEC.md:17) is the normative product source beneath current human instruction. The [current prototype handoff](../public-prototype.md) supplies installable CLI/API commands, final scoped review evidence and distribution conditions; the [earlier experiment](../experiment-handoff.md) preserves historical results. Use only OSG for operational memory.
+Human-facing derived documentation, not operational memory or approval. The frozen [specification](../OSG_MVP_SPEC.md:17) is normative beneath current human instruction. The [prototype handoff](../public-prototype.md) consolidates current state, attributed proof and historical experiment/package evidence. Use only OSG for operational memory.
 
 - [Overview](README.md) — status and navigation
-- [Maintainer log](log.md) — dated initialization and experiment provenance
+- [Maintainer milestones](log.md) — substantive initialization and prototype history
 - [Decisions](decisions.md) — bounded human experiment authorization and rationale
 - [Open work](open-work.md) — human distribution conditions and unverified evidence
 - [Tech stack](tech-stack.md) — manifest pins versus reported platform execution

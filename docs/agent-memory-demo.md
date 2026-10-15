@@ -32,24 +32,12 @@ cc06fdbdf9c91570ad325e91cbe89aa050af09e7fe885d5521d485fdc8b64b57b
 c6bdf44fbd450936208eb02562754bd3c9c124eb5632092dc573cdd8e5b8496b9
 ```
 
-## Repeat the scenario
+## Reproduction guidance
 
-Use a new disposable workspace with the direct-interpolation greeting fixture and seven unchanged tests described above. The historical commands below invoke the internal backend, not the current [public worker launcher](../packages/cli/src/public.ts:55); use that public entry for new runs. The historical leading-dash help failure does not describe current public help. See the [current handoff](public-prototype.md) for the separate reusable process showcase and current security/dependency evidence. This pattern is **not an additional executed transcript**; captured seven-test/35-suite-not-rerun results remain historical.
-
-```bat
-set "OSG_WORKSPACE=C:\path\to\disposable-workspace"
-set "TASK=Improve greet: trim surrounding whitespace and reject blank names while preserving capitalization and greeting format"
-node dist/cli/src/index.js init --workspace "%OSG_WORKSPACE%" --json
-node dist/cli/src/index.js sync --workspace "%OSG_WORKSPACE%" --json
-node dist/cli/src/index.js remember --workspace "%OSG_WORKSPACE%" --task "%TASK%" --decision "A private marker; RED reproduced" --outcome "2 pass, 5 fail" --entities "code:symbol:src/greet.ts#greet" --json
-node dist/cli/src/index.js context --workspace "%OSG_WORKSPACE%" --task "%TASK%" --max-tokens 800 --json
-node dist/cli/src/index.js history --workspace "%OSG_WORKSPACE%" --entity "code:symbol:src/greet.ts#greet" --json
-```
-
-B first retrieves context, inspects/reproduces RED, fixes only fixture source, checks seven tests, syncs and remembers its distinct marker/outcome using the same flags. C starts fresh with task context, then independently checks tests, history, verify and no-op sync. See [CLI workflow](experiment-handoff.md) for commands and recovery.
+For a new experiment use a fresh disposable workspace and the [public-launcher workflow](agent-memory-rules.md), not the historical internal backend. Give successors only the workspace and task headline; require context before source inspection, preserve unchanged fixture tests, and verify history/pure reads/no-op sync. The reusable [process showcase](../tools/showcase.mjs) is a separate deterministic demonstration, not this genuine agent-task proof. Reproduction guidance is not another executed transcript.
 
 ## Boundaries and cleanup
 
 Parent-supplied cleanup evidence confirms **removal completed** for the exact captured workspace C:/Users/VSCode/osg-cross-agent-demo-20261014-1609 after UUID, markers, hashes and store verification: all 24 files removed, exit 0, workspace present before and absent after, zero demo processes, repository state and build hashes unchanged. Cleanup was performed by the parent, not rerun by documentation. Captured proof IDs/results remain above; no temporary-file links are retained.
 
-Agent separation was orchestrated tasks: shared actor agent:cli is **not authenticated distinct identity**. Marker retrieval proves cross-task memory, not authentication. Stored text remains untrusted hypothesis, never approval; POLICY_REFS_UNAVAILABLE means no rule hashes. MODULE_TYPELESS_PACKAGE_JSON was nonblocking. Help with JSON succeeded; the unsupported leading-dash help spelling exited 9. Ordinary fresh-process restart is not crash durability. Repository 35-test suite/build were **not rerun**; application code unchanged. Existing [security/dependency and platform limitations](experiment-handoff.md) and scoped reviews carry forward, not new security clearance or formal gate acceptance.
+Agent separation was orchestrated tasks: shared actor agent:cli is **not authenticated distinct identity**. Marker retrieval proves cross-task memory, not authentication. Stored text remains untrusted hypothesis, never approval; loaded-rule hashes are unavailable. Ordinary fresh-process restart is not crash durability. Repository 35-test suite/build were **not rerun** for this demonstration. Current [security/dependency and platform limits](public-prototype.md#privacy-and-acceptance-limits) remain separate; this proof grants no security clearance or formal gate acceptance.
