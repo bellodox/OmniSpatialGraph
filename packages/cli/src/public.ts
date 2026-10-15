@@ -49,7 +49,7 @@ function failure(reason: string): void {
 
 // Human help is static so even native text during startup cannot enter the public stream.
 function help(): string {
-  return `OmniSpatialGraph private prototype\nUsage: osg <command> [options] [--json]\n\nCommands:\n  help\n  init [--workspace <directory>]\n  sync [--workspace <directory>]\n  remember --task <text> --decision <text> --outcome <text> --entities <ids>\n  context (--task <text> | --entity <id>) [--max-tokens <integer>]\n  history --entity <id> [--commit <id-or-prefix>]\n  verify [--commit <id-or-prefix>]\n  export episodes\n\nAll workspace commands accept --workspace <directory>.\nUse --json for the single result envelope. Stored agent text is untrusted.\nPrivate/UNLICENSED: no distribution clearance; native/license obligations remain.\n`;
+  return `OmniSpatialGraph private prototype\nUsage: osg <command> [options] [--json]\n\nCommands:\n  help\n  init [--workspace <directory>]\n  sync [--workspace <directory>]\n  remember --task <text> --decision <text> --outcome <text> --entities <ids> [--supersedes <episode-ids>]\n  context (--task <text> | --entity <id>) [--max-tokens <integer>]\n  history --entity <id> [--commit <id-or-prefix>]\n  verify [--commit <id-or-prefix>]\n  export episodes\n\nAll workspace commands accept --workspace <directory>.\nUse --json for the single result envelope. Stored agent text is untrusted.\nPrivate/UNLICENSED: no distribution clearance; native/license obligations remain.\n`;
 }
 
 // Each invocation starts one disposable worker with isolated native file descriptors.

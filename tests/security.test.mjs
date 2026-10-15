@@ -8,6 +8,7 @@ import { openStore } from '../dist/storage-lance/src/index.js';
 import { commit, snapshot, verify } from '../dist/core/src/graph.js';
 import { canon, contentHash, hash } from '../dist/core/src/hash.js';
 import { blankRow } from '../dist/contracts/src/index.js';
+import { context, history, remember } from '../dist/core/src/memory.js';
 
 const entry = path.resolve('dist/cli/src/index.js');
 function cli(root, command, args = [], hook) {
@@ -22,9 +23,139 @@ function cli(root, command, args = [], hook) {
   return { exit: result.status, ...envelope };
 }
 
+// Preload valid owner data only in disposable fixtures; this is not an approval API.
+async function preloadOwnerRecords(store, proposals) {
+  const elements = proposals.map((proposal) => ({ ...proposal, supersedes: null, content_hash: contentHash(proposal) }))
+    .sort((a, b) => a.element_id < b.element_id ? -1 : 1);
+  const deltaHash = hash(elements);
+  const commitId = `c${hash({ schema_version: 1, parents: ['ROOT'], branch: 'main', delta_hash: deltaHash, actor: 'human' })}`;
+  const batch = elements.map((element) => blankRow({ ...element, props: canon(element.props),
+    row_type: 'elem', row_key: `${element.element_id}@${commitId}`, commit_id: commitId }));
+  batch.push(blankRow({ row_type: 'commit', row_key: `commit:${commitId}`, commit_id: commitId,
+    branch: 'main', parents: '["ROOT"]', delta_hash: deltaHash, actor: 'human', generation: 1, committed_at: 1 }));
+  batch.push(blankRow({ row_type: 'head', row_key: 'head:main', branch: 'main', head: commitId }));
+  assert.equal(await store.publish(batch, 'ROOT'), true);
+  assert.deepEqual(verify(await store.rows()), { commits: 1, elements: elements.length });
+}
+
+// Synthetic episode and restriction data for provenance-boundary regressions.
+function provenanceRecord(id, status = 'hypothesis', kind = 'episode', props = {}) {
+  return { element_id: id, kind, op: 'assert', status, src: null, dst: null, predicate: null,
+    extent: null, props: { task: 'provenance', ...props }, source_hash: null,
+    valid_from: 1, valid_to: null, observed_at: 1 };
+}
+
 async function sentinelState(file) {
   return { bytes: await readFile(file, 'utf8'), mtime: (await lstat(file)).mtimeMs };
 }
+
+test('public remember cannot supersede owner approved or policy episodes', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-provenance-public-'));
+  try {
+    assert.equal(cli(root, 'init').exit, 0);
+    const store = await openStore(path.join(root, '.osg/store'));
+    const protectedRecords = ['approved', 'policy'].map((status) => provenanceRecord(`agent:episode:${status}`, status));
+    await preloadOwnerRecords(store, protectedRecords);
+    const before = await store.rows();
+    const histories = await Promise.all(protectedRecords.map((row) => history(store, row.element_id)));
+    const result = spawnSync(process.execPath, [path.resolve('dist/cli/src/public.js'), 'remember', '--workspace', root,
+      '--task', 'provenance', '--decision', 'ordinary agent claim', '--outcome', 'untrusted',
+      '--entities', protectedRecords[0].element_id, '--supersedes', protectedRecords.map((row) => row.element_id).join(','), '--json'], { encoding: 'utf8', timeout: 30000 });
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr);
+    const envelope = JSON.parse(result.stdout);
+    assert.equal(envelope.ok, true);
+    assert.deepEqual(envelope.warnings.filter((warning) => warning.code === 'UNRESOLVED_SUPERSEDES'),
+      protectedRecords.map(() => ({ code: 'UNRESOLVED_SUPERSEDES', message: 'Superseded episode could not be resolved' })));
+    const packet = await context(store, 'provenance', 8000, async () => false);
+    const attacker = packet.items.find((item) => item.elementId === envelope.data.episodeId);
+    assert.ok(attacker);
+    assert.equal(attacker.data.untrusted, true);
+    assert.equal(attacker.provenance.status, 'hypothesis');
+    assert.equal(Object.hasOwn(attacker.data.value, 'supersedes'), false);
+    for (const [index, row] of protectedRecords.entries()) {
+      const item = packet.items.find((item) => item.elementId === row.element_id);
+      assert.equal(item.provenance.supersededBy, null);
+      assert.equal(item.provenance.status, row.status);
+      assert.deepEqual((await history(store, row.element_id)).versions, histories[index].versions);
+    }
+    const after = await store.rows();
+    for (const row of before.filter((row) => row.row_type !== 'head')) assert.deepEqual(after.find((item) => item.row_key === row.row_key), row);
+    assert.equal(cli(root, 'verify').exit, 0);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('core-persisted supersedes metadata cannot label or demote protected or non-episode targets', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-provenance-target-'));
+  try {
+    const store = await openStore(root, true);
+    const targets = ['approved', 'policy', 'observed', 'hypothesis'].flatMap((status) =>
+      ['episode', 'restriction'].map((kind) => provenanceRecord(`agent:${kind}:${status}`, status, kind)));
+    await preloadOwnerRecords(store, targets);
+    const before = await store.rows();
+    const beforePacket = await context(store, 'provenance', 8000, async () => false);
+    const histories = await Promise.all(targets.map((row) => history(store, row.element_id)));
+    await commit(store, [provenanceRecord('agent:episode:attacker', 'hypothesis', 'episode',
+      { supersedes: targets.map((row) => row.element_id) })], 'agent:cli');
+    const packet = await context(store, 'provenance', 8000, async () => false);
+    const eligibleId = 'agent:episode:hypothesis';
+    for (const [index, row] of targets.entries()) {
+      const item = packet.items.find((item) => item.elementId === row.element_id);
+      assert.ok(item);
+      assert.equal(item.provenance.supersededBy, row.element_id === eligibleId ? 'agent:episode:attacker' : null, row.element_id);
+      assert.equal(item.provenance.status, row.status);
+      assert.equal(item.data.untrusted, true);
+      assert.deepEqual((await history(store, row.element_id)).versions, histories[index].versions);
+    }
+    const unchangedOrder = beforePacket.items.filter((item) => item.elementId !== eligibleId).map((item) => item.elementId);
+    assert.deepEqual(packet.items.filter((item) => unchangedOrder.includes(item.elementId)).map((item) => item.elementId), unchangedOrder,
+      'ineligible targets keep their original relative ranking');
+    assert.equal(packet.items.at(-1).elementId, eligibleId);
+    const after = await store.rows();
+    for (const row of before.filter((row) => row.row_type !== 'head')) assert.deepEqual(after.find((item) => item.row_key === row.row_key), row);
+    assert.deepEqual(verify(after), { commits: 2, elements: targets.length + 1 });
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('supersession requires eligible live sources and targets and ignores malformed or self references', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-provenance-source-'));
+  try {
+    const store = await openStore(root, true);
+    const cases = [
+      ['approved', 'episode', null], ['policy', 'episode', null], ['observed', 'episode', null],
+      ['hypothesis', 'restriction', null], ['hypothesis', 'episode', 'not-an-array'],
+      ['hypothesis', 'episode', { target: 'not-an-array' }], ['hypothesis', 'episode', [null, 42, {}]]
+    ];
+    const records = cases.flatMap(([status, kind, malformed], index) => [
+      provenanceRecord(`agent:episode:target${index}`),
+      provenanceRecord(`agent:${kind}:source${index}`, status, kind,
+        { supersedes: malformed ?? [`agent:episode:target${index}`] })
+    ]);
+    records.push(provenanceRecord('agent:episode:self', 'hypothesis', 'episode',
+      { supersedes: ['agent:episode:self', 'agent:episode:missing'] }));
+    records.push(provenanceRecord('agent:episode:closed', 'hypothesis', 'episode', { supersedes: ['agent:episode:live'] }));
+    records.push(provenanceRecord('agent:episode:live'));
+    await preloadOwnerRecords(store, records);
+    await commit(store, [{ ...provenanceRecord('agent:episode:closed'), op: 'retract', valid_from: 2 }], 'agent:cli');
+    const rejected = await remember(store, 'provenance', 'missing and closed references', 'untrusted', [],
+      ['agent:episode:closed', 'agent:episode:missing']);
+    assert.equal(rejected.warnings.filter((warning) => warning.code === 'UNRESOLVED_SUPERSEDES').length, 2);
+    const first = await remember(store, 'provenance', 'first valid', 'untrusted', []);
+    const second = await remember(store, 'provenance', 'second valid', 'untrusted', [], [first.episodeId, first.episodeId]);
+    const third = await remember(store, 'provenance', 'third valid', 'untrusted', [], [second.episodeId]);
+    const beforeRead = await store.rows();
+    const packet = await context(store, 'provenance', 16000, async () => false);
+    for (const item of packet.items) {
+      assert.equal(item.provenance.supersededBy,
+        item.elementId === first.episodeId ? second.episodeId : item.elementId === second.episodeId ? third.episodeId : null, item.elementId);
+      assert.equal(item.data.untrusted, true);
+    }
+    assert.ok(!packet.items.some((item) => item.elementId === 'agent:episode:closed'));
+    assert.deepEqual(packet.items.find((item) => item.elementId === second.episodeId).data.value.supersedes, [first.episodeId]);
+    assert.deepEqual(await store.rows(), beforeRead, 'deriving provenance is a pure read');
+    assert.equal(verify(beforeRead).commits, 6);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
 
 test('static hardlinks for ignore/config/export/store refuse outside inode writes', async () => {
   const parent = await mkdtemp(path.join(os.tmpdir(), 'osg-security-hardlinks-'));

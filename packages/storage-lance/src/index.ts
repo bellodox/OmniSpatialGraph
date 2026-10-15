@@ -62,6 +62,7 @@ export async function openStore(directory: string, create = false): Promise<Grap
     if (!(await connection.tableNames()).includes('graph')) throw new OsgError('NOT_INITIALIZED', 'Graph is not initialized');
     table = await connection.openTable('graph');
   }
+  let cached: { version: number; rows: GraphRow[] } | undefined;
   const heads = await table.query().where("row_key = 'head:main'").toArray();
   if (!heads.length) throw new OsgError('NOT_INITIALIZED', 'Graph has no main head; initialization is incomplete. Preserve the store for recovery.');
   if (heads.length !== 1 || heads[0]!.row_type !== 'head' || heads[0]!.branch !== 'main' ||
@@ -69,7 +70,36 @@ export async function openStore(directory: string, create = false): Promise<Grap
     throw new OsgError('VERIFY_FAILED', 'Invalid main head');
   }
   return {
-    async rows() { return (await table.query().toArray()).map((row) => normalize(row as Record<string, unknown>)); },
+    // toArray() converts the nested `extent` struct row by row (about 20x slower); read Arrow columns directly instead.
+    // Table versions are immutable, so rows read at a version can be reused until the version changes.
+    async rows() {
+      const version = await table.version();
+      if (cached?.version === version) return structuredClone(cached.rows);
+      const arrow = await table.query().toArrow();
+      if (arrow.numRows === 0) { cached = { version, rows: [] }; return []; }
+      const vectors = columns.filter((column) => column !== 'extent').map((column) => [column, arrow.getChild(column)!] as const);
+      const parts = ['frame_id', 't', 'q', 'ext_min', 'ext_max'].map((name) => arrow.getChild('extent')!.getChild(name)!);
+      const out: GraphRow[] = [];
+      for (let i = 0; i < arrow.numRows; i++) {
+        const row: Record<string, unknown> = {};
+        for (const [column, vector] of vectors) {
+          const value = vector.get(i);
+          row[column] = integerFields.has(column) && value != null ? Number(value) : value;
+        }
+        const frame = parts[0]!.get(i);
+        row.extent = frame == null ? null : {
+          frame_id: frame,
+          ...Object.fromEntries((['t', 'q', 'ext_min', 'ext_max'] as const).map((name, k) => {
+            const value = parts[k + 1]!.get(i);
+            return [name, value ? Array.from(value as Iterable<bigint>, Number) : value];
+          }))
+        };
+        out.push(row as unknown as GraphRow);
+      }
+      cached = { version, rows: out };
+      // Callers own their rows, including nested extent lists; the cache stays private.
+      return structuredClone(out);
+    },
     async head(branch) {
       const row = (await table.query().where(`row_key = 'head:${branch}'`).toArray())[0];
       return row?.head as string ?? null;

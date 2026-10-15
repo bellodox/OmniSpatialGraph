@@ -10,7 +10,7 @@ type Warning = { code: string; message: string };
 const supported = new Set(['help', 'init', 'sync', 'remember', 'context', 'history', 'verify', 'export']);
 const choices: Record<string, Set<string>> = {
   help: new Set(['json']), init: new Set(['workspace', 'json']), sync: new Set(['workspace', 'json']),
-  remember: new Set(['workspace', 'task', 'decision', 'outcome', 'entities', 'json']),
+  remember: new Set(['workspace', 'task', 'decision', 'outcome', 'entities', 'supersedes', 'json']),
   context: new Set(['workspace', 'task', 'entity', 'max-tokens', 'json']),
   history: new Set(['workspace', 'entity', 'commit', 'json']),
   verify: new Set(['workspace', 'commit', 'json']), export: new Set(['workspace', 'json'])
@@ -54,6 +54,7 @@ function publicWarnings(warnings: Warning[]): Warning[] {
     AMBIGUOUS_DECLARATION: 'Ambiguous source declaration skipped',
     SYMLINK_SKIPPED: 'Linked source path skipped',
     UNRESOLVED_ENTITY: 'Entity could not be resolved',
+    UNRESOLVED_SUPERSEDES: 'Superseded episode could not be resolved',
     POLICY_REFS_UNAVAILABLE: 'Host-loaded rules could not be verified; no rule hash was recorded.'
   };
   return warnings.map(({ code }) => ({ code: Object.hasOwn(messages, code) ? code : 'SOURCE_WARNING',
@@ -290,7 +291,7 @@ async function main() {
         data = { commitId: result.commitId, noop: result.noop, idempotent: result.idempotent, changes: result.count, files: result.files };
       }
       if (command === 'remember') {
-        const result = await remember(store, options.task!, options.decision!, options.outcome!, options.entities?.split(',').filter(Boolean) ?? []);
+        const result = await remember(store, options.task!, options.decision!, options.outcome!, options.entities?.split(',').filter(Boolean) ?? [], options.supersedes?.split(',').filter(Boolean) ?? []);
         graphCommitId = result.commitId;
         warnings = result.warnings;
         data = { episodeId: result.episodeId, commitId: result.commitId, resolved: result.count - 1 };
