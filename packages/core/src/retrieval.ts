@@ -1,6 +1,7 @@
 import { OsgError, type GraphPort, type GraphRow } from '../../contracts/src/index.js';
 import { resolveCommit, snapshot, type HeadView } from './graph.js';
 import { headView, type StateCache } from './state.js';
+import { embeddableText, nearest, textDigest, type QueryVectors } from './embedding.js';
 const append = <K, V>(map: Map<K, V[]>, key: K, value: V) => { const list = map.get(key); if (list) list.push(value); else map.set(key, [value]); };
 
 const stopwords = new Set(('a an and are as at be but by can could did do does for from had has have how i if in into is it its me my of on or our should so that the their ' +
@@ -46,7 +47,7 @@ export interface ContextItem {
     newerOnSameEntity?: string[]; anchors?: 'ok' | 'changed' | 'missing';
     git?: { branch: string | null; revision: string | null; otherBranch: boolean };
   };
-  reason: { via?: string; edge?: string | null; hops: number; score: number };
+  reason: { via?: string; edge?: string | null; hops: number; score: number; seed?: 'keyword' | 'meaning' | 'both' };
   citation: { path: string; startLine: number; endLine: number; sourceHash: string | null; stale: boolean } | null;
   snippet?: { untrusted: true; value: string };
   data: { untrusted: true; value: Record<string, unknown> };
@@ -62,7 +63,12 @@ export interface ContextOptions {
   source?: (path: string, startLine: number, endLine: number) => Promise<string | null>;
   currentBranch?: string | null;
   now?: number;
+  /** Optional meaning-based candidates. Used only for task queries; the keyword search runs either way. */
+  vectors?: QueryVectors;
 }
+
+/** Cosine similarity below which a vector match is ignored. A starting value; tune it against recall measurements. */
+export const minSimilarity = 0.35;
 
 const propsOf = (row: GraphRow) => JSON.parse(row.props ?? '{}') as Record<string, unknown>;
 
@@ -87,7 +93,7 @@ export async function context(store: GraphPort, query: string, maxTokens: number
 
   // Seeds: the entity itself, or the best lexical matches.
   const score = new Map<string, number>();
-  const reason = new Map<string, { via: string | null; edge: string | null; hops: number; score: number }>();
+  const reason = new Map<string, { via: string | null; edge: string | null; hops: number; score: number; seed?: 'keyword' | 'meaning' | 'both' }>();
   const queryTokens = [...new Set(tokenize(query))];
   const propsCache = new Map<string, Record<string, unknown>>();
   const props = (row: GraphRow) => { let value = propsCache.get(row.row_key); if (!value) { value = propsOf(row); propsCache.set(row.row_key, value); } return value; };
@@ -141,6 +147,27 @@ export async function context(store: GraphPort, query: string, maxTokens: number
     const top = Math.max(0, ...raw);
     docs.map((doc, i) => [doc, raw[i]!] as const).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1] || (a[0].row.element_id < b[0].row.element_id ? -1 : 1)).slice(0, 24)
       .forEach(([doc, value]) => { const normalized = value / top; score.set(doc.row.element_id, normalized); reason.set(doc.row.element_id, { via: null, edge: null, hops: 0, score: normalized }); });
+  }
+
+  // Optional meaning-based seeds. A vector counts only while the element still yields the text it was made from.
+  if (entity === undefined && options.vectors && query.trim()) {
+    for (const id of score.keys()) reason.get(id)!.seed = 'keyword';
+    const queryVector = await options.vectors.embedQuery(query);
+    if (queryVector) {
+      let kept = 0;
+      for (const hit of nearest(options.vectors.index, queryVector, 60)) {
+        if (kept >= 24 || hit.similarity < minSimilarity) break;
+        const row = state.get(hit.key);
+        const text = row && !row.src ? embeddableText(row) : null;
+        if (text === null || textDigest(text) !== hit.hash) continue;
+        kept++;
+        const meaning = (hit.similarity - minSimilarity) / (1 - minSimilarity);
+        const lexical = score.get(hit.key) ?? 0;
+        const combined = lexical > 0 ? Math.min(1, lexical + 0.3 * meaning) : 0.6 * meaning;
+        score.set(hit.key, combined);
+        reason.set(hit.key, { via: null, edge: null, hops: 0, score: combined, seed: lexical > 0 ? 'both' : 'meaning' });
+      }
+    }
   }
 
   // Weighted expansion over typed edges, two hops, skipping hub nodes.
@@ -251,7 +278,7 @@ export async function context(store: GraphPort, query: string, maxTokens: number
           observedAt: row.observed_at == null ? null : new Date(row.observed_at / 1000).toISOString(),
           ...(supersededBy.has(row.element_id) ? { supersededBy: supersededBy.get(row.element_id)! } : {}),
           ...(newer.length ? { newerOnSameEntity: newer } : {}), ...(anchors ? { anchors } : {}), ...(git ? { git } : {}) },
-        reason: { ...(why.via ? { via: why.via, edge: why.edge } : {}), hops: why.hops, score: Math.round(finalScore(row) * 100) / 100 },
+        reason: { ...(why.via ? { via: why.via, edge: why.edge } : {}), hops: why.hops, score: Math.round(finalScore(row) * 100) / 100, ...(why.seed ? { seed: why.seed } : {}) },
         citation: located ? { path: p.path as string, startLine: row.extent!.ext_min![0]!, endLine: row.extent!.ext_max![0]!, sourceHash: row.source_hash, stale: isStale } : null,
         ...(snippet ? { snippet: { untrusted: true as const, value: snippet } } : {}),
         data: { untrusted: true, value: p } };

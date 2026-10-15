@@ -6,7 +6,7 @@ import path from 'node:path';
 import { OsgError } from '../../contracts/src/index.js';
 import { escapeComponent, sourcePath } from '../../core/src/hash.js';
 import type { Proposal } from '../../core/src/graph.js';
-import { languageOf, parseWithTreeSitter, sourceExtensions, type TsImport } from './treesitter.js';
+import { closeParsers, languageOf, parseWithTreeSitter, sourceExtensions, type TsImport } from './treesitter.js';
 const append = <K, V>(map: Map<K, V[]>, key: K, value: V) => { const list = map.get(key); if (list) list.push(value); else map.set(key, [value]); };
 
 export interface Scan { facts: Proposal[]; warnings: { code: string; message: string }[]; files: number; }
@@ -222,7 +222,7 @@ export async function scan(workspace: string, options: ScanOptions = {}): Promis
       }
     }
   }
-  await walk(root);
+  try { await walk(root); } finally { closeParsers(); }
   infos.sort((a, b) => a.relative < b.relative ? -1 : 1);
   if (infos.some((info) => info.parser === 'lines')) warnings.push({ code: 'TREE_SITTER_UNAVAILABLE', message: 'Tree-sitter grammars could not be loaded; line-based fallback used.' });
   const codePaths = new Set(infos.filter((file) => tsLike.test(file.relative)).map((file) => file.relative));

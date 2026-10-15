@@ -4,6 +4,23 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+test('TypeScript stays development-only in root and provider package metadata', async () => {
+  const manifest = JSON.parse(await readFile('package.json', 'utf8'));
+  const provider = JSON.parse(await readFile('packages/indexing-kilo/package.json', 'utf8'));
+  const lock = JSON.parse(await readFile('package-lock.json', 'utf8'));
+  assert.equal(manifest.devDependencies.typescript, '5.9.3');
+  assert.equal(manifest.dependencies.typescript, undefined);
+  assert.ok(!manifest.bundleDependencies.includes('typescript'));
+  assert.equal(provider.dependencies.typescript, undefined);
+  assert.equal(lock.packages[''].devDependencies.typescript, manifest.devDependencies.typescript);
+  assert.equal(lock.packages[''].dependencies.typescript, undefined);
+  assert.ok(!lock.packages[''].bundleDependencies.includes('typescript'));
+  assert.deepEqual(lock.packages['packages/indexing-kilo'].dependencies, provider.dependencies);
+  assert.equal(lock.packages['node_modules/typescript'].version, manifest.devDependencies.typescript);
+  assert.equal(lock.packages['node_modules/typescript'].dev, true);
+  assert.equal(lock.packages['node_modules/typescript'].inBundle, undefined);
+});
+
 test('public root API remains portable; package controls a single private compiled entry', async () => {
   const manifest = JSON.parse(await readFile('package.json', 'utf8'));
   assert.equal(manifest.name, 'omnispatialgraph');

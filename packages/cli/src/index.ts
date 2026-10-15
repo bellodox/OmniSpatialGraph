@@ -7,15 +7,17 @@ import { diff, history, remember, sync } from '../../core/src/memory.js';
 import { context } from '../../core/src/retrieval.js';
 import { headView, type StateCache } from '../../core/src/state.js';
 import { snapshot, verify } from '../../core/src/graph.js';
+import { buildIndex, decodeIndex, embeddableText, encodeIndex, textDigest, type QueryVectors, type VectorIndex, type VectorStorage } from '../../core/src/embedding.js';
+import { loadEmbedder } from './embedder.js';
 
 type Warning = { code: string; message: string };
-const supported = new Set(['help', 'init', 'sync', 'migrate', 'remember', 'context', 'history', 'verify', 'export', 'diff', 'backup', 'restore', 'doctor', 'stats']);
+const supported = new Set(['help', 'init', 'sync', 'migrate', 'remember', 'context', 'history', 'verify', 'export', 'diff', 'backup', 'restore', 'doctor', 'stats', 'embed']);
 const choices: Record<string, Set<string>> = {
   help: new Set(['json']), migrate: new Set(['workspace', 'dry-run', 'json']), init: new Set(['workspace', 'json']), sync: new Set(['workspace', 'json']),
   remember: new Set(['workspace', 'task', 'decision', 'outcome', 'entities', 'supersedes', 'tags', 'json']),
   context: new Set(['workspace', 'task', 'entity', 'max-tokens', 'at', 'commit', 'with-source', 'json']),
   diff: new Set(['workspace', 'from', 'to', 'json']), backup: new Set(['workspace', 'json']), restore: new Set(['workspace', 'backup', 'json']),
-  doctor: new Set(['workspace', 'fix', 'json']), stats: new Set(['workspace', 'json']),
+  doctor: new Set(['workspace', 'fix', 'json']), stats: new Set(['workspace', 'json']), embed: new Set(['workspace', 'json']),
   history: new Set(['workspace', 'entity', 'commit', 'json']),
   verify: new Set(['workspace', 'commit', 'json']), export: new Set(['workspace', 'json'])
 };
@@ -29,7 +31,9 @@ const safeMessages = new Set([
   'Invalid runtime config JSON', 'Invalid runtime config', 'Runtime path is not a real directory',
   'Runtime symlink rejected', 'Nonregular or linked runtime file rejected', 'Nonregular or linked ignore file rejected',
   'Workspace storage initialized, but ignore-file update failed; release file locks or sharing restrictions and rerun init.',
-  'Episode committed; export failed. Run export episodes to recover.', 'Unable to load storage adapter',
+  'Episode committed; export failed. Run export episodes to recover.',
+  'Embeddings need the optional package @huggingface/transformers; see the README section on optional embeddings',
+  'Embedding model is not available; run osg embed to download it', 'Unable to load storage adapter',
   'Graph is not initialized', 'Graph has no main head; initialization is incomplete. Preserve the store for recovery.',
   'Invalid main head', 'Invalid head CAS', 'Head changed', 'Invalid token budget',
   'Missing remember fields', 'Missing entity', 'Missing diff range', 'Invalid time', 'Specify exactly one task or entity',
@@ -68,7 +72,8 @@ function publicWarnings(warnings: Warning[]): Warning[] {
     PARSE_RECOVERED: 'A source file has syntax errors; declarations were read from the parts that parsed.',
     TREE_SITTER_UNAVAILABLE: 'Tree-sitter grammars could not be loaded; a line-based fallback was used.',
     COCHANGE_UNAVAILABLE: 'Git history was not available for co-change links.',
-    POLICY_REFS_UNAVAILABLE: 'Host-loaded rules could not be verified; no rule hash was recorded.'
+    POLICY_REFS_UNAVAILABLE: 'Host-loaded rules could not be verified; no rule hash was recorded.',
+    VECTORS_UNAVAILABLE: 'The embedding index exists but its model could not be loaded; keyword search was used. Run osg embed.'
   };
   return warnings.map(({ code }) => ({ code: Object.hasOwn(messages, code) ? code : 'SOURCE_WARNING',
     message: messages[code] ?? 'Source warning; check the workspace locally.' }));
@@ -268,6 +273,32 @@ function cacheIO(run: string, name: string): StateCache & { path: string; load()
   return { ...io, load: () => io.read(), save: (value: unknown) => io.write(value) };
 }
 
+/** Optional embedding index: derived, rebuildable files under .osg/cache (never part of the graph). */
+function vectorIO(run: string): VectorStorage {
+  const directory = path.join(run, 'cache');
+  const header = path.join(directory, 'vectors.json');
+  const data = path.join(directory, 'vectors.bin');
+  return {
+    async read() {
+      try {
+        await safeDirectory(directory); await safeFile(header); await safeFile(data);
+        return decodeIndex(JSON.parse(await readFile(header, 'utf8')) as unknown, await readFile(data));
+      } catch { return null; }
+    },
+    async write(index: VectorIndex) {
+      await safeDirectory(directory, true);
+      const encoded = encodeIndex(index);
+      const stage = async (target: string, content: string | Uint8Array) => {
+        const temporary = path.join(directory, `${randomUUID()}.tmp`);
+        try { await writeFile(temporary, content, { flag: 'wx' }); await rename(temporary, target); }
+        finally { await rm(temporary, { force: true }); }
+      };
+      await stage(data, encoded.data);
+      await stage(header, encoded.header);
+    }
+  };
+}
+
 /** Current git branch and revision, read from .git files without running git. */
 async function readGit(root: string): Promise<{ branch: string | null; revision: string | null } | null> {
   try {
@@ -288,7 +319,7 @@ async function readGit(root: string): Promise<{ branch: string | null; revision:
 }
 
 const writes = (command: string, options: Record<string, string>) =>
-  ['init', 'sync', 'migrate', 'remember', 'export', 'backup'].includes(command) || (command === 'doctor' && options.fix === 'true') || (command === 'restore' && options.backup !== undefined);
+  ['init', 'sync', 'migrate', 'remember', 'export', 'backup', 'embed'].includes(command) || (command === 'doctor' && options.fix === 'true') || (command === 'restore' && options.backup !== undefined);
 
 async function logUsage(run: string, entry: Record<string, unknown>): Promise<void> {
   try {
@@ -588,13 +619,30 @@ async function main() {
             return (await readFile(target, 'utf8')).split(/\r?\n/).slice(startLine - 1, endLine).map((line) => line.slice(0, 160)).join('\n');
           } catch { return null; }
         };
-        data = await context(store, options.task ?? options.entity!, Number(options['max-tokens'] ?? 800), stale, options.entity, {
-          cache: readOnlyState, atCommit: options.commit, atTime: options.at ? Date.parse(options.at) * 1000 : undefined,
-          source: options['with-source'] ? source : undefined, currentBranch: git?.branch ?? null });
+        // Meaning-based candidates only when an index exists; the model is loaded from disk and never downloaded here.
+        let vectors: QueryVectors | undefined;
+        let closeEmbedder: (() => Promise<void>) | null = null;
+        const index = options.task ? await vectorIO(scope.run).read() : null;
+        if (index) {
+          let loaded: Awaited<ReturnType<typeof loadEmbedder>> | null = null;
+          vectors = { index, embedQuery: async (text) => {
+            try {
+              loaded ??= await loadEmbedder(path.join(scope.run, 'cache', 'models'), false);
+              if (loaded.id !== index.model) throw new OsgError('UNSUPPORTED_OPERATION', 'Embedding model differs from the index');
+              closeEmbedder = () => loaded!.close();
+              return (await loaded.embed([text]))[0] ?? null;
+            } catch { warnings.push({ code: 'VECTORS_UNAVAILABLE', message: '' }); return null; }
+          } };
+        }
+        try {
+          data = await context(store, options.task ?? options.entity!, Number(options['max-tokens'] ?? 800), stale, options.entity, {
+            cache: readOnlyState, atCommit: options.commit, atTime: options.at ? Date.parse(options.at) * 1000 : undefined,
+            source: options['with-source'] ? source : undefined, currentBranch: git?.branch ?? null, vectors });
+        } finally { await (closeEmbedder as (() => Promise<void>) | null)?.().catch(() => undefined); }
         const packet = data as Awaited<ReturnType<typeof context>>;
         const budget = packet.maxTokens * 4;
         const size = () => JSON.stringify({ schemaVersion: 1, requestId, workspaceId, branch, graphCommitId, ok: true,
-          data: packet, error: null, warnings }).length;
+          data: packet, error: null, warnings: publicWarnings(warnings) }).length;
         while (packet.items.length && size() > budget) packet.items.pop();
         if (size() > budget) throw new OsgError('USAGE', 'Token budget too small for envelope');
         packet.estimatedTokens = Math.ceil(size() / 4);
@@ -613,6 +661,21 @@ async function main() {
         data = { ...(await usageStats(scope.run)), elements: view.state.size, episodes: [...view.state.values()].filter((row) => row.kind === 'episode').length,
           commits: view.commits.size, format: scope.format, git: git ? { branch: git.branch, revision: git.revision?.slice(0, 12) ?? null } : null };
       }
+      if (command === 'embed') {
+        // Writes only derived files under .osg/cache. The graph, its hashes and `verify` are untouched.
+        const view = await headView(store, readOnlyState);
+        const modelDirectory = path.join(scope.run, 'cache', 'models');
+        await safeDirectory(path.join(scope.run, 'cache'), true);
+        await safeDirectory(modelDirectory, true);
+        const embedder = await loadEmbedder(modelDirectory, true);
+        try {
+          const vectors = vectorIO(scope.run);
+          // Stop starting batches after 70 s so model loading and the write fit in the 120 s command deadline; run again to continue.
+          const { index, report } = await buildIndex(view.state, embedder, await vectors.read(), { deadlineMs: 70_000 });
+          await vectors.write(index);
+          data = { model: embedder.id, ...report, complete: report.remaining === 0 };
+        } finally { await embedder.close(); }
+      }
       if (command === 'backup') data = await makeBackup(scope.run, scope.storePath, store, '', scope.format);
       if (command === 'doctor') {
         const checks: { name: string; ok: boolean; detail: string }[] = [];
@@ -622,11 +685,20 @@ async function main() {
         const head = await store.head('main');
         const authoritative = head && head !== 'ROOT' ? snapshot(rows, head).state : new Map();
         const cached = await stateCache.read() as { head?: string; rows?: GraphRow[] } | null;
-        const cacheOk = cached === null || (cached.head === head && Array.isArray(cached.rows) &&
+        // A cache written for an older head is harmless: nothing reads it as evidence. Only a cache claiming the current head can be wrong.
+        const cacheOlder = cached !== null && typeof cached.head === 'string' && cached.head !== head;
+        const cacheOk = cached === null || cacheOlder || (cached.head === head && Array.isArray(cached.rows) &&
           cached.rows.length === authoritative.size && new Set(cached.rows.map((row) => row?.element_id)).size === authoritative.size &&
           cached.rows.every((row) => row && JSON.stringify(authoritative.get(row.element_id)) === JSON.stringify(row)));
         checks.push({ name: 'data format', ok: scope.format === currentFormat, detail: scope.format === currentFormat ? `format ${scope.format}` : `format ${scope.format}, current is ${currentFormat}; run migrate --dry-run` });
-        checks.push({ name: 'state cache', ok: cacheOk, detail: cached ? (cacheOk ? 'matches the graph' : 'differs from the graph; run doctor --fix') : 'absent (rebuilt on demand)' });
+        checks.push({ name: 'state cache', ok: cacheOk, detail: cached ? (cacheOlder ? 'older than the graph; not used' : cacheOk ? 'matches the graph' : 'differs from the graph; run doctor --fix') : 'absent (rebuilt on demand)' });
+        const vectorIndex = await vectorIO(scope.run).read();
+        if (vectorIndex) {
+          const current = new Map<string, string>();
+          for (const [id, row] of authoritative) { const text = embeddableText(row); if (text !== null) current.set(id, textDigest(text)); }
+          const covered = vectorIndex.keys.filter((key, i) => current.get(key) === vectorIndex.hashes[i]).length;
+          checks.push({ name: 'embeddings', ok: true, detail: `${covered} of ${current.size} searchable elements have current vectors${covered < current.size ? '; run osg embed to add the rest' : ''}` });
+        }
         let exportedCount: number | null = null;
         try { exportedCount = (await readFile(path.join(scope.run, 'export', 'episodes.jsonl'), 'utf8')).split('\n').filter(Boolean).length; } catch { /* none */ }
         const episodes = [...authoritative.values()].filter((row) => row.kind === 'episode').length;

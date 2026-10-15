@@ -130,9 +130,11 @@ withFixture('stats, backup and doctor operate on a healthy store; doctor --fix r
   assert.ok((await readdir(path.join(workspace, '.osg/backup'))).length === 1);
   const diagnosis = ok(workspace, 'doctor').data;
   assert.equal(diagnosis.checks.find((check) => check.name === 'graph verification').ok, true);
-  // Remember advances the graph; pure context reads must not refresh its older cache.
-  assert.equal(diagnosis.checks.find((check) => check.name === 'state cache').ok, false);
-  assert.equal(diagnosis.ok, false);
+  // Remember advances the graph; pure context reads must not refresh its older cache, and an older cache is not a fault.
+  const older = diagnosis.checks.find((check) => check.name === 'state cache');
+  assert.equal(older.ok, true);
+  assert.match(older.detail, /older than the graph/);
+  assert.equal(diagnosis.ok, true);
   await writeFile(path.join(workspace, '.osg/cache/state.json'), '{"broken":');
   assert.equal(ok(workspace, 'doctor').data.ok, true);
   const fixed = ok(workspace, 'doctor', '--fix').data;

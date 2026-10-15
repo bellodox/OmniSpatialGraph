@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { execFile } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { escapeComponent, hash } from '../../core/src/hash.js';
@@ -671,27 +671,77 @@ function walkScript(c: Ctx, root: SyntaxNode): void {
   walk(root, [], null);
 }
 
+/**
+ * One child process, started with `--liftoff-only`, parses every Swift file of a scan (newline-delimited JSON over stdio).
+ * Starting a process per file costs about 0.1 s each and can exceed the command deadline on large Swift trees.
+ */
+const swiftWorker = (() => {
+  const timeoutMs = 60_000;
+  const childScript = `import { parseWithTreeSitter } from ${JSON.stringify(import.meta.url)};
+    import readline from 'node:readline';
+    for await (const line of readline.createInterface({ input: process.stdin })) {
+      const { id, text } = JSON.parse(line);
+      let result = null;
+      try { result = await parseWithTreeSitter('swift', text); } catch { result = null; }
+      process.stdout.write(JSON.stringify({ id, result }) + '\\n');
+    }`;
+  let child: ChildProcess | null = null;
+  let queue: Promise<unknown> = Promise.resolve();
+  let nextId = 0;
+  const waiting = new Map<number, (value: unknown) => void>();
+
+  function stop(): void {
+    const current = child;
+    child = null;
+    current?.kill();
+    for (const [id, done] of waiting) { waiting.delete(id); done(null); }
+  }
+  function start(): ChildProcess {
+    const created = spawn(process.execPath, ['--liftoff-only', '--input-type=module', '-e', childScript], { stdio: ['pipe', 'pipe', 'ignore'], windowsHide: true });
+    let pending = '';
+    created.stdout!.setEncoding('utf8');
+    created.stdout!.on('data', (chunk: string) => {
+      pending += chunk;
+      for (let end = pending.indexOf('\n'); end >= 0; end = pending.indexOf('\n')) {
+        const line = pending.slice(0, end);
+        pending = pending.slice(end + 1);
+        try { const { id, result } = JSON.parse(line) as { id: number; result: unknown }; waiting.get(id)?.(result); waiting.delete(id); } catch { /* malformed reply: the request times out */ }
+      }
+    });
+    created.stdin!.on('error', () => { /* an early exit is handled by the close event */ });
+    created.on('error', () => { if (child === created) stop(); });
+    created.on('close', () => { if (child === created) stop(); });
+    return created;
+  }
+  async function one(text: string): Promise<unknown> {
+    child ??= start();
+    const id = nextId++;
+    const reply = new Promise<unknown>((resolve) => {
+      const timer = setTimeout(() => { if (waiting.has(id)) stop(); }, timeoutMs);
+      waiting.set(id, (value) => { clearTimeout(timer); resolve(value); });
+    });
+    child.stdin!.write(JSON.stringify({ id, text }) + '\n');
+    return reply;
+  }
+  return {
+    parse(text: string): Promise<{ decls: TsDecl[]; imports: TsImport[]; recovered: boolean } | null> {
+      const run = queue.then(() => one(text), () => one(text));
+      queue = run.catch(() => null);
+      return run as Promise<{ decls: TsDecl[]; imports: TsImport[]; recovered: boolean } | null>;
+    },
+    /** Ends the child; the next Swift file starts a new one. */
+    close(): void { child?.stdin?.end(); child = null; },
+  };
+})();
+
+/** Release helper processes. Safe to call at any time; scans call it when they finish. */
+export function closeParsers(): void { swiftWorker.close(); }
+
 /** Parse one file. Returns null when the grammar cannot be loaded, so the caller can fall back. */
 export async function parseWithTreeSitter(language: TsLanguage, text: string): Promise<{ decls: TsDecl[]; imports: TsImport[]; recovered: boolean } | null> {
   // Swift's optimizing Wasm compile can fatally exhaust V8's Zone on Node 24. Runtime flag changes do not prevent it;
   // isolate that grammar with a startup flag instead of changing the importing application's V8 configuration.
-  if (language === 'swift' && !process.execArgv.includes('--liftoff-only')) {
-    const timeoutMs = 60_000;
-    const maxOutputBytes = 16 * 1024 * 1024;
-    const script = `import { parseWithTreeSitter } from ${JSON.stringify(import.meta.url)};
-      let text = ''; process.stdin.setEncoding('utf8');
-      for await (const chunk of process.stdin) text += chunk;
-      process.stdout.write(JSON.stringify(await parseWithTreeSitter('swift', text)));`;
-    return new Promise((resolve) => {
-      const child = execFile(process.execPath, ['--liftoff-only', '--input-type=module', '-e', script],
-        { encoding: 'utf8', timeout: timeoutMs, maxBuffer: maxOutputBytes, windowsHide: true }, (error, stdout) => {
-          if (error) { resolve(null); return; }
-          try { resolve(JSON.parse(stdout)); } catch { resolve(null); }
-        });
-      child.stdin?.on('error', () => { /* An early child exit is handled by the completion callback. */ });
-      child.stdin?.end(text);
-    });
-  }
+  if (language === 'swift' && !process.execArgv.includes('--liftoff-only')) return swiftWorker.parse(text);
   const loaded = await load();
   if (!loaded) return null;
   const resolved = await grammarFor(language, loaded);

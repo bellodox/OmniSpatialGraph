@@ -22,7 +22,7 @@
     "compatibility": "Unresolved: LanceDB 0.40.0 pins optional Transformers 3.0.2, whose Sharp ^0.33.5 range excludes bundled 0.35.5. npm ls exits 1; zero audit findings do not establish compatibility. Image and embedding features are not enabled.",
     "nativeClosure": "All seven LanceDB optional platform declarations retained; this Windows-built archive bundles the installed win32-x64-msvc binary, not all seven binaries. Large bundled artifact, not a minimal download. Other platform installs and native/LGPL notices and redistribution obligations remain unverified."
   },
-  "bundleDependencies": ["@lancedb/lancedb", "apache-arrow", "@noble/hashes", "@vscode/tree-sitter-wasm", "tree-sitter-wasms", "ignore", "typescript", "sharp"],
+  "bundleDependencies": ["@lancedb/lancedb", "apache-arrow", "@noble/hashes", "@vscode/tree-sitter-wasm", "tree-sitter-wasms", "ignore", "sharp"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepack": "node tools/pack.mjs",
@@ -36,9 +36,8 @@
     "@vscode/tree-sitter-wasm": "0.3.1",
     "ignore": "7.0.12",
     "sharp": "0.35.5",
-    "tree-sitter-wasms": "0.1.13",
-    "typescript": "5.9.3"
+    "tree-sitter-wasms": "0.1.13"
   },
-  "devDependencies": { "@types/node": "24.10.0" },
+  "devDependencies": { "@types/node": "24.10.0", "typescript": "5.9.3" },
   "overrides": { "sharp": "0.35.5" }
 }

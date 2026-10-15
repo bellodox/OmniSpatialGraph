@@ -3,3 +3,4 @@ export * from './graph.js';
 export * from './memory.js';
 export * from './state.js';
 export * from './retrieval.js';
+export * from './embedding.js';
