@@ -5,6 +5,7 @@ import path from 'node:path';
 import type { GraphPort, GraphRow } from '../../contracts/src/index.js';
 import { OsgError, blankRow } from '../../contracts/src/index.js';
 
+const compactEvery = 25;
 const text = new Utf8();
 const integer = new Int64();
 const list = () => new List(new Field('item', integer, true));
@@ -20,15 +21,29 @@ const schema = new Schema(columns.map((column) => new Field(column,
   column === 'extent' ? extent : integerFields.has(column) ? integer : text,
   column !== 'row_key' && column !== 'row_type')));
 
-function normalize(row: Record<string, unknown>): GraphRow {
-  const normalized = { ...row };
-  for (const field of integerFields) if (normalized[field] != null) normalized[field] = Number(normalized[field]);
-  if (normalized.extent && typeof normalized.extent === 'object') {
-    const input = normalized.extent as Record<string, unknown>;
-    normalized.extent = input.frame_id == null ? null : Object.fromEntries(
-      Object.entries(input).map(([key, value]) => [key, value && key !== 'frame_id' ? Array.from(value as Iterable<bigint>, Number) : value]));
+// toArray() converts the nested `extent` struct row by row (about 20x slower); read Arrow columns directly instead.
+function convert(arrow: { numRows: number; getChild(name: string): any }): GraphRow[] {
+  if (arrow.numRows === 0) return [];
+  const vectors = columns.filter((column) => column !== 'extent').map((column) => [column, arrow.getChild(column)!] as const);
+  const parts = ['frame_id', 't', 'q', 'ext_min', 'ext_max'].map((name) => arrow.getChild('extent')!.getChild(name)!);
+  const out: GraphRow[] = [];
+  for (let i = 0; i < arrow.numRows; i++) {
+    const row: Record<string, unknown> = {};
+    for (const [column, vector] of vectors) {
+      const value = vector.get(i);
+      row[column] = integerFields.has(column) && value != null ? Number(value) : value;
+    }
+    const frame = parts[0]!.get(i);
+    row.extent = frame == null ? null : {
+      frame_id: frame,
+      ...Object.fromEntries((['t', 'q', 'ext_min', 'ext_max'] as const).map((name, k) => {
+        const value = parts[k + 1]!.get(i);
+        return [name, value ? Array.from(value as Iterable<bigint>, Number) : value];
+      }))
+    };
+    out.push(row as unknown as GraphRow);
   }
-  return normalized as unknown as GraphRow;
+  return out;
 }
 
 export async function openStore(directory: string, create = false): Promise<GraphPort> {
@@ -75,31 +90,28 @@ export async function openStore(directory: string, create = false): Promise<Grap
     async rows() {
       const version = await table.version();
       if (cached?.version === version) return structuredClone(cached.rows);
-      const arrow = await table.query().toArrow();
-      if (arrow.numRows === 0) { cached = { version, rows: [] }; return []; }
-      const vectors = columns.filter((column) => column !== 'extent').map((column) => [column, arrow.getChild(column)!] as const);
-      const parts = ['frame_id', 't', 'q', 'ext_min', 'ext_max'].map((name) => arrow.getChild('extent')!.getChild(name)!);
-      const out: GraphRow[] = [];
-      for (let i = 0; i < arrow.numRows; i++) {
-        const row: Record<string, unknown> = {};
-        for (const [column, vector] of vectors) {
-          const value = vector.get(i);
-          row[column] = integerFields.has(column) && value != null ? Number(value) : value;
-        }
-        const frame = parts[0]!.get(i);
-        row.extent = frame == null ? null : {
-          frame_id: frame,
-          ...Object.fromEntries((['t', 'q', 'ext_min', 'ext_max'] as const).map((name, k) => {
-            const value = parts[k + 1]!.get(i);
-            return [name, value ? Array.from(value as Iterable<bigint>, Number) : value];
-          }))
-        };
-        out.push(row as unknown as GraphRow);
-      }
+      const out = convert(await table.query().toArrow());
       cached = { version, rows: out };
-      // Callers own their rows, including nested extent lists; the cache stays private.
       return structuredClone(out);
     },
+    async commitRows() { return convert(await table.query().where("row_type = 'commit'").toArrow()); },
+    async rowsOfCommits(ids) {
+      const out: GraphRow[] = [];
+      if (ids.some((id) => !/^c[0-9a-f]{64}$/.test(id))) throw new OsgError('INVALID_SCHEMA', 'Invalid commit id');
+      for (let i = 0; i < ids.length; i += 200) {
+        const list = ids.slice(i, i + 200).map((id) => `'${id}'`).join(',');
+        out.push(...convert(await table.query().where(`row_type = 'elem' AND commit_id IN (${list})`).toArrow()));
+      }
+      return out;
+    },
+    async rowsOfKind(kind) {
+      if (!/^[a-z][a-z0-9_]{0,31}$/.test(kind)) throw new OsgError('INVALID_SCHEMA', 'Invalid kind');
+      return convert(await table.query().where(`row_type = 'elem' AND kind = '${kind}'`).toArrow());
+    },
+    async rowsOfElement(elementId) {
+      return convert(await table.query().where(`row_type = 'elem' AND element_id = '${elementId.replace(/'/g, "''")}'`).toArrow());
+    },
+    close() { table.close(); connection.close(); },
     async head(branch) {
       const row = (await table.query().where(`row_key = 'head:${branch}'`).toArray())[0];
       return row?.head as string ?? null;
@@ -125,7 +137,13 @@ export async function openStore(directory: string, create = false): Promise<Grap
             valid_from: row.valid_from == null ? null : BigInt(row.valid_from), valid_to: row.valid_to == null ? null : BigInt(row.valid_to),
             observed_at: row.observed_at == null ? null : BigInt(row.observed_at), generation: row.generation == null ? null : BigInt(row.generation),
             committed_at: row.committed_at == null ? null : BigInt(row.committed_at) })), { schema }));
-      return Number(result.numUpdatedRows) === 1;
+      const accepted = Number(result.numUpdatedRows) === 1;
+      // History lives in rows, not in table versions: merge the per-commit fragments and drop old versions periodically.
+      const generation = rows.find((row) => row.row_type === 'commit')?.generation ?? 0;
+      if (accepted && generation > 0 && generation % compactEvery === 0) {
+        try { await table.optimize({ cleanupOlderThan: new Date(Date.now() - 60_000) }); } catch { /* maintenance is best effort */ }
+      }
+      return accepted;
     }
   };
 }

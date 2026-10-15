@@ -1,0 +1,11 @@
+OmniSpatialGraph (osg)
+Copyright 2026 Vlad Bellomorski
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party software keeps its own licence, shipped with each dependency:
+- @vscode/tree-sitter-wasm (MIT): Tree-sitter runtime and the TypeScript, TSX, JavaScript, Python, Go, Rust, Java, C#, C++, Ruby and PHP grammars, as WebAssembly.
+- tree-sitter-wasms (Unlicense): prebuilt C, Kotlin, Swift and Solidity grammars, as WebAssembly. The upstream grammar licences are not included in that package and have not been reviewed.
+- @lancedb/lancedb (Apache-2.0) with native platform binaries; apache-arrow (Apache-2.0); typescript (Apache-2.0);
+  @noble/hashes (MIT); ignore (MIT); sharp (Apache-2.0) with libvips (LGPL-3.0-or-later) in its platform binaries.
+Redistributing a build that bundles native binaries carries the notice obligations of those binaries.

@@ -8,12 +8,13 @@ import { openStore } from '../dist/storage-lance/src/index.js';
 import { commit, snapshot, verify } from '../dist/core/src/graph.js';
 import { canon, contentHash, hash } from '../dist/core/src/hash.js';
 import { blankRow } from '../dist/contracts/src/index.js';
-import { context, history, remember } from '../dist/core/src/memory.js';
+import { context } from '../dist/core/src/retrieval.js';
+import { history, remember } from '../dist/core/src/memory.js';
 
 const entry = path.resolve('dist/cli/src/index.js');
-function cli(root, command, args = [], hook) {
+function cli(root, command, args = [], hook, executable = entry) {
   const result = spawnSync(process.execPath, [...(hook ? ['--import', `data:text/javascript,${encodeURIComponent(hook)}`] : []),
-    entry, command, ...(command === 'export' ? ['episodes'] : []), '--workspace', root, ...args, '--json'],
+    executable, command, ...(command === 'export' ? ['episodes'] : []), '--workspace', root, ...args, '--json'],
   { encoding: 'utf8', timeout: 30000 });
   assert.ifError(result.error);
   assert.equal(result.signal, null);
@@ -23,7 +24,134 @@ function cli(root, command, args = [], hook) {
   return { exit: result.status, ...envelope };
 }
 
-// Preload valid owner data only in disposable fixtures; this is not an approval API.
+async function sentinelState(file) {
+  return { bytes: await readFile(file, 'utf8'), mtime: (await lstat(file)).mtimeMs };
+}
+
+// Exit status detects even forbidden reads swallowed by the freshness/source callbacks.
+function forbiddenReadHook(root, relatives) {
+  return `import fs from 'node:fs/promises'; import path from 'node:path'; import {syncBuiltinESMExports} from 'node:module';
+    const denied=new Set(${JSON.stringify(relatives.map((relative) => path.join(root, relative)))});
+    const original=fs.readFile; let forbidden=0;
+    fs.readFile=async function(target,...args) { if(denied.has(path.resolve(String(target)))) { forbidden++; throw Error('FORBIDDEN_FIXTURE_READ'); } return original(target,...args); };
+    syncBuiltinESMExports(); process.on('exit',()=>{if(forbidden)process.exitCode=99;});`;
+}
+
+async function runtimeBytes(root) {
+  const directory = path.join(root, '.osg');
+  const files = await readdir(directory, { recursive: true, withFileTypes: true });
+  const result = {};
+  for (const file of files.filter((entry) => entry.isFile())) {
+    const target = path.join(file.parentPath, file.name);
+    result[path.relative(directory, target)] = { bytes: (await readFile(target)).toString('hex'), mtime: (await lstat(target)).mtimeMs };
+  }
+  return result;
+}
+
+test('current and historical source reads enforce newly ignored ancestors before hashing or snippets', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-source-ignore-'));
+  try {
+    const relative = 'nested/closed/source.ts';
+    const marker = 'CurrentRawPrivacyMarker';
+    await mkdir(path.join(root, 'nested/closed'), { recursive: true });
+    await writeFile(path.join(root, relative), `export function visibleSymbol() { return '${marker}'; }\n`);
+    await writeFile(path.join(root, 'nested/closed/.gitignore'), '!source.ts\n');
+    assert.equal(cli(root, 'init').exit, 0);
+    assert.equal(cli(root, 'sync').exit, 0);
+    const found = cli(root, 'context', ['--task', 'visibleSymbol', '--max-tokens', '4000']);
+    const symbol = found.data.items.find((item) => item.kind === 'function');
+    assert.ok(symbol);
+    const remembered = cli(root, 'remember', ['--task', 'source privacy', '--decision', 'retain metadata', '--outcome', 'fixture', '--entities', symbol.elementId]);
+    assert.equal(remembered.exit, 0);
+    const baseArgs = ['--entity', symbol.elementId, '--max-tokens', '4000'];
+    const publicEntry = path.resolve('dist/cli/src/public.js');
+    const permitted = cli(root, 'context', [...baseArgs, '--with-source'], undefined, publicEntry);
+    assert.equal(permitted.exit, 0);
+    assert.ok(permitted.data.items.find((item) => item.elementId === symbol.elementId).snippet.value.includes(marker));
+    await writeFile(path.join(root, 'nested/.gitignore'), 'closed/\n!closed/source.ts\n');
+    const before = await runtimeBytes(root);
+    const hook = forbiddenReadHook(root, [relative, 'nested/closed/.gitignore']);
+    for (const selector of [[], ['--commit', remembered.graphCommitId]]) {
+      const args = [...baseArgs, ...selector];
+      const result = cli(root, 'context', [...args, '--with-source'], undefined, publicEntry);
+      assert.equal(result.exit, 0);
+      const item = result.data.items.find((item) => item.elementId === symbol.elementId);
+      assert.ok(item, 'historical metadata remains available');
+      assert.equal(item.citation.stale, true);
+      assert.equal(item.snippet, undefined);
+      assert.ok(!JSON.stringify(result).includes(marker));
+      for (const sourceArgs of [[], ['--with-source']]) {
+        assert.equal(cli(root, 'context', [...args, ...sourceArgs], hook, publicEntry).exit, 0, 'excluded content must not be read, even for hashing');
+      }
+    }
+    assert.deepEqual(await runtimeBytes(root), before, 'context must not mutate runtime files');
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('current and historical source callbacks reject mandatory paths from previously indexed rows', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-source-mandatory-'));
+  try {
+    assert.equal(cli(root, 'init').exit, 0);
+    const paths = process.platform === 'win32'
+      ? ['pOdS/private.ts', '.OSG/private.ts', 'docs/Tasks/private.ts', '.SpeXcode/private.ts', 'nested/Types.d.TS', 'nested/Credentials.JSON/private.ts']
+      : ['Pods/private.ts', '.osg/private.ts', 'docs/tasks/private.ts', '.spexcode/private.ts', 'nested/types.d.ts', 'nested/credentials.json/private.ts'];
+    paths.push('nested/.env.fixture.ts');
+    const body = "export function priorSymbol() { return 'MandatoryRawPrivacyMarker'; }\n";
+    // Use the raw-byte source SHA, not the canonical graph hash.
+    const { createHash } = await import('node:crypto');
+    const rawHash = createHash('sha256').update(body).digest('hex');
+    const proposals = [];
+    for (const relative of paths) {
+      await mkdir(path.dirname(path.join(root, relative)), { recursive: true });
+      await writeFile(path.join(root, relative), body);
+      const fileId = `code:file:${relative}`;
+      proposals.push({ ...provenanceRecord(`code:symbol:${relative}#priorSymbol`, 'observed', 'function', { name: 'priorSymbol', path: relative }),
+        source_hash: rawHash, extent: { frame_id: fileId, t: null, q: null, ext_min: [1], ext_max: [1] } });
+    }
+    const store = await openStore(path.join(root, '.osg/store'));
+    const prior = await commit(store, proposals, 'provider-tsc@0.1.0');
+    const before = await runtimeBytes(root);
+    const hook = forbiddenReadHook(root, paths);
+    for (const proposal of proposals) for (const selector of [[], ['--commit', prior.commitId]]) {
+      const args = ['--entity', proposal.element_id, '--max-tokens', '4000', ...selector];
+      const result = cli(root, 'context', [...args, '--with-source']);
+      assert.equal(result.exit, 0);
+      const item = result.data.items.find((item) => item.elementId === proposal.element_id);
+      assert.ok(item);
+      assert.equal(item.citation.stale, true);
+      assert.equal(item.snippet, undefined);
+      assert.ok(!JSON.stringify(result).includes('MandatoryRawPrivacyMarker'));
+      assert.equal(cli(root, 'context', [...args, '--with-source'], hook).exit, 0);
+    }
+    assert.deepEqual(await runtimeBytes(root), before);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('doctor detects forged cache text and status with unchanged row keys without writing', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-doctor-cache-'));
+  try {
+    await writeFile(path.join(root, 'source.ts'), 'export function cacheSymbol() { return 1; }\n');
+    assert.equal(cli(root, 'init').exit, 0);
+    assert.equal(cli(root, 'sync').exit, 0);
+    const target = path.join(root, '.osg/cache/state.json');
+    const original = JSON.parse(await readFile(target, 'utf8'));
+    assert.equal(cli(root, 'doctor').data.checks.find((check) => check.name === 'state cache').ok, true);
+    for (const mutation of [{ props: '{"name":"ForgedCacheText"}' }, { status: 'policy' }]) {
+      const forged = structuredClone(original);
+      Object.assign(forged.rows[0], mutation);
+      await writeFile(target, JSON.stringify(forged));
+      const before = await runtimeBytes(root);
+      const result = cli(root, 'doctor', [], undefined, path.resolve('dist/cli/src/public.js'));
+      assert.equal(result.exit, 0);
+      const check = result.data.checks.find((entry) => entry.name === 'state cache');
+      assert.equal(check.ok, false);
+      assert.match(check.detail, /differs from the graph/);
+      assert.deepEqual(await runtimeBytes(root), before);
+    }
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+// Synthetic owner rows exist only in disposable stores; no approval operation is invoked.
 async function preloadOwnerRecords(store, proposals) {
   const elements = proposals.map((proposal) => ({ ...proposal, supersedes: null, content_hash: contentHash(proposal) }))
     .sort((a, b) => a.element_id < b.element_id ? -1 : 1);
@@ -35,125 +163,85 @@ async function preloadOwnerRecords(store, proposals) {
     branch: 'main', parents: '["ROOT"]', delta_hash: deltaHash, actor: 'human', generation: 1, committed_at: 1 }));
   batch.push(blankRow({ row_type: 'head', row_key: 'head:main', branch: 'main', head: commitId }));
   assert.equal(await store.publish(batch, 'ROOT'), true);
-  assert.deepEqual(verify(await store.rows()), { commits: 1, elements: elements.length });
 }
 
-// Synthetic episode and restriction data for provenance-boundary regressions.
 function provenanceRecord(id, status = 'hypothesis', kind = 'episode', props = {}) {
   return { element_id: id, kind, op: 'assert', status, src: null, dst: null, predicate: null,
     extent: null, props: { task: 'provenance', ...props }, source_hash: null,
     valid_from: 1, valid_to: null, observed_at: 1 };
 }
 
-async function sentinelState(file) {
-  return { bytes: await readFile(file, 'utf8'), mtime: (await lstat(file)).mtimeMs };
-}
-
-test('public remember cannot supersede owner approved or policy episodes', async () => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-provenance-public-'));
+test('remember rejects protected, absent and non-episode supersession while preserving live hypothesis chains', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-supersession-'));
   try {
     assert.equal(cli(root, 'init').exit, 0);
     const store = await openStore(path.join(root, '.osg/store'));
-    const protectedRecords = ['approved', 'policy'].map((status) => provenanceRecord(`agent:episode:${status}`, status));
-    await preloadOwnerRecords(store, protectedRecords);
+    const protectedRows = ['approved', 'policy', 'observed'].map((status) => provenanceRecord(`agent:episode:${status}`, status));
+    await preloadOwnerRecords(store, [...protectedRows, provenanceRecord('agent:restriction:ordinary', 'hypothesis', 'restriction')]);
     const before = await store.rows();
-    const histories = await Promise.all(protectedRecords.map((row) => history(store, row.element_id)));
-    const result = spawnSync(process.execPath, [path.resolve('dist/cli/src/public.js'), 'remember', '--workspace', root,
-      '--task', 'provenance', '--decision', 'ordinary agent claim', '--outcome', 'untrusted',
-      '--entities', protectedRecords[0].element_id, '--supersedes', protectedRecords.map((row) => row.element_id).join(','), '--json'], { encoding: 'utf8', timeout: 30000 });
-    assert.ifError(result.error);
-    assert.equal(result.status, 0, result.stderr);
-    const envelope = JSON.parse(result.stdout);
-    assert.equal(envelope.ok, true);
-    assert.deepEqual(envelope.warnings.filter((warning) => warning.code === 'UNRESOLVED_SUPERSEDES'),
-      protectedRecords.map(() => ({ code: 'UNRESOLVED_SUPERSEDES', message: 'Superseded episode could not be resolved' })));
-    const packet = await context(store, 'provenance', 8000, async () => false);
-    const attacker = packet.items.find((item) => item.elementId === envelope.data.episodeId);
-    assert.ok(attacker);
-    assert.equal(attacker.data.untrusted, true);
-    assert.equal(attacker.provenance.status, 'hypothesis');
-    assert.equal(Object.hasOwn(attacker.data.value, 'supersedes'), false);
-    for (const [index, row] of protectedRecords.entries()) {
-      const item = packet.items.find((item) => item.elementId === row.element_id);
-      assert.equal(item.provenance.supersededBy, null);
-      assert.equal(item.provenance.status, row.status);
-      assert.deepEqual((await history(store, row.element_id)).versions, histories[index].versions);
-    }
-    const after = await store.rows();
-    for (const row of before.filter((row) => row.row_type !== 'head')) assert.deepEqual(after.find((item) => item.row_key === row.row_key), row);
-    assert.equal(cli(root, 'verify').exit, 0);
-  } finally { await rm(root, { recursive: true, force: true }); }
-});
-
-test('core-persisted supersedes metadata cannot label or demote protected or non-episode targets', async () => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-provenance-target-'));
-  try {
-    const store = await openStore(root, true);
-    const targets = ['approved', 'policy', 'observed', 'hypothesis'].flatMap((status) =>
-      ['episode', 'restriction'].map((kind) => provenanceRecord(`agent:${kind}:${status}`, status, kind)));
-    await preloadOwnerRecords(store, targets);
-    const before = await store.rows();
-    const beforePacket = await context(store, 'provenance', 8000, async () => false);
-    const histories = await Promise.all(targets.map((row) => history(store, row.element_id)));
-    await commit(store, [provenanceRecord('agent:episode:attacker', 'hypothesis', 'episode',
-      { supersedes: targets.map((row) => row.element_id) })], 'agent:cli');
-    const packet = await context(store, 'provenance', 8000, async () => false);
-    const eligibleId = 'agent:episode:hypothesis';
-    for (const [index, row] of targets.entries()) {
-      const item = packet.items.find((item) => item.elementId === row.element_id);
+    const histories = await Promise.all(protectedRows.map((row) => history(store, row.element_id)));
+    const result = cli(root, 'remember', ['--task', 'provenance', '--decision', 'ordinary claim', '--outcome', 'untrusted',
+      '--entities', protectedRows[0].element_id,
+      '--supersedes', [...protectedRows.map((row) => row.element_id), 'agent:restriction:ordinary', 'agent:episode:missing'].join(',')]);
+    assert.equal(result.exit, 0);
+    assert.equal(result.warnings.filter((warning) => warning.code === 'UNRESOLVED_SUPERSEDES').length, 5);
+    const first = await remember(store, 'provenance', 'first', 'untrusted', []);
+    const second = await remember(store, 'provenance', 'second', 'untrusted', [], { supersedes: [first.episodeId, first.episodeId] });
+    const third = await remember(store, 'provenance', 'third', 'untrusted', [], { supersedes: [second.episodeId] });
+    const packet = await context(store, 'provenance', 12000, async () => false);
+    assert.deepEqual(packet.items.find((item) => item.elementId === second.episodeId).data.value.supersedes, [first.episodeId]);
+    assert.equal(packet.items.find((item) => item.elementId === first.episodeId).provenance.supersededBy, second.episodeId);
+    assert.equal(packet.items.find((item) => item.elementId === second.episodeId).provenance.supersededBy, third.episodeId);
+    for (const [index, row] of protectedRows.entries()) {
+      const item = packet.items.find((entry) => entry.elementId === row.element_id);
       assert.ok(item);
-      assert.equal(item.provenance.supersededBy, row.element_id === eligibleId ? 'agent:episode:attacker' : null, row.element_id);
+      assert.equal(item.provenance.supersededBy, undefined);
       assert.equal(item.provenance.status, row.status);
-      assert.equal(item.data.untrusted, true);
       assert.deepEqual((await history(store, row.element_id)).versions, histories[index].versions);
     }
-    const unchangedOrder = beforePacket.items.filter((item) => item.elementId !== eligibleId).map((item) => item.elementId);
-    assert.deepEqual(packet.items.filter((item) => unchangedOrder.includes(item.elementId)).map((item) => item.elementId), unchangedOrder,
-      'ineligible targets keep their original relative ranking');
-    assert.equal(packet.items.at(-1).elementId, eligibleId);
-    const after = await store.rows();
-    for (const row of before.filter((row) => row.row_type !== 'head')) assert.deepEqual(after.find((item) => item.row_key === row.row_key), row);
-    assert.deepEqual(verify(after), { commits: 2, elements: targets.length + 1 });
+    for (const original of before.filter((row) => row.row_type !== 'head')) {
+      assert.deepEqual((await store.rows()).find((row) => row.row_key === original.row_key), original);
+    }
+    assert.equal(verify(await store.rows()).commits, 5);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
-test('supersession requires eligible live sources and targets and ignores malformed or self references', async () => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-provenance-source-'));
+test('retrieval ignores forged protected, malformed, self and closed-source supersession metadata', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-supersession-read-'));
   try {
     const store = await openStore(root, true);
-    const cases = [
-      ['approved', 'episode', null], ['policy', 'episode', null], ['observed', 'episode', null],
-      ['hypothesis', 'restriction', null], ['hypothesis', 'episode', 'not-an-array'],
-      ['hypothesis', 'episode', { target: 'not-an-array' }], ['hypothesis', 'episode', [null, 42, {}]]
-    ];
-    const records = cases.flatMap(([status, kind, malformed], index) => [
-      provenanceRecord(`agent:episode:target${index}`),
-      provenanceRecord(`agent:${kind}:source${index}`, status, kind,
-        { supersedes: malformed ?? [`agent:episode:target${index}`] })
-    ]);
-    records.push(provenanceRecord('agent:episode:self', 'hypothesis', 'episode',
-      { supersedes: ['agent:episode:self', 'agent:episode:missing'] }));
-    records.push(provenanceRecord('agent:episode:closed', 'hypothesis', 'episode', { supersedes: ['agent:episode:live'] }));
-    records.push(provenanceRecord('agent:episode:live'));
+    const records = ['approved', 'policy', 'observed', 'hypothesis'].flatMap((status) =>
+      ['episode', 'restriction'].map((kind) => provenanceRecord(`agent:${kind}:${status}`, status, kind,
+        status !== 'hypothesis' ? { supersedes: ['agent:episode:hypothesis'] } : {})));
+    records.push(provenanceRecord('agent:episode:malformed', 'hypothesis', 'episode', { supersedes: [null, 42, {}] }));
+    records.push(provenanceRecord('agent:episode:self', 'hypothesis', 'episode', { supersedes: ['agent:episode:self', 'agent:episode:missing'] }));
+    records.push(provenanceRecord('agent:episode:closed', 'hypothesis', 'episode', { supersedes: ['agent:episode:hypothesis'] }));
     await preloadOwnerRecords(store, records);
     await commit(store, [{ ...provenanceRecord('agent:episode:closed'), op: 'retract', valid_from: 2 }], 'agent:cli');
-    const rejected = await remember(store, 'provenance', 'missing and closed references', 'untrusted', [],
-      ['agent:episode:closed', 'agent:episode:missing']);
-    assert.equal(rejected.warnings.filter((warning) => warning.code === 'UNRESOLVED_SUPERSEDES').length, 2);
-    const first = await remember(store, 'provenance', 'first valid', 'untrusted', []);
-    const second = await remember(store, 'provenance', 'second valid', 'untrusted', [], [first.episodeId, first.episodeId]);
-    const third = await remember(store, 'provenance', 'third valid', 'untrusted', [], [second.episodeId]);
+    const beforePacket = await context(store, 'provenance', 16000, async () => false);
+    const histories = await Promise.all(records.map((row) => history(store, row.element_id)));
+    assert.equal(beforePacket.items.find((item) => item.elementId === 'agent:episode:hypothesis').provenance.supersededBy, undefined,
+      'owner and observed episodes, malformed/self references and a retracted source cannot retire a live hypothesis');
+    await commit(store, [provenanceRecord('agent:episode:attacker', 'hypothesis', 'episode',
+      { supersedes: records.map((row) => row.element_id) })], 'agent:cli');
     const beforeRead = await store.rows();
     const packet = await context(store, 'provenance', 16000, async () => false);
-    for (const item of packet.items) {
-      assert.equal(item.provenance.supersededBy,
-        item.elementId === first.episodeId ? second.episodeId : item.elementId === second.episodeId ? third.episodeId : null, item.elementId);
-      assert.equal(item.data.untrusted, true);
+    const eligible = new Set(['agent:episode:hypothesis', 'agent:episode:malformed', 'agent:episode:self']);
+    for (const [index, row] of records.entries()) {
+      const item = packet.items.find((entry) => entry.elementId === row.element_id);
+      assert.equal(item?.provenance.supersededBy, eligible.has(row.element_id) ? 'agent:episode:attacker' : undefined, row.element_id);
+      assert.deepEqual((await history(store, row.element_id)).versions, histories[index].versions);
     }
-    assert.ok(!packet.items.some((item) => item.elementId === 'agent:episode:closed'));
-    assert.deepEqual(packet.items.find((item) => item.elementId === second.episodeId).data.value.supersedes, [first.episodeId]);
-    assert.deepEqual(await store.rows(), beforeRead, 'deriving provenance is a pure read');
-    assert.equal(verify(beforeRead).commits, 6);
+    const protectedIds = records.filter((row) => ['approved', 'policy'].includes(row.status)).map((row) => row.element_id);
+    assert.deepEqual(packet.items.filter((item) => protectedIds.includes(item.elementId)).map((item) => item.elementId),
+      beforePacket.items.filter((item) => protectedIds.includes(item.elementId)).map((item) => item.elementId));
+    for (const id of protectedIds) {
+      const before = beforePacket.items.find((item) => item.elementId === id);
+      const after = packet.items.find((item) => item.elementId === id);
+      if (before && after) assert.equal(after.reason.score, before.reason.score, id);
+    }
+    assert.deepEqual(await store.rows(), beforeRead, 'context must be a pure read');
+    assert.deepEqual(verify(beforeRead), { commits: 3, elements: records.length + 2 });
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
@@ -412,6 +500,46 @@ test('mandatory mixed-case exclusions prune before reads and never persist fresh
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
+test('Windows CocoaPods directories are pruned before traversal, reads and history', { skip: process.platform !== 'win32' }, async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-pods-'));
+  try {
+    const variants = ['Pods', 'pOdS'];
+    await writeFile(path.join(root, '.gitignore'), '!Pods/\n!Pods/**\n!pOdS/\n!pOdS/**\n');
+    for (const directory of variants) {
+      await mkdir(path.join(root, directory), { recursive: true });
+      await writeFile(path.join(root, directory, '.gitignore'), '!private.md\n');
+      await writeFile(path.join(root, directory, 'private.md'), '# CocoaPodsPrivateMarker');
+    }
+    await writeFile(path.join(root, 'public.md'), '# PublicMarker');
+    const denied = variants.map((directory) => path.join(root, directory).toLowerCase());
+    const guardModule = `import * as fs from 'node:fs/promises'; import path from 'node:path';
+      const denied=${JSON.stringify(denied)};
+      function guard(target) { const value=path.resolve(String(target)).toLowerCase(); if(denied.some(item=>value===item||value.startsWith(item+path.sep))) throw Error('PODS_PRIVACY_READ'); }
+      export const realpath=fs.realpath;
+      export async function lstat(target,...args) { guard(target); return fs.lstat(target,...args); }
+      export async function readdir(target,...args) { guard(target); return fs.readdir(target,...args); }
+      export async function readFile(target,...args) { guard(target); return fs.readFile(target,...args); }`;
+    const hook = `import {registerHooks} from 'node:module';registerHooks({resolve(specifier,context,next) {
+      if(specifier==='node:fs/promises' && context.parentURL?.includes('/indexing-kilo/src/')) return {url:${JSON.stringify(`data:text/javascript,${encodeURIComponent(guardModule)}`)},shortCircuit:true};
+      return next(specifier,context);
+    }});`;
+    assert.equal(cli(root, 'init').exit, 0);
+    const synced = cli(root, 'sync', [], hook);
+    assert.equal(synced.exit, 0, JSON.stringify(synced));
+    assert.equal(synced.data.files, 1);
+    const store = await openStore(path.join(root, '.osg/store'));
+    const rows = await store.rows();
+    assert.ok(!JSON.stringify(rows).includes('CocoaPodsPrivateMarker'));
+    for (const directory of variants) {
+      assert.deepEqual(cli(root, 'history', ['--entity', `code:file:${directory}/private.md`]).data.versions, []);
+      assert.ok(!rows.some((row) => row.element_id?.includes(`${directory}/`)));
+    }
+    assert.equal(cli(root, 'sync', [], hook).data.noop, true);
+    assert.deepEqual(await store.rows(), rows);
+    assert.equal(cli(root, 'verify').exit, 0);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
 test('mandatory exclusions reconcile prior leaked current facts without purging append-only history', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'osg-security-mandatory-reconcile-'));
   try {
@@ -469,7 +597,7 @@ test('bounded ignore replacement sharing failures report actionable storage erro
     for (const code of ['EPERM', 'EACCES', 'EBUSY', 'EIO']) {
       const expectedAttempts = code === 'EIO' ? 1 : 21;
       const guardModule = `import * as fs from 'node:fs/promises'; import path from 'node:path';
-        export const link=fs.link,lstat=fs.lstat,mkdir=fs.mkdir,readFile=fs.readFile,readdir=fs.readdir,
+        export const appendFile=fs.appendFile,cp=fs.cp,stat=fs.stat,link=fs.link,lstat=fs.lstat,mkdir=fs.mkdir,readFile=fs.readFile,readdir=fs.readdir,
           realpath=fs.realpath,rm=fs.rm,writeFile=fs.writeFile;
         let attempts=0;
         process.on('exit',()=>{if(attempts!==${expectedAttempts}) process.exitCode=99;});

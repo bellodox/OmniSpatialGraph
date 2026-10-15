@@ -14,7 +14,7 @@ const manifest = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf
 assert.equal(manifest.name, 'omnispatialgraph');
 assert.equal(manifest.version, '0.1.0-prototype.0');
 assert.equal(manifest.private, true);
-assert.equal(manifest.license, 'UNLICENSED');
+assert.equal(manifest.license, 'Apache-2.0');
 assert.equal(path.dirname(consumer), path.resolve(temporary));
 assert.equal(path.basename(consumer), 'osg-independent-consumer-final');
 assert.equal((await realpath(temporary)).toLowerCase(), path.resolve(temporary).toLowerCase());
@@ -51,7 +51,7 @@ try {
   assert.equal(installed.name, manifest.name);
   assert.equal(installed.version, manifest.version);
   assert.equal(installed.private, true);
-  assert.equal(installed.license, 'UNLICENSED');
+  assert.equal(installed.license, 'Apache-2.0');
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
   // A partial preexisting consumer is not ownership evidence.
@@ -64,7 +64,7 @@ try {
   assert.equal(previous.name, manifest.name);
   assert.equal(previous.version, manifest.version);
   assert.equal(previous.private, true);
-  assert.equal(previous.license, 'UNLICENSED');
+  assert.ok(['UNLICENSED', 'Apache-2.0'].includes(previous.license));
   console.log(JSON.stringify({ replacingOwnedArchive: archive, previousSha256: await sha256(archive) }));
 } catch (error) { if (error.code !== 'ENOENT') throw error; }
 const packed = JSON.parse(npm(`pack --json --pack-destination ${temporary}`).stdout)[0];
@@ -82,7 +82,7 @@ assert.ok(!ownFiles.includes('fixtures/showcase/greet.test.mjs'));
 assert.ok(ownFiles.includes(manifest.bin.osg));
 assert.ok(ownFiles.includes('tools/showcase.mjs'));
 assert.ok(ownFiles.every((name) => name.startsWith('dist/') || manifest.files.includes(name)
-  || ['package.json', 'README.md'].includes(name)), JSON.stringify(ownFiles));
+  || ['package.json', 'README.md', 'LICENSE', 'NOTICE'].includes(name)), JSON.stringify(ownFiles));
 console.log(JSON.stringify({ archive, size: packed.size, unpackedSize: packed.unpackedSize,
   sha256: await sha256(archive), files: packed.files.length, declaredPlatforms, archivePlatforms, ownFiles }));
 await rm(consumer, { recursive: true, force: true });

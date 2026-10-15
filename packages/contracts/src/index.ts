@@ -43,6 +43,16 @@ export interface GraphPort {
   rows(): Promise<GraphRow[]>;
   head(branch: string): Promise<string | null>;
   publish(rows: GraphRow[], expectedHead: string): Promise<boolean>;
+  /** Commit rows only: one per commit, so cheap regardless of element history. */
+  commitRows(): Promise<GraphRow[]>;
+  /** Element rows written by the given commits (ids must match c + 64 hex). */
+  rowsOfCommits(ids: string[]): Promise<GraphRow[]>;
+  /** Element rows of one kind, for example every episode or every about edge. */
+  rowsOfKind(kind: string): Promise<GraphRow[]>;
+  /** Every stored version of one element. */
+  rowsOfElement(elementId: string): Promise<GraphRow[]>;
+  /** Release file handles, for example before the store directory is renamed. */
+  close?(): void;
 }
 
 export function blankRow(values: Partial<GraphRow> & Pick<GraphRow, 'row_key' | 'row_type'>): GraphRow {

@@ -14,7 +14,7 @@ function storedJson(text: string, rowKey: string): unknown {
   }
 }
 
-function readParents(row: GraphRow): string[] {
+export function readParents(row: GraphRow): string[] {
   const parents = storedJson(row.parents!, row.row_key);
   if (!Array.isArray(parents) || !parents.length || parents.some((parent) => typeof parent !== 'string' || (parent !== 'ROOT' && !commitPattern.test(parent)))) {
     throw new OsgError('VERIFY_FAILED', `Invalid parents ${row.row_key}`);
@@ -54,7 +54,7 @@ function elementOf(row: GraphRow): Element {
     observed_at: row.observed_at, supersedes: row.supersedes, content_hash: row.content_hash };
 }
 
-function reach(commits: Map<string, GraphRow>, head: string): Set<string> {
+export function reach(commits: Map<string, GraphRow>, head: string): Set<string> {
   const found = new Set<string>();
   const pending = [head];
   while (pending.length) {
@@ -145,22 +145,26 @@ export function prepare(open: Map<string, GraphRow>, proposed: Proposal[]): Elem
 
 export interface CommitResult { commitId: string; noop: boolean; idempotent: boolean; count: number; }
 
-export async function commit(store: GraphPort, proposals: Proposal[], actor: string, branch = 'main', expected?: string): Promise<CommitResult> {
+export interface HeadView { head: string; state: Map<string, GraphRow>; commits: Map<string, GraphRow>; }
+
+export async function commit(store: GraphPort, proposals: Proposal[], actor: string, branch = 'main', expected?: string, view?: HeadView): Promise<CommitResult> {
   if (!/^[a-z0-9][a-z0-9._-]{0,63}$/.test(branch)) throw new OsgError('INVALID_SCHEMA', 'Invalid branch');
   const head = await store.head(branch);
   if (head == null) throw new OsgError('BRANCH_NOT_FOUND', 'Branch not found');
   const parent = expected ?? head;
   if (parent !== 'ROOT' && !commitPattern.test(parent)) throw new OsgError('INVALID_SCHEMA', 'Invalid expected head');
-  const rows = await store.rows();
-  const previous = snapshot(rows, parent);
-  const elements = prepare(previous.state, proposals).sort((a, b) => a.element_id < b.element_id ? -1 : a.element_id > b.element_id ? 1 : 0);
+  // Only commit rows are needed for lineage; element state comes from the caller's view when it matches the parent.
+  const commits = view && view.head === parent ? view.commits : new Map((await store.commitRows()).map((row) => [row.commit_id!, row]));
+  if (parent !== 'ROOT') reach(commits, parent);
+  const previousState = view && view.head === parent ? view.state : snapshot(await store.rows(), parent).state;
+  const elements = prepare(previousState, proposals).sort((a, b) => a.element_id < b.element_id ? -1 : a.element_id > b.element_id ? 1 : 0);
   if (!elements.length) {
     if (head !== parent) throw new OsgError('STALE_HEAD', 'Head changed');
     return { commitId: head, noop: true, idempotent: false, count: 0 };
   }
   const deltaHash = hash(elements);
   const commitId = `c${hash({ schema_version: 1, parents: [parent], branch, delta_hash: deltaHash, actor })}`;
-  const generation = parent === 'ROOT' ? 1 : previous.commits.get(parent)!.generation! + 1;
+  const generation = parent === 'ROOT' ? 1 : commits.get(parent)!.generation! + 1;
   const written = elements.map((element) => blankRow({ ...element, props: element.props == null ? null : canon(element.props),
     row_key: `${element.element_id}@${commitId}`, row_type: 'elem', commit_id: commitId }));
   written.push(blankRow({ row_key: `commit:${commitId}`, row_type: 'commit', commit_id: commitId, branch,
@@ -168,41 +172,56 @@ export async function commit(store: GraphPort, proposals: Proposal[], actor: str
     committed_at: Date.now() * 1000 }));
   written.push(blankRow({ row_key: `head:${branch}`, row_type: 'head', branch, head: commitId }));
   // A retry may have been published and advanced since its first acknowledgement.
+  const published = async (at: string) => reach(new Map((await store.commitRows()).map((row) => [row.commit_id!, row])), at).has(commitId);
   if (head !== parent) {
-    if (snapshot(rows, head).reachable.has(commitId)) return { commitId, noop: false, idempotent: true, count: elements.length };
+    if (await published(head)) return { commitId, noop: false, idempotent: true, count: elements.length };
     throw new OsgError('STALE_HEAD', 'Head changed', { expected: parent, actual: head });
   }
   const accepted = await store.publish(written, parent);
   if (!accepted) {
     const latest = await store.head(branch);
-    if (latest && snapshot(await store.rows(), latest).reachable.has(commitId)) return { commitId, noop: false, idempotent: true, count: elements.length };
+    if (latest && await published(latest)) return { commitId, noop: false, idempotent: true, count: elements.length };
     throw new OsgError('STALE_HEAD', 'Head changed', { expected: parent, actual: latest });
   }
   return { commitId, noop: false, idempotent: false, count: elements.length };
 }
 
+interface Tracked { state: Map<string, GraphRow>; degree: Map<string, number>; }
+
+function cloneTracked(source: Tracked): Tracked { return { state: new Map(source.state), degree: new Map(source.degree) }; }
+
 export function verify(rows: GraphRow[], selector?: string): { commits: number; elements: number } {
   const keys = new Set<string>();
+  const byCommit = new Map<string, GraphRow[]>();
   for (const row of rows) {
     if (keys.has(row.row_key)) throw new OsgError('VERIFY_FAILED', `Duplicate row ${row.row_key}`);
     keys.add(row.row_key);
+    if (row.row_type === 'elem' && row.commit_id) { const list = byCommit.get(row.commit_id); if (list) list.push(row); else byCommit.set(row.commit_id, [row]); }
   }
   const commits = new Map(rows.filter((row) => row.row_type === 'commit').map((row) => [row.commit_id!, row]));
   const visited = new Set<string>();
   const heads = selector === undefined ? rows.filter((row) => row.row_type === 'head').map((row) => row.head!) : [resolveCommit(rows, selector)];
   for (const head of heads) for (const id of reach(commits, head)) visited.add(id);
+  const children = new Map<string, number>();
+  for (const id of visited) for (const parent of readParents(commits.get(id)!)) children.set(parent, (children.get(parent) ?? 0) + 1);
+  // States are carried along single-parent chains and mutated in place when only one child needs them,
+  // so verification is linear in history instead of replaying a snapshot per commit.
+  const tracked = new Map<string, Tracked>();
+  const ordered = [...visited].sort((a, b) => (commits.get(a)!.generation ?? 0) - (commits.get(b)!.generation ?? 0));
+  const isEdge = (row: GraphRow) => row.src != null;
   let elements = 0;
-  for (const id of visited) {
+  for (const id of ordered) {
     const row = commits.get(id)!;
     const parents = readParents(row);
     if (parents.includes(id) || parents.includes('ROOT') && parents.length !== 1) throw new OsgError('VERIFY_FAILED', `Invalid parents ${id}`);
     if (!parents.length || parents.some((parent) => parent !== 'ROOT' && !commits.has(parent)) ||
         row.generation !== Math.max(0, ...parents.filter((parent) => parent !== 'ROOT').map((parent) => commits.get(parent)!.generation!)) + 1) throw new OsgError('VERIFY_FAILED', `Invalid ancestry ${id}`);
-    const content = rows.filter((element) => element.row_type === 'elem' && element.commit_id === id)
+    const deltaRows = byCommit.get(id) ?? [];
+    const content = deltaRows.slice()
       .sort((a, b) => a.element_id < b.element_id ? -1 : a.element_id > b.element_id ? 1 : 0).map((element) => {
         const decoded = elementOf(element);
         const { element_id, kind, op, status, src, dst, predicate, extent, props, source_hash } = decoded;
-        if (element.row_key !== `${element.element_id}@${id}` || element.content_hash !== verifiedHash({ element_id, kind, op, status, src, dst, predicate, extent, props, source_hash })) throw new OsgError('VERIFY_FAILED', `Invalid content ${element.row_key}`);
+        if (element.row_key !== `${element.element_id}@${id}` || element.content_hash !== verifiedHash({ element_id, kind, op, status, src, dst, predicate, extent, props, source_hash })) throw new OsgError('VERIFY_FAILED', `Invalid element ${element.row_key}`);
         elements++;
         return decoded;
       });
@@ -210,9 +229,35 @@ export function verify(rows: GraphRow[], selector?: string): { commits: number; 
         `c${verifiedHash({ schema_version: 1, parents, branch: row.branch, delta_hash: row.delta_hash, actor: row.actor })}` !== id) {
       throw new OsgError('VERIFY_FAILED', `Invalid commit ${id}`);
     }
-    {
-      const before = snapshot(rows, parents[0]!);
-      const deltaRows = rows.filter((element) => element.row_type === 'elem' && element.commit_id === id);
+    const parentId = parents[0]!;
+    const fast = parents.length === 1 && deltaRows.every((element) => element.valid_to == null) && (parentId === 'ROOT' || tracked.has(parentId));
+    if (fast) {
+      let before: Tracked;
+      if (parentId === 'ROOT') before = { state: new Map(), degree: new Map() };
+      else if (children.get(parentId) === 1) { before = tracked.get(parentId)!; tracked.delete(parentId); }
+      else before = cloneTracked(tracked.get(parentId)!);
+      const retired: string[] = [];
+      const added: GraphRow[] = [];
+      for (const element of deltaRows) {
+        const prior = before.state.get(element.element_id);
+        if (element.supersedes !== (prior?.row_key ?? null) || (element.op === 'retract' && !prior)) throw new OsgError('VERIFY_FAILED', `Invalid supersedes ${element.row_key}`);
+      }
+      for (const element of deltaRows) {
+        const prior = before.state.get(element.element_id);
+        if (prior && isEdge(prior)) for (const end of [prior.src!, prior.dst!]) before.degree.set(end, (before.degree.get(end) ?? 1) - 1);
+        if (element.op === 'retract') { before.state.delete(element.element_id); retired.push(element.element_id); }
+        else {
+          before.state.set(element.element_id, element); added.push(element);
+          if (isEdge(element)) for (const end of [element.src!, element.dst!]) before.degree.set(end, (before.degree.get(end) ?? 0) + 1);
+        }
+      }
+      for (const element of added) if (isEdge(element) && (!before.state.has(element.src!) || !before.state.has(element.dst!))) {
+        throw new OsgError('VERIFY_FAILED', `Dangling edge ${element.row_key}`);
+      }
+      for (const gone of retired) if ((before.degree.get(gone) ?? 0) > 0 && !before.state.has(gone)) throw new OsgError('VERIFY_FAILED', `Dangling edge to ${gone}`);
+      tracked.set(id, before);
+    } else {
+      const before = snapshot(rows, parentId);
       const next = new Map(before.state);
       for (const element of deltaRows) {
         if (element.supersedes !== (before.state.get(element.element_id)?.row_key ?? null) ||

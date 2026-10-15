@@ -40,12 +40,16 @@ function cli(root, command, ...args) {
 }
 
 // Content and mtime together detect mutations even if a read rewrites identical bytes.
-async function diskSnapshot(root, relative = '') {
+// Reads are strict (R15): nothing under the workspace may change. For `sync`, which may refresh its own
+// caches and usage log, `ignoreDerived` skips `.osg/logs` and `.osg/cache`; store, export and sources stay compared.
+const derived = new Set([path.join('.osg', 'logs'), path.join('.osg', 'cache')]);
+async function diskSnapshot(root, relative = '', ignoreDerived = false) {
   const entries = [];
   for (const name of (await readdir(path.join(root, relative))).sort()) {
     const locator = path.join(relative, name);
+    if (ignoreDerived && derived.has(locator)) continue;
     const stat = await lstat(path.join(root, locator));
-    if (stat.isDirectory()) entries.push(...await diskSnapshot(root, locator));
+    if (stat.isDirectory()) entries.push(...await diskSnapshot(root, locator, ignoreDerived));
     else entries.push([locator, stat.mtimeMs, createHash('sha256').update(await readFile(path.join(root, locator))).digest('hex')]);
   }
   return entries;
@@ -138,11 +142,11 @@ test('separate CLI processes respect budget, stale-read disk purity, nullable ex
     assert.equal(history.envelope.data.current, false);
     assert.equal(history.envelope.data.versions.length, 3);
     const stableHead = history.envelope.graphCommitId;
-    const unchangedDisk = await diskSnapshot(root);
+    const unchangedDisk = await diskSnapshot(root, '', true);
     const noop = cli(root, 'sync');
     assert.equal(noop.envelope.data.noop, true);
     assert.equal(noop.envelope.graphCommitId, stableHead);
-    assert.deepEqual(await diskSnapshot(root), unchangedDisk, 'noop sync must not write rows');
+    assert.deepEqual(await diskSnapshot(root, '', true), unchangedDisk, 'noop sync must not write rows');
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
@@ -340,7 +344,7 @@ test('commit selectors reject short, unknown and ambiguous prefixes without gues
     assert.throws(() => resolveCommit(rows, selector), { code: 'COMMIT_NOT_FOUND' });
   }
   const failure = new Error('unrelated storage failure');
-  await assert.rejects(history({ head: async () => first, rows: async () => { throw failure; } }, 'code:file:a.ts', first), (error) => error === failure);
+  await assert.rejects(history({ head: async () => first, commitRows: async () => { throw failure; } }, 'code:file:a.ts', first), (error) => error === failure);
 });
 
 test('runtime config requires a versioned object and UUID on reads and repeated init', async () => {

@@ -8,12 +8,12 @@ test('public root API remains portable; package controls a single private compil
   const manifest = JSON.parse(await readFile('package.json', 'utf8'));
   assert.equal(manifest.name, 'omnispatialgraph');
   assert.equal(manifest.private, true);
-  assert.equal(manifest.license, 'UNLICENSED');
+  assert.equal(manifest.license, 'Apache-2.0');
   assert.equal(manifest.bin.osg, 'dist/cli/src/public.js');
-  assert.deepEqual(manifest.files, ['dist/cli/src', 'dist/contracts/src', 'dist/core/src', 'dist/indexing-kilo/src', 'dist/storage-lance/src',
+  assert.deepEqual(manifest.files, ['NOTICE', 'dist/cli/src', 'dist/contracts/src', 'dist/core/src', 'dist/indexing-kilo/src', 'dist/storage-lance/src',
     'tools/showcase.mjs', 'fixtures/showcase/package.json', 'fixtures/showcase/src/greet.js', 'fixtures/showcase/checks.mjs']);
   assert.match(manifest.osgPrototype.compatibility, /npm ls exits 1/);
-  assert.match(manifest.osgPrototype.distribution, /Private evaluation only/);
+  assert.match(manifest.osgPrototype.distribution, /Apache-2\.0 licensed source/);
   assert.ok((await readFile('fixtures/showcase/checks.mjs', 'utf8')).includes('rejects blank names'));
   for (const [name, expected] of [['@lancedb/lancedb', '0.40.0'], ['apache-arrow', '18.1.0'], ['sharp', '0.35.5']]) {
     assert.equal(manifest.dependencies[name], expected);

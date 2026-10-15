@@ -17,6 +17,7 @@ for (const operation of ['sync', 'remember']) {
     const store = {
       head: async () => 'ROOT',
       rows: async () => [structuredClone(root)],
+      commitRows: async () => [],
       publish: async () => { publications++; return false; }
     };
     const execute = operation === 'remember'

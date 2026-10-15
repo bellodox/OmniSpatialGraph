@@ -71,7 +71,7 @@ test('missing config is NOT_INITIALIZED, nonregular config is refused, and unrel
     await rm(configPath, { recursive: true });
     assert.equal(cli(root, 'init').exit, 0);
     const guardedFs = `import * as fs from 'node:fs/promises';
-      export const link=fs.link,lstat=fs.lstat,mkdir=fs.mkdir,readdir=fs.readdir,realpath=fs.realpath,rename=fs.rename,rm=fs.rm,writeFile=fs.writeFile;
+      export const appendFile=fs.appendFile,cp=fs.cp,stat=fs.stat,link=fs.link,lstat=fs.lstat,mkdir=fs.mkdir,readdir=fs.readdir,realpath=fs.realpath,rename=fs.rename,rm=fs.rm,writeFile=fs.writeFile;
       export async function readFile(target,...args) {
         if(String(target)===${JSON.stringify(configPath)}) throw Object.assign(new Error('injected config I/O failure'),{code:'EACCES'});
         return fs.readFile(target,...args);

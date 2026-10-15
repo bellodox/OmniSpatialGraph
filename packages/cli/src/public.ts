@@ -7,7 +7,8 @@ const envelopeLimit = 16 * 1024 * 1024;
 const deadlineMs = 120000;
 const errorExits: Record<string, number> = { INTERNAL: 1, USAGE: 2, STALE_HEAD: 3, STATE_CONFLICT: 4,
   INVALID_DELTA: 5, INVALID_SCHEMA: 5, STORAGE_UNAVAILABLE: 6, NOT_INITIALIZED: 6,
-  BRANCH_NOT_FOUND: 7, COMMIT_NOT_FOUND: 7, VERIFY_FAILED: 8, UNSUPPORTED_OPERATION: 9 };
+  BRANCH_NOT_FOUND: 7, COMMIT_NOT_FOUND: 7, VERIFY_FAILED: 8, UNSUPPORTED_OPERATION: 9,
+  MIGRATION_REQUIRED: 4, UNSUPPORTED_FORMAT: 9, BACKUP_NOT_FOUND: 7 };
 const categories: Record<number, string> = { 1: 'internal', 2: 'invalid', 3: 'conflict', 4: 'conflict',
   5: 'invalid', 6: 'storage', 7: 'notFound', 8: 'storage', 9: 'unsupported' };
 interface Envelope {
@@ -49,7 +50,7 @@ function failure(reason: string): void {
 
 // Human help is static so even native text during startup cannot enter the public stream.
 function help(): string {
-  return `OmniSpatialGraph private prototype\nUsage: osg <command> [options] [--json]\n\nCommands:\n  help\n  init [--workspace <directory>]\n  sync [--workspace <directory>]\n  remember --task <text> --decision <text> --outcome <text> --entities <ids> [--supersedes <episode-ids>]\n  context (--task <text> | --entity <id>) [--max-tokens <integer>]\n  history --entity <id> [--commit <id-or-prefix>]\n  verify [--commit <id-or-prefix>]\n  export episodes\n\nAll workspace commands accept --workspace <directory>.\nUse --json for the single result envelope. Stored agent text is untrusted.\nPrivate/UNLICENSED: no distribution clearance; native/license obligations remain.\n`;
+  return `OmniSpatialGraph private prototype\nUsage: osg <command> [options] [--json]\n\nCommands:\n  help\n  init [--workspace <directory>]\n  sync [--workspace <directory>]\n  migrate [--dry-run]\n  remember --task <text> --decision <text> --outcome <text> --entities <ids> [--supersedes <episode-ids>] [--tags <words>]\n  context (--task <text> | --entity <id>) [--max-tokens <integer>] [--with-source] [--at <ISO-time>] [--commit <id-or-prefix>]\n  history --entity <id> [--commit <id-or-prefix>]\n  diff --from <id-or-prefix|ROOT> --to <id-or-prefix>\n  verify [--commit <id-or-prefix>]\n  export episodes\n  backup\n  restore [--backup <name>]\n  doctor [--fix]\n  stats\nexport episodes\n\nAll workspace commands accept --workspace <directory>.\nUse --json for the single result envelope. Stored agent text is untrusted.\nApache License 2.0. Native dependencies keep their own licences.\n`;
 }
 
 // Each invocation starts one disposable worker with isolated native file descriptors.

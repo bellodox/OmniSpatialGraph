@@ -82,7 +82,7 @@ test('a superseding episode retires the earlier one, which is labelled and liste
     assert.ok(second.json.warnings.some((warning) => warning.code === 'UNRESOLVED_SUPERSEDES'));
     const found = episodes(run(workspace, 'context', '--entity', entity, '--max-tokens', '4000'));
     assert.equal(found[0].data.value.decision, 'use scrypt instead');
-    assert.equal(found[0].provenance.supersededBy, null);
+    assert.equal(found[0].provenance.supersededBy, undefined);
     assert.equal(found[1].elementId, oldId);
     assert.equal(found[1].provenance.supersededBy, second.json.data.episodeId);
     assert.equal(run(workspace, 'verify').status, 0);
@@ -102,6 +102,9 @@ test('six concurrent remember processes respect bounded conflicts and recover wi
       return result.value;
     });
     t.diagnostic(`first-wave exits: ${results.map((result) => result.status).join(',')}`);
+    for (const [index, result] of results.entries()) {
+      if (result.status !== 0) t.diagnostic(`writer ${index} failure: ${JSON.stringify(result)}`);
+    }
     assert.ok(results.some((result) => result.status === 0), 'at least one concurrent writer succeeds');
     const successfulIds = [];
     for (const result of results) {

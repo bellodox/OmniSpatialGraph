@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 // This is a private evaluation artifact, never an automatic release path.
 const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 assert.equal(manifest.private, true);
-assert.equal(manifest.license, 'UNLICENSED');
+assert.equal(manifest.license, 'Apache-2.0');
 assert.equal(manifest.bin.osg, 'dist/cli/src/public.js');
 assert.ok(manifest.files.includes('fixtures/showcase/checks.mjs'));
 assert.ok((await readFile(new URL('../fixtures/showcase/checks.mjs', import.meta.url), 'utf8')).includes('rejects blank names'));
