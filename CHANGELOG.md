@@ -8,6 +8,7 @@ Documentation baseline: 2026-10-13, not a release date. Earlier experiment resul
 
 ### Changed
 
+- 2026-10-15: Recorded the [human-authorized repository migration to verified format 2](docs/public-prototype.md#current-repository-migration-completed-2026-10-15), preserving identity, original rows/30 episodes and the verified pre-migration backup. Removed the obsolete current source-sync write stop from the existing usage rule and memory workflow; ordinary authorized sync/remember is available again. Retained pre-upgrade evidence, future format-error stops and human/stopped-writer recovery safeguards. Migration and each validation sync skipped ambiguous declarations with 742 warnings, not exhaustive indexing; old episode anchors remain changed. No application tests rerun for migration or this documentation subtask; final sync/remember remains with the parent.
 - 2026-10-15: Clarified the existing local OSG usage rule and [memory policy](docs/maintainer-wiki/concept-carbon-memory.md): OSG alone holds operational memory; the wiki remains human-facing durable documentation, not a task diary. Added bounded scope, source/provenance checks and recovery/write-stop safeguards. Retained entrypoints, installation documentation and frozen specifications; indexing never authorizes deletion. Documentation-only validation; no application tests rerun or permanent-store writes, and this update is not persisted to OSG.
 
 ### Added
