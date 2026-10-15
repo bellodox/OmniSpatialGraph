@@ -6,6 +6,10 @@ Notable changes are recorded in Keep a Changelog style. **No application release
 
 Documentation baseline: 2026-10-13, not a release date. Earlier experiment results below are historical; their reviews, audit findings and limitations are not the current prototype verdict. Use the [current handoff](docs/public-prototype.md) and [acceptance checklist](docs/tasks/public-prototype.md).
 
+### Changed
+
+- 2026-10-15: Clarified the existing local OSG usage rule and [memory policy](docs/maintainer-wiki/concept-carbon-memory.md): OSG alone holds operational memory; the wiki remains human-facing durable documentation, not a task diary. Added bounded scope, source/provenance checks and recovery/write-stop safeguards. Retained entrypoints, installation documentation and frozen specifications; indexing never authorizes deletion. Documentation-only validation; no application tests rerun or permanent-store writes, and this update is not persisted to OSG.
+
 ### Added
 
 - 2026-10-15: **More languages and Tree-sitter for TypeScript/JavaScript.** C#, C, C++ (`.cpp .cc .cxx .hpp .hh .hxx .h`), Ruby, PHP, Kotlin, Swift and Solidity are indexed (declarations, calls, imports where the language names files or modules), from `@vscode/tree-sitter-wasm` and the new exact dependency `tree-sitter-wasms` 0.1.13. TypeScript and JavaScript (`.ts .tsx .mts .cts .js .jsx .mjs .cjs`) now use Tree-sitter instead of the compiler API, with the compiler's rules kept: same ids, line ranges, signatures, body digests, calls and imports (identical output on 2,312 TS/JS files from this repository and its dependencies; one grammar difference found and handled: a generic call after `await` or `!`). The compiler-based provider and its fallback are removed. Unique-name call fallbacks: `Type.member` repository-wide, and bare names among C/C++ files. `vendor`, `__pycache__`, `.venv`, `venv` and `Pods` directories are skipped. The Swift grammar is compiled baseline-only because its optimizing compile otherwise blocks process exit for about 16 seconds. The data format stays 2; the scan cache version changed, so the first `sync` re-reads every file.
