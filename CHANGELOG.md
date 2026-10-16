@@ -27,6 +27,7 @@ Notable changes, not a test transcript. The package remains private at **0.1.0-p
 
 ### Changed
 
+- 2026-10-16: Documented [user-authorized embeddings in the existing local checkout](docs/public-prototype.md#local-checkout-embedding-snapshot) and explicit vector refresh after source/episode changes. New-workspace default-off behavior and unresolved human legal/distribution decisions are unchanged; no version bump or upstream-latest claim.
 - 2026-10-16: Declared exact optional Transformers.js 4.3.1, supporting retained Sharp 0.35.5 in the scoped checkout dependency arrangement. LanceDB remains required at 0.40.0 but is removed from root bundle metadata for npm validity; Arrow stays 18.1.0. Root overrides do not propagate to consumers; no consumer parity/distribution claim. The [handoff](docs/public-prototype.md#evidence) preserves the historical **131-pass** validation before the final public error-map fix; latest proof is recorded above.
 - 2026-10-15: Reconciled current docs for optional/default-off embeddings, persistent Swift requests and other-head doctor caches; repaired removed-wiki links while retaining historical evidence and unresolved human risks. Real-model validation is not claimed.
 - 2026-10-15: Checkout metadata and license files declare Apache-2.0; the package remains private. The frozen specification's MIT description and third-party redistribution conditions still require human reconciliation.

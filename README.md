@@ -65,7 +65,9 @@ Reading commands (`context`, `history`, `diff`, `verify`, `stats`) never write t
 
 Off by default. Without it, task context matches words (names, tags, task text). [Optional vector blending](packages/core/src/retrieval.ts:152) can add candidates without shared words. The [model adapter](packages/cli/src/embedder.ts:19) selects Xenova/all-MiniLM-L6-v2 (q8, 384 dimensions) through declared optional Transformers.js 4.3.1. Only the explicit embedding command permits remote model loading; task-context reads use local model files only. A bounded [Windows real-model proof](docs/public-prototype.md#real-model-proof) established inference, offline reload and one controlled paraphrase result, not generalized retrieval benefit. [Licensing, native obligations and human risk disposition](docs/limitations.md#human-decisions) remain unresolved; these instructions are not enablement or distribution approval.
 
-To switch it on for a workspace:
+This repository checkout has [user-authorized local embeddings enabled](docs/public-prototype.md#local-checkout-embedding-snapshot). New-workspace defaults are unchanged; local authorization does not resolve legal/distribution decisions. “Latest” here means the current authorized checkout, not a verified upstream latest version.
+
+To switch it on for a workspace within authorized write/download scope:
 
 1. Use the [checkout installation](#install) with optional dependencies retained; Transformers.js 4.3.1 is already declared. The scoped checkout override selects its supported Sharp range while retaining root Sharp 0.35.5. Root overrides do not propagate to consumers, and LanceDB's separate embedding wrapper remains unsupported; no consumer install-parity claim follows.
 2. Build the index. The explicit command permits model downloads into the workspace's runtime model cache; cached model files can be reused locally:
