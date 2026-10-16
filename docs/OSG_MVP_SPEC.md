@@ -1149,7 +1149,7 @@ const assert = (c, m) => { if (!c) { console.log("FAIL:", m); process.exitCode =
   await s.commit({ branch: "main", expectedHead: h2, parents: [h2], actor: "y", now: 8001, elements: [{ element_id: "phys:object:cup-1", kind: "object", op: "assert", status: "observed", valid_from: 8000, supersedes: cur, props: { color: "blue" } }] });
   const m2 = await s.merge({ from: "f2", into: "main", actor: "human", now: 9000 });
   assert(!m2.ok && m2.error === "MERGE_CONFLICT" && m2.conflicts[0] === "phys:object:cup-1", "exclusive facts conflict and the merge is rejected (test 7)");
-  // late-acknowledged retry: commit published, then the head moved on, then the writer retries
+  // late-acknowledged retry: commit published, then the head moved on, then the writer retries 
   const h3 = await s.head("main");
   const la = { branch: "main", expectedHead: h3, parents: [h3], actor: "late", now: 9100, elements: [{ element_id: "agent:episode:late", kind: "episode", op: "assert", status: "hypothesis", valid_from: 9100, props: { task: "t" } }] };
   const first = await s.commit(la);
@@ -1328,3 +1328,4 @@ Write `G0-repo-check.md`: list the repository's files and folders, the rules and
 - T20 reports two numbers per platform: trials where the writer was killed before it acknowledged the commit, and trials where the kill came after the acknowledgement. Both must satisfy the invariants, but a run with zero kills before an acknowledgement is **inconclusive**, not a pass.
 - The test runner records the exit code of each subcommand itself. A watchdog kills only its own verified child processes. It never stops a parent shell.
 - The Windows and Linux halves are separate runs with separate evidence files.
+ 
