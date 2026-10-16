@@ -4,6 +4,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, writeFile, rm, symlink } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { moduleHooks } from './module-hooks.mjs';
 
 const entry = path.resolve('dist/cli/src/index.js');
 function cli(directory, command, ...args) {
@@ -76,11 +77,11 @@ test('missing config is NOT_INITIALIZED, nonregular config is refused, and unrel
         if(String(target)===${JSON.stringify(configPath)}) throw Object.assign(new Error('injected config I/O failure'),{code:'EACCES'});
         return fs.readFile(target,...args);
       }`;
-    const hook = `import {registerHooks} from 'node:module';registerHooks({resolve(specifier,context,next) {
+    const hook = `const hooks = {resolve(specifier,context,next) {
       if(specifier==='node:fs/promises' && context.parentURL?.includes('/cli/src/')) return {url:${JSON.stringify('data:text/javascript,' + encodeURIComponent(guardedFs))},shortCircuit:true};
       return next(specifier,context);
-    }});`;
-    const unrelated = spawnSync(process.execPath, ['--import', 'data:text/javascript,' + encodeURIComponent(hook),
+    }};`;
+    const unrelated = spawnSync(process.execPath, ['--import', moduleHooks(hook),
       entry, 'sync', '--workspace', root, '--json'], { encoding: 'utf8', timeout: 30000 });
     assert.ifError(unrelated.error);
     assert.equal(unrelated.status, 1);
@@ -91,11 +92,11 @@ test('missing config is NOT_INITIALIZED, nonregular config is refused, and unrel
 test('missing native dependency permits help and yields one storage failure envelope', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'osg-native-load-'));
   // Isolate module resolution in the child; never alter installed dependencies.
-  const hook = `import { registerHooks } from 'node:module'; registerHooks({ resolve(specifier, context, nextResolve) {
+  const hook = `const hooks = { resolve(specifier, context, nextResolve) {
     if (specifier === '@lancedb/lancedb') throw Object.assign(new Error('simulated missing native module'), { code: 'ERR_MODULE_NOT_FOUND' });
     return nextResolve(specifier, context);
-  } });`;
-  const run = (...args) => spawnSync(process.execPath, ['--import', `data:text/javascript,${encodeURIComponent(hook)}`, entry, ...args, '--json'], { encoding: 'utf8', timeout: 30000 });
+  } };`;
+  const run = (...args) => spawnSync(process.execPath, ['--import', moduleHooks(hook), entry, ...args, '--json'], { encoding: 'utf8', timeout: 30000 });
   try {
     const help = run('help');
     assert.equal(help.status, 0, help.stderr);

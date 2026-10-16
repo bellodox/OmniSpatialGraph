@@ -3,6 +3,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { escapeComponent, hash } from '../../core/src/hash.js';
+import { OsgError } from '../../contracts/src/index.js';
 
 /**
  * Declarations, calls and imports found with Tree-sitter grammars (WebAssembly).
@@ -675,6 +676,25 @@ function walkScript(c: Ctx, root: SyntaxNode): void {
  * One child process, started with `--liftoff-only`, parses every Swift file of a scan (newline-delimited JSON over stdio).
  * Starting a process per file costs about 0.1 s each and can exceed the command deadline on large Swift trees.
  */
+interface ParseResult { decls: TsDecl[]; imports: TsImport[]; recovered: boolean; }
+const SWIFT_RESPONSE_MAX_BYTES = 16 * 1024 * 1024;
+const SWIFT_REQUEST_MAX_BYTES = 16 * 1024 * 1024;
+
+/** Validate the IPC payload before it can become source facts; null is failure, not an empty parse. */
+function swiftResult(value: unknown): value is ParseResult {
+  const record = (item: unknown): item is Record<string, unknown> => item !== null && typeof item === 'object' && !Array.isArray(item);
+  const strings = (item: unknown): item is string[] => Array.isArray(item) && item.every((entry) => typeof entry === 'string');
+  const nullableString = (item: unknown): boolean => item === null || typeof item === 'string';
+  return record(value) && typeof value.recovered === 'boolean' && Array.isArray(value.decls) && value.decls.every((decl) =>
+    record(decl) && typeof decl.name === 'string' && decl.name.length > 0 && typeof decl.kind === 'string' && decl.kind.length > 0 &&
+    Number.isSafeInteger(decl.start) && Number(decl.start) >= 1 && Number.isSafeInteger(decl.end) && Number(decl.end) >= Number(decl.start) &&
+    nullableString(decl.signature) && nullableString(decl.bodyHash) && strings(decl.calls)) &&
+    Array.isArray(value.imports) && value.imports.every((item) => record(item) && ['relative', 'module', 'file'].includes(String(item.mode)) &&
+      typeof item.specifier === 'string' && Array.isArray(item.bindings) && item.bindings.every((binding) =>
+        record(binding) && typeof binding.local === 'string' && typeof binding.imported === 'string') &&
+      (item.extensions === undefined || strings(item.extensions)));
+}
+
 const swiftWorker = (() => {
   const timeoutMs = 60_000;
   const childScript = `import { parseWithTreeSitter } from ${JSON.stringify(import.meta.url)};
@@ -688,49 +708,84 @@ const swiftWorker = (() => {
   let child: ChildProcess | null = null;
   let queue: Promise<unknown> = Promise.resolve();
   let nextId = 0;
-  const waiting = new Map<number, (value: unknown) => void>();
+  let failure: OsgError | null = null;
+  const waiting = new Map<number, { done(value: ParseResult): void; fail(error: OsgError): void }>();
 
-  function stop(): void {
+  /** Reject all pending work and terminate only our helper; failure stays sticky until scan cleanup. */
+  function stop(message: string): void {
+    failure ??= new OsgError('SWIFT_PARSE_FAILED', message);
     const current = child;
     child = null;
-    current?.kill();
-    for (const [id, done] of waiting) { waiting.delete(id); done(null); }
+    current?.stdin?.destroy();
+    current?.stdout?.destroy();
+    current?.kill('SIGKILL');
+    for (const request of waiting.values()) request.fail(failure);
+    waiting.clear();
   }
   function start(): ChildProcess {
     const created = spawn(process.execPath, ['--liftoff-only', '--input-type=module', '-e', childScript], { stdio: ['pipe', 'pipe', 'ignore'], windowsHide: true });
-    let pending = '';
-    created.stdout!.setEncoding('utf8');
-    created.stdout!.on('data', (chunk: string) => {
-      pending += chunk;
-      for (let end = pending.indexOf('\n'); end >= 0; end = pending.indexOf('\n')) {
-        const line = pending.slice(0, end);
-        pending = pending.slice(end + 1);
-        try { const { id, result } = JSON.parse(line) as { id: number; result: unknown }; waiting.get(id)?.(result); waiting.delete(id); } catch { /* malformed reply: the request times out */ }
+    let chunks: Buffer[] = [];
+    let responseBytes = 0;
+    created.stdout!.on('data', (chunk: Buffer) => {
+      if (child !== created) return;
+      const end = chunk.indexOf(10);
+      const size = end < 0 ? chunk.length : end;
+      // Count raw bytes before retaining any chunk, including responses without a delimiter.
+      // The framing newline is not part of the JSON response-byte limit.
+      if (size > SWIFT_RESPONSE_MAX_BYTES - responseBytes) {
+        chunks = []; stop('Swift helper response exceeds 16 MiB'); return;
       }
+      responseBytes += size;
+      chunks.push(chunk.subarray(0, size));
+      if (end < 0) return;
+      try {
+        const reply: unknown = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks, responseBytes)));
+        chunks = []; responseBytes = 0;
+        if (!reply || typeof reply !== 'object' || !('id' in reply) || !('result' in reply) ||
+          !Number.isSafeInteger(reply.id) || !waiting.has(Number(reply.id)) || !swiftResult(reply.result) || end !== chunk.length - 1) {
+          stop('Invalid Swift helper response'); return;
+        }
+        const id = Number(reply.id);
+        const request = waiting.get(id)!;
+        waiting.delete(id);
+        request.done(reply.result);
+      } catch { chunks = []; stop('Malformed Swift helper response'); }
     });
-    created.stdin!.on('error', () => { /* an early exit is handled by the close event */ });
-    created.on('error', () => { if (child === created) stop(); });
-    created.on('close', () => { if (child === created) stop(); });
+    created.stdin!.on('error', () => { if (child === created) stop('Swift helper input failed'); });
+    created.stdout!.on('error', () => { if (child === created) stop('Swift helper output failed'); });
+    created.on('error', () => { if (child === created) stop('Swift helper failed to start'); });
+    created.on('close', () => { if (child === created) stop('Swift helper exited before scan completion'); });
     return created;
   }
-  async function one(text: string): Promise<unknown> {
-    child ??= start();
+  async function one(text: string): Promise<ParseResult> {
+    if (failure) throw failure;
     const id = nextId++;
-    const reply = new Promise<unknown>((resolve) => {
-      const timer = setTimeout(() => { if (waiting.has(id)) stop(); }, timeoutMs);
-      waiting.set(id, (value) => { clearTimeout(timer); resolve(value); });
+    // Bound raw input before serialization (JSON escaping expands by at most six), then bound the wire request too.
+    if (Buffer.byteLength(text, 'utf8') > SWIFT_REQUEST_MAX_BYTES) {
+      stop('Swift helper input exceeds 16 MiB'); throw failure;
+    }
+    const input = JSON.stringify({ id, text }) + '\n';
+    if (Buffer.byteLength(input, 'utf8') > SWIFT_REQUEST_MAX_BYTES) {
+      stop('Swift helper request exceeds 16 MiB'); throw failure;
+    }
+    try { child ??= start(); } catch { stop('Swift helper failed to start'); throw failure; }
+    return new Promise<ParseResult>((resolve, reject) => {
+      const timer = setTimeout(() => { if (waiting.has(id)) stop('Swift helper request timed out'); }, timeoutMs);
+      waiting.set(id, {
+        done(value) { clearTimeout(timer); resolve(value); },
+        fail(error) { clearTimeout(timer); reject(error); }
+      });
+      try { child!.stdin!.write(input); } catch { stop('Swift helper input failed'); }
     });
-    child.stdin!.write(JSON.stringify({ id, text }) + '\n');
-    return reply;
   }
   return {
-    parse(text: string): Promise<{ decls: TsDecl[]; imports: TsImport[]; recovered: boolean } | null> {
-      const run = queue.then(() => one(text), () => one(text));
+    parse(text: string): Promise<ParseResult> {
+      const run = queue.then(() => one(text));
       queue = run.catch(() => null);
-      return run as Promise<{ decls: TsDecl[]; imports: TsImport[]; recovered: boolean } | null>;
+      return run;
     },
-    /** Ends the child; the next Swift file starts a new one. */
-    close(): void { child?.stdin?.end(); child = null; },
+    /** Terminate the owned child even if it is hung; a later scan can start a new session. */
+    close(): void { stop('Swift parser session closed'); failure = null; },
   };
 })();
 

@@ -4,12 +4,13 @@ import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { moduleHooks } from './module-hooks.mjs';
 
 const entry = process.env.OSG_TEST_PUBLIC_BIN ?? path.resolve('dist/cli/src/public.js');
 const secret = 'private-unique-diagnostic-marker';
 
 function run(command, workspace, args = [], hook) {
-  const result = spawnSync(process.execPath, [...(hook ? ['--import', `data:text/javascript,${encodeURIComponent(hook)}`] : []),
+  const result = spawnSync(process.execPath, [...(hook ? ['--import', moduleHooks(hook)] : []),
     entry, command, ...(command === 'export' ? ['episodes'] : []), '--workspace', workspace, ...args, '--json'],
   { encoding: 'utf8', timeout: 30000 });
   assert.ifError(result.error);
@@ -30,10 +31,10 @@ test('usage, filesystem and native diagnostic streams reject echoed inputs and c
     assert.equal(run(secret, root).exit, 9);
     assert.equal(run('init', path.join(root, secret)).exit, 5);
     assert.equal(run('context', root, [`--${secret}`]).exit, 2);
-    const hook = `import {registerHooks} from 'node:module'; registerHooks({resolve(specifier,context,next) {
+    const hook = `const hooks = {resolve(specifier,context,next) {
       if(specifier==='@lancedb/lancedb') throw new Error(${JSON.stringify(`native ${secret} ${root}`)});
       return next(specifier,context);
-    }});`;
+    }};`;
     const native = run('init', root, [], hook);
     assert.equal(native.exit, 6);
     assert.equal(native.error.code, 'STORAGE_UNAVAILABLE');
@@ -66,10 +67,11 @@ test('scanner warning paths and third-party stderr are redacted while warning co
     await writeFile(path.join(root, `${secret}.ts`), 'export function duplicate() {}\nexport function duplicate() {}\n');
     assert.equal(run('init', root).exit, 0);
     const nativeMessage = `external warning ${root} ${secret}`;
-    const hook = `import {registerHooks} from 'node:module'; registerHooks({resolve(specifier,context,next) {
-      if(specifier==='ignore') process.stderr.write(${JSON.stringify(nativeMessage)});
+    const hook = `import { writeSync } from 'node:fs';
+    const hooks = {resolve(specifier,context,next) {
+      if(specifier==='ignore') writeSync(2, ${JSON.stringify(nativeMessage)});
       return next(specifier,context);
-    }});`;
+    }};`;
     const synced = run('sync', root, [], hook);
     assert.equal(synced.exit, 0);
     assert.ok(synced.warnings.some((warning) => warning.code === 'AMBIGUOUS_DECLARATION'));

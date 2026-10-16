@@ -19,10 +19,10 @@
   "files": ["NOTICE", "dist/cli/src", "dist/contracts/src", "dist/core/src", "dist/indexing-kilo/src", "dist/storage-lance/src", "tools/showcase.mjs", "fixtures/showcase/package.json", "fixtures/showcase/src/greet.js", "fixtures/showcase/checks.mjs"],
   "osgPrototype": {
     "distribution": "Apache-2.0 licensed source. The package stays private (not published to npm) until a release is authorised; bundled native binaries carry their own notice obligations.",
-    "compatibility": "Unresolved: LanceDB 0.40.0 pins optional Transformers 3.0.2, whose Sharp ^0.33.5 range excludes bundled 0.35.5. npm ls exits 1; zero audit findings do not establish compatibility. Image and embedding features are not enabled.",
-    "nativeClosure": "All seven LanceDB optional platform declarations retained; this Windows-built archive bundles the installed win32-x64-msvc binary, not all seven binaries. Large bundled artifact, not a minimal download. Other platform installs and native/LGPL notices and redistribution obligations remain unverified."
+    "compatibility": "Private-checkout scoped overrides select optional Transformers 4.3.1 with range-compatible Sharp 0.35.5, with bounded real-model inference/offline reload evidence on Windows Node 22.0.0 and Node 24; not generalized retrieval quality. LanceDB's separate Transformers embedding wrapper remains unsupported and unverified; osg storage uses graph operations, not that wrapper. Root overrides do not propagate to consumers; current distribution/install parity and other-platform guarantees remain unverified. See docs/public-prototype.md and docs/limitations.md.",
+    "nativeClosure": "All seven LanceDB optional platform declarations retained. LanceDB is not bundled because npm 11 validates bundled dependencies against their original ranges rather than overrides. Optional native packages must remain included during installation. Other platform installs and native/LGPL notices and redistribution obligations remain unverified."
   },
-  "bundleDependencies": ["@lancedb/lancedb", "apache-arrow", "@noble/hashes", "@vscode/tree-sitter-wasm", "tree-sitter-wasms", "ignore", "sharp"],
+  "bundleDependencies": ["apache-arrow", "@noble/hashes", "@vscode/tree-sitter-wasm", "tree-sitter-wasms", "ignore", "sharp"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepack": "node tools/pack.mjs",
@@ -39,5 +39,9 @@
     "tree-sitter-wasms": "0.1.13"
   },
   "devDependencies": { "@types/node": "24.10.0", "typescript": "5.9.3" },
-  "overrides": { "sharp": "0.35.5" }
+  "optionalDependencies": { "@huggingface/transformers": "4.3.1" },
+  "overrides": {
+    "@lancedb/lancedb@0.40.0": { "@huggingface/transformers": "$@huggingface/transformers" },
+    "@huggingface/transformers@4.3.1": { "sharp": "$sharp" }
+  }
 }

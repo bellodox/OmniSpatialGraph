@@ -171,7 +171,17 @@ async function parseFile(relative: string, bytes: Buffer): Promise<FileInfo> {
     return { ...base, markdown: true, ...parseMarkdown(relative, text, fileId), decls: [], imports: [] };
   }
   const language = languageOf(relative);
-  const tree = language ? await parseWithTreeSitter(language, text) : null;
+  // A failed Swift extraction is not evidence of deletion. Abort the scan before facts reach sync's diff/commit.
+  const tree = await (async () => {
+    try {
+      const parsed = language ? await parseWithTreeSitter(language, text) : null;
+      if (language === 'swift' && !parsed) throw new OsgError('SWIFT_PARSE_FAILED', 'Swift extraction unavailable; scan aborted');
+      return parsed;
+    } catch (error) {
+      if (language !== 'swift' || error instanceof OsgError) throw error;
+      throw new OsgError('SWIFT_PARSE_FAILED', 'Swift extraction failed; scan aborted');
+    }
+  })();
   if (tree) {
     return { ...base, markdown: false, headings: [], mentions: [], parser: 'tree-sitter', decls: tree.decls, imports: tree.imports,
       warnings: tree.recovered ? [{ code: 'PARSE_RECOVERED', message: relative }] : [] };

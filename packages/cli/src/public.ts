@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 const outputLimit = 1024 * 1024;
 const envelopeLimit = 16 * 1024 * 1024;
 const deadlineMs = 120000;
-const errorExits: Record<string, number> = { INTERNAL: 1, USAGE: 2, STALE_HEAD: 3, STATE_CONFLICT: 4,
+const errorExits: Record<string, number> = { INTERNAL: 1, SWIFT_PARSE_FAILED: 1, USAGE: 2, STALE_HEAD: 3, STATE_CONFLICT: 4,
   INVALID_DELTA: 5, INVALID_SCHEMA: 5, STORAGE_UNAVAILABLE: 6, NOT_INITIALIZED: 6,
   BRANCH_NOT_FOUND: 7, COMMIT_NOT_FOUND: 7, VERIFY_FAILED: 8, UNSUPPORTED_OPERATION: 9,
   MIGRATION_REQUIRED: 4, UNSUPPORTED_FORMAT: 9, BACKUP_NOT_FOUND: 7 };

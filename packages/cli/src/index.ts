@@ -21,7 +21,7 @@ const choices: Record<string, Set<string>> = {
   history: new Set(['workspace', 'entity', 'commit', 'json']),
   verify: new Set(['workspace', 'commit', 'json']), export: new Set(['workspace', 'json'])
 };
-const exits: Record<string, number> = { USAGE: 2, STALE_HEAD: 3, STATE_CONFLICT: 4, INVALID_DELTA: 5,
+const exits: Record<string, number> = { SWIFT_PARSE_FAILED: 1, USAGE: 2, STALE_HEAD: 3, STATE_CONFLICT: 4, INVALID_DELTA: 5,
   INVALID_SCHEMA: 5, STORAGE_UNAVAILABLE: 6, NOT_INITIALIZED: 6, BRANCH_NOT_FOUND: 7,
   COMMIT_NOT_FOUND: 7, VERIFY_FAILED: 8, UNSUPPORTED_OPERATION: 9, MIGRATION_REQUIRED: 4, UNSUPPORTED_FORMAT: 9, BACKUP_NOT_FOUND: 7 };
 const categories: Record<number, string> = { 1: 'internal', 2: 'invalid', 3: 'conflict', 4: 'conflict', 5: 'invalid',
@@ -53,6 +53,7 @@ function publicError(error: OsgError): { message: string; details: Record<string
     INVALID_DELTA: 'Invalid graph change', VERIFY_FAILED: 'Graph verification failed',
     COMMIT_NOT_FOUND: 'Commit not found', BRANCH_NOT_FOUND: 'Branch not found',
     STATE_CONFLICT: 'Conflicting graph state', STALE_HEAD: 'Head changed',
+    SWIFT_PARSE_FAILED: 'Swift extraction failed; scan aborted before committing',
     STORAGE_UNAVAILABLE: 'Storage unavailable', UNSUPPORTED_OPERATION: 'Unsupported command'
   }[error.code] ?? 'Internal error';
   const details: Record<string, unknown> = {};
@@ -73,7 +74,8 @@ function publicWarnings(warnings: Warning[]): Warning[] {
     TREE_SITTER_UNAVAILABLE: 'Tree-sitter grammars could not be loaded; a line-based fallback was used.',
     COCHANGE_UNAVAILABLE: 'Git history was not available for co-change links.',
     POLICY_REFS_UNAVAILABLE: 'Host-loaded rules could not be verified; no rule hash was recorded.',
-    VECTORS_UNAVAILABLE: 'The embedding index exists but its model could not be loaded; keyword search was used. Run osg embed.'
+    VECTORS_UNAVAILABLE: 'The embedding index exists but its model could not be loaded; keyword search was used. Run osg embed.',
+    VECTORS_INVALID: 'The embedding cache is incomplete, invalid or outdated; keyword search was used. Run osg embed to rebuild it.'
   };
   return warnings.map(({ code }) => ({ code: Object.hasOwn(messages, code) ? code : 'SOURCE_WARNING',
     message: messages[code] ?? 'Source warning; check the workspace locally.' }));
@@ -274,16 +276,22 @@ function cacheIO(run: string, name: string): StateCache & { path: string; load()
 }
 
 /** Optional embedding index: derived, rebuildable files under .osg/cache (never part of the graph). */
-function vectorIO(run: string): VectorStorage {
+function vectorIO(run: string, invalid?: () => void): VectorStorage {
   const directory = path.join(run, 'cache');
   const header = path.join(directory, 'vectors.json');
   const data = path.join(directory, 'vectors.bin');
   return {
     async read() {
+      let present = false;
       try {
-        await safeDirectory(directory); await safeFile(header); await safeFile(data);
-        return decodeIndex(JSON.parse(await readFile(header, 'utf8')) as unknown, await readFile(data));
-      } catch { return null; }
+        await safeDirectory(directory);
+        present = (await Promise.all([header, data].map((target) => lstat(target).then(() => true, () => false)))).some(Boolean);
+        if (!present) return null;
+        await safeFile(header); await safeFile(data);
+        const index = decodeIndex(JSON.parse(await readFile(header, 'utf8')) as unknown, await readFile(data));
+        if (!index) invalid?.();
+        return index;
+      } catch { if (present) invalid?.(); return null; }
     },
     async write(index: VectorIndex) {
       await safeDirectory(directory, true);
@@ -293,6 +301,9 @@ function vectorIO(run: string): VectorStorage {
         try { await writeFile(temporary, content, { flag: 'wx' }); await rename(temporary, target); }
         finally { await rm(temporary, { force: true }); }
       };
+      // Publish owned binary bytes first and the bound header last. Each rename replaces a complete file.
+      // A crash or concurrent writer can leave a mixed pair, but readers verify the combined digest before use.
+      // Such a pair is only a cache miss (lexical fallback), never partially ranked data or graph damage.
       await stage(data, encoded.data);
       await stage(header, encoded.header);
     }
@@ -622,7 +633,7 @@ async function main() {
         // Meaning-based candidates only when an index exists; the model is loaded from disk and never downloaded here.
         let vectors: QueryVectors | undefined;
         let closeEmbedder: (() => Promise<void>) | null = null;
-        const index = options.task ? await vectorIO(scope.run).read() : null;
+        const index = options.task ? await vectorIO(scope.run, () => warnings.push({ code: 'VECTORS_INVALID', message: '' })).read() : null;
         if (index) {
           let loaded: Awaited<ReturnType<typeof loadEmbedder>> | null = null;
           vectors = { index, embedQuery: async (text) => {

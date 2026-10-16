@@ -21,6 +21,43 @@ test('TypeScript stays development-only in root and provider package metadata', 
   assert.equal(lock.packages['node_modules/typescript'].inBundle, undefined);
 });
 
+test('optional Transformers closure uses compatible exact pins and narrowly scoped overrides', async () => {
+  const manifest = JSON.parse(await readFile('package.json', 'utf8'));
+  const lock = JSON.parse(await readFile('package-lock.json', 'utf8'));
+  assert.equal(manifest.optionalDependencies['@huggingface/transformers'], '4.3.1');
+  assert.equal(manifest.dependencies['@huggingface/transformers'], undefined);
+  assert.deepEqual(manifest.overrides, {
+    '@lancedb/lancedb@0.40.0': { '@huggingface/transformers': '$@huggingface/transformers' },
+    '@huggingface/transformers@4.3.1': { sharp: '$sharp' }
+  });
+  // npm checks bundled nodes against raw upstream ranges, bypassing overrides.
+  assert.ok(!manifest.bundleDependencies.includes('@lancedb/lancedb'));
+  assert.ok(!manifest.bundleDependencies.includes('@huggingface/transformers'));
+  assert.deepEqual(lock.packages[''].optionalDependencies, manifest.optionalDependencies);
+  assert.deepEqual(lock.packages[''].bundleDependencies, manifest.bundleDependencies);
+  for (const [name, version] of [
+    ['@huggingface/transformers', '4.3.1'], ['sharp', '0.35.5'],
+    ['onnxruntime-node', '1.30.0'], ['onnxruntime-web', '1.31.0-dev.20260914-8d85527a0'],
+    ['@lancedb/lancedb', '0.40.0'], ['apache-arrow', '18.1.0']
+  ]) {
+    const resolved = Object.entries(lock.packages).filter(([location]) => location.endsWith(`/node_modules/${name}`) || location === `node_modules/${name}`);
+    assert.ok(resolved.length > 0, `${name} must be resolved`);
+    assert.deepEqual([...new Set(resolved.map(([, metadata]) => metadata.version))], [version], `${name} has no incompatible nested version`);
+  }
+  const transformers = lock.packages['node_modules/@huggingface/transformers'];
+  assert.equal(transformers.optional, true);
+  assert.equal(transformers.dependencies.sharp, '^0.35.4');
+  assert.equal(transformers.dependencies['onnxruntime-node'], '1.30.0');
+  assert.equal(transformers.dependencies['onnxruntime-web'], '1.31.0-dev.20260914-8d85527a0');
+  const lance = lock.packages['node_modules/@lancedb/lancedb'];
+  for (const platform of ['darwin-arm64', 'linux-x64-gnu', 'linux-arm64-gnu', 'linux-x64-musl', 'linux-arm64-musl', 'win32-x64-msvc', 'win32-arm64-msvc']) {
+    const name = `@lancedb/lancedb-${platform}`;
+    assert.equal(lance.optionalDependencies[name], manifest.dependencies['@lancedb/lancedb']);
+    assert.equal(lock.packages[`node_modules/${name}`].version, manifest.dependencies['@lancedb/lancedb']);
+    assert.equal(lock.packages[`node_modules/${name}`].optional, true);
+  }
+});
+
 test('public root API remains portable; package controls a single private compiled entry', async () => {
   const manifest = JSON.parse(await readFile('package.json', 'utf8'));
   assert.equal(manifest.name, 'omnispatialgraph');
@@ -29,7 +66,8 @@ test('public root API remains portable; package controls a single private compil
   assert.equal(manifest.bin.osg, 'dist/cli/src/public.js');
   assert.deepEqual(manifest.files, ['NOTICE', 'dist/cli/src', 'dist/contracts/src', 'dist/core/src', 'dist/indexing-kilo/src', 'dist/storage-lance/src',
     'tools/showcase.mjs', 'fixtures/showcase/package.json', 'fixtures/showcase/src/greet.js', 'fixtures/showcase/checks.mjs']);
-  assert.match(manifest.osgPrototype.compatibility, /npm ls exits 1/);
+  assert.match(manifest.osgPrototype.compatibility, /embedding wrapper remains unsupported/);
+  assert.match(manifest.osgPrototype.compatibility, /Root overrides do not propagate to consumers/);
   assert.match(manifest.osgPrototype.distribution, /Apache-2\.0 licensed source/);
   assert.ok((await readFile('fixtures/showcase/checks.mjs', 'utf8')).includes('rejects blank names'));
   for (const [name, expected] of [['@lancedb/lancedb', '0.40.0'], ['apache-arrow', '18.1.0'], ['sharp', '0.35.5']]) {

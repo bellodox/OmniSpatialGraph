@@ -3,9 +3,29 @@ Copyright 2026 Vlad Bellomorski
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
-Third-party software keeps its own licence, shipped with each dependency:
-- @vscode/tree-sitter-wasm (MIT): Tree-sitter runtime and the TypeScript, TSX, JavaScript, Python, Go, Rust, Java, C#, C++, Ruby and PHP grammars, as WebAssembly.
-- tree-sitter-wasms (Unlicense): prebuilt C, Kotlin, Swift and Solidity grammars, as WebAssembly. The upstream grammar licences are not included in that package and have not been reviewed.
-- @lancedb/lancedb (Apache-2.0) with native platform binaries; apache-arrow (Apache-2.0); typescript (Apache-2.0);
-  @noble/hashes (MIT); ignore (MIT); sharp (Apache-2.0) with libvips (LGPL-3.0-or-later) in its platform binaries.
-Redistributing a build that bundles native binaries carries the notice obligations of those binaries.
+Third-party components retain their own licences; package-level licences do not
+replace the licences of included grammars or native libraries.
+- @vscode/tree-sitter-wasm 0.3.1: Microsoft packaging is MIT. Its Tree-sitter
+  runtime and used TypeScript/TSX, JavaScript, Python, Go, Rust, Java, C#, C++,
+  Ruby and PHP grammar sources have separately inspected MIT licences.
+- tree-sitter-wasms 0.1.13: packaging is Unlicense. Its used C, Kotlin, Swift and
+  Solidity grammar sources have separately inspected MIT licences, not Unlicense.
+  Declared build references do not prove binary-to-source correspondence.
+- @lancedb/lancedb 0.40.0 and apache-arrow 18.1.0 are Apache-2.0. LanceDB's
+  NODEJS_THIRD_PARTY_LICENSES.md and RUST_THIRD_PARTY_LICENSES.html contain
+  third-party evidence relevant to its native payloads.
+- @noble/hashes and ignore are MIT. Sharp 0.35.5 is Apache-2.0; its Windows
+  native package lists LGPLv3-selected libvips and other components, MPL 1.1
+  cairo, and additional MIT/BSD/patent and other terms. Its README and versions
+  inventory must be considered separately from the top-level Apache licence.
+- Optional Transformers.js 4.3.1 is Apache-2.0; ONNX Runtime 1.30.0 is MIT
+  with separate upstream third-party notices and build-specific obligations.
+- No model weights or tokenizer assets are redistributed. The inspected pinned
+  Xenova/all-MiniLM-L6-v2 publisher README declares Apache-2.0; that revision
+  contains no standalone LICENSE file.
+
+Exact source references, copyright attributions, installed notice locations and
+remaining source/notice/relinking checks are in docs/third-party-licenses.md.
+This factual notice is not a complete redistribution notice bundle or legal
+clearance. The package remains private; human licensing/distribution decisions
+and the frozen specification's MIT discrepancy remain unresolved.

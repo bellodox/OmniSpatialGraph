@@ -32,6 +32,46 @@ export interface QueryVectors {
 
 const maxTextLength = 1000;
 const skipped = new Set(['file', 'dir']);
+const vectorFormat = 2;
+// Float32 rounding is allowed, but materially scaled stored vectors are not.
+const unitTolerance = 1e-5;
+
+/** Checks metadata before sizes are multiplied or storage is allocated. */
+function validMetadata(model: unknown, dimension: unknown, keys: unknown, hashes: unknown): boolean {
+  return typeof model === 'string' && model.trim().length > 0
+    && typeof dimension === 'number' && Number.isSafeInteger(dimension) && dimension > 0
+    && Array.isArray(keys) && keys.every((key) => typeof key === 'string' && key.length > 0)
+    && new Set(keys).size === keys.length && Number.isSafeInteger(keys.length * dimension * 4)
+    && Array.isArray(hashes) && hashes.length === keys.length
+    && hashes.every((hash) => typeof hash === 'string' && /^[0-9a-f]{32}$/.test(hash));
+}
+
+/** Finite Float32 values have squared magnitudes representable in a JS number. Zero has no cosine direction. */
+function vectorNorm(vector: Float32Array): number {
+  let squared = 0;
+  for (const value of vector) {
+    if (!Number.isFinite(value)) return NaN;
+    squared += value * value;
+  }
+  return Math.sqrt(squared);
+}
+
+/** Validates even in-memory indexes: callers need not have used the disk decoder. */
+function validIndex(index: VectorIndex): boolean {
+  if (!validMetadata(index.model, index.dimension, index.keys, index.hashes)
+    || !(index.data instanceof Float32Array) || index.data.length !== index.keys.length * index.dimension) return false;
+  for (let at = 0; at < index.data.length; at += index.dimension) {
+    const norm = vectorNorm(index.data.subarray(at, at + index.dimension));
+    if (!Number.isFinite(norm) || Math.abs(norm - 1) > unitTolerance) return false;
+  }
+  return true;
+}
+
+/** Binds ordered metadata and exact binary bytes. This detects inconsistency, not a coherent malicious rewrite. */
+function indexDigest(model: string, dimension: number, keys: string[], hashes: string[], data: Uint8Array): string {
+  const metadata = JSON.stringify([vectorFormat, model, dimension, keys, hashes]);
+  return bytesToHex(sha256.create().update(new TextEncoder().encode(metadata)).update(data).digest());
+}
 
 const words = (identifier: string) => identifier.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2').replace(/[_.$#/:-]+/g, ' ').toLowerCase().trim();
 
@@ -66,7 +106,7 @@ function candidates(state: Map<string, GraphRow>): { key: string; text: string; 
   return out.sort((a, b) => Number(b.episode) - Number(a.episode) || (a.key < b.key ? -1 : 1));
 }
 
-export interface EmbedReport { total: number; embedded: number; reused: number; remaining: number; removed: number; }
+export interface EmbedReport { total: number; embedded: number; reused: number; remaining: number; removed: number; skippedZero: number; }
 
 /**
  * Brings the index up to date with the current state. Vectors whose text is unchanged are kept.
@@ -78,10 +118,12 @@ export async function buildIndex(state: Map<string, GraphRow>, embedder: Embedde
   const started = now();
   const batch = options.batch ?? 32;
   const dim = embedder.dimension;
+  if (!validMetadata(embedder.id, dim, [], []) || !Number.isSafeInteger(batch) || batch < 1) throw new Error('Invalid embedder configuration');
   const wanted = candidates(state);
   const known = new Map<string, Float32Array>();
-  if (previous && previous.model === embedder.id && previous.dimension === dim && previous.data.length === previous.keys.length * dim) {
-    previous.keys.forEach((key, i) => known.set(`${key}\n${previous.hashes[i]}`, previous.data.subarray(i * dim, (i + 1) * dim)));
+  const reusable = previous && validIndex(previous) ? previous : null;
+  if (reusable && reusable.model === embedder.id && reusable.dimension === dim) {
+    reusable.keys.forEach((key, i) => known.set(`${key}\n${reusable.hashes[i]}`, reusable.data.subarray(i * dim, (i + 1) * dim)));
   }
   const keys: string[] = [];
   const hashes: string[] = [];
@@ -93,32 +135,43 @@ export async function buildIndex(state: Map<string, GraphRow>, embedder: Embedde
     if (vector) { keys.push(item.key); hashes.push(item.hash); vectors.push(vector); reused++; } else todo.push(item);
   }
   let embedded = 0;
+  let skippedZero = 0;
   for (let at = 0; at < todo.length; at += batch) {
     if (options.deadlineMs !== undefined && now() - started >= options.deadlineMs) break;
     const slice = todo.slice(at, at + batch);
     const out = await embedder.embed(slice.map((item) => item.text));
-    if (out.length !== slice.length || out.some((vector) => vector.length !== dim)) throw new Error('Embedder returned an unexpected shape');
-    slice.forEach((item, i) => { keys.push(item.key); hashes.push(item.hash); vectors.push(out[i]!); });
-    embedded += slice.length;
+    if (out.length !== slice.length || out.some((vector) => !(vector instanceof Float32Array) || vector.length !== dim)) throw new Error('Embedder returned an unexpected shape');
+    slice.forEach((item, i) => {
+      const vector = out[i]!;
+      const norm = vectorNorm(vector);
+      if (!Number.isFinite(norm)) throw new Error('Embedder returned nonfinite values');
+      // A legitimate all-zero model output cannot be normalized: omit it, report it, and leave lexical retrieval intact.
+      if (norm === 0) { skippedZero++; return; }
+      keys.push(item.key); hashes.push(item.hash); vectors.push(vector.map((value) => value / norm)); embedded++;
+    });
   }
   const data = new Float32Array(keys.length * dim);
   vectors.forEach((vector, i) => data.set(vector, i * dim));
-  const removed = previous ? previous.keys.filter((key) => !state.has(key)).length : 0;
+  const removed = reusable ? reusable.keys.filter((key) => !state.has(key)).length : 0;
   return { index: { model: embedder.id, dimension: dim, keys, hashes, data },
-    report: { total: wanted.length, embedded, reused, remaining: todo.length - embedded, removed } };
+    report: { total: wanted.length, embedded, reused, remaining: todo.length - embedded - skippedZero, removed, skippedZero } };
 }
 
-/** Cosine similarity of `query` against every stored vector (vectors are unit length), best first. */
+/** Actual bounded cosine, including Float32 unit-rounding error; invalid indexes/queries never add rank. */
 export function nearest(index: VectorIndex, query: Float32Array, limit: number): { key: string; hash: string; similarity: number }[] {
   const dim = index.dimension;
-  if (query.length !== dim || index.data.length !== index.keys.length * dim) return [];
+  if (!Number.isSafeInteger(limit) || limit < 1 || !validIndex(index) || !(query instanceof Float32Array) || query.length !== dim) return [];
+  const queryNorm = vectorNorm(query);
+  if (!Number.isFinite(queryNorm) || queryNorm === 0) return [];
   const best: { at: number; similarity: number }[] = [];
   for (let at = 0; at < index.keys.length; at++) {
     let dot = 0;
     const base = at * dim;
     for (let d = 0; d < dim; d++) dot += index.data[base + d]! * query[d]!;
-    if (best.length < limit || dot > best[best.length - 1]!.similarity) {
-      best.push({ at, similarity: dot });
+    const norm = vectorNorm(index.data.subarray(base, base + dim));
+    const similarity = Math.max(-1, Math.min(1, dot / (norm * queryNorm)));
+    if (best.length < limit || similarity > best[best.length - 1]!.similarity) {
+      best.push({ at, similarity });
       best.sort((a, b) => b.similarity - a.similarity);
       if (best.length > limit) best.pop();
     }
@@ -126,24 +179,29 @@ export function nearest(index: VectorIndex, query: Float32Array, limit: number):
   return best.map(({ at, similarity }) => ({ key: index.keys[at]!, hash: index.hashes[at]!, similarity }));
 }
 
-/** Serialised form: a small JSON header and the raw little-endian floats. */
+/** Versioned rebuildable format: bound JSON metadata plus an owned snapshot of little-endian float bytes. */
 export function encodeIndex(index: VectorIndex): { header: string; data: Uint8Array } {
-  return { header: JSON.stringify({ schemaVersion: 1, model: index.model, dimension: index.dimension, keys: index.keys, hashes: index.hashes }),
-    data: new Uint8Array(index.data.buffer, index.data.byteOffset, index.data.byteLength) };
+  if (!validIndex(index)) throw new Error('Invalid vector index');
+  const { model, dimension, keys, hashes } = index;
+  const data = new Uint8Array(index.data.byteLength);
+  const view = new DataView(data.buffer);
+  index.data.forEach((value, at) => view.setFloat32(at * 4, value, true));
+  return { header: JSON.stringify({ schemaVersion: vectorFormat, model, dimension, keys, hashes,
+    digest: indexDigest(model, dimension, keys, hashes, data) }), data };
 }
 
+/** Old, torn, mixed or invalid caches are misses. Only an explicit embed command rebuilds them; graph format is unrelated. */
 export function decodeIndex(header: unknown, data: Uint8Array): VectorIndex | null {
   if (!header || typeof header !== 'object') return null;
   const value = header as Record<string, unknown>;
-  const { model, dimension, keys, hashes } = value;
-  if (value.schemaVersion !== 1 || typeof model !== 'string' || !Number.isInteger(dimension) || (dimension as number) < 1
-    || !Array.isArray(keys) || !Array.isArray(hashes) || keys.length !== hashes.length
-    || !keys.every((key) => typeof key === 'string') || !hashes.every((hash) => typeof hash === 'string')) return null;
-  const dim = dimension as number;
-  if (data.byteLength !== keys.length * dim * 4) return null;
-  const copy = new Uint8Array(data.byteLength);
-  copy.set(data);
-  const floats = new Float32Array(copy.buffer);
-  for (const number of floats) if (!Number.isFinite(number)) return null;
-  return { model, dimension: dim, keys: keys as string[], hashes: hashes as string[], data: floats };
+  if (value.schemaVersion !== vectorFormat || !validMetadata(value.model, value.dimension, value.keys, value.hashes)
+    || typeof value.digest !== 'string' || !/^[0-9a-f]{64}$/.test(value.digest)) return null;
+  const model = value.model as string, dimension = value.dimension as number;
+  const keys = value.keys as string[], hashes = value.hashes as string[];
+  if (data.byteLength !== keys.length * dimension * 4 || indexDigest(model, dimension, keys, hashes, data) !== value.digest) return null;
+  const floats = new Float32Array(data.byteLength / 4);
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  for (let at = 0; at < floats.length; at++) floats[at] = view.getFloat32(at * 4, true);
+  const index = { model, dimension, keys: [...keys], hashes: [...hashes], data: floats };
+  return validIndex(index) ? index : null;
 }

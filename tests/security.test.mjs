@@ -10,10 +10,11 @@ import { canon, contentHash, hash } from '../dist/core/src/hash.js';
 import { blankRow } from '../dist/contracts/src/index.js';
 import { context } from '../dist/core/src/retrieval.js';
 import { history, remember } from '../dist/core/src/memory.js';
+import { moduleHooks } from './module-hooks.mjs';
 
 const entry = path.resolve('dist/cli/src/index.js');
 function cli(root, command, args = [], hook, executable = entry) {
-  const result = spawnSync(process.execPath, [...(hook ? ['--import', `data:text/javascript,${encodeURIComponent(hook)}`] : []),
+  const result = spawnSync(process.execPath, [...(hook ? ['--import', hook] : []),
     executable, command, ...(command === 'export' ? ['episodes'] : []), '--workspace', root, ...args, '--json'],
   { encoding: 'utf8', timeout: 30000 });
   assert.ifError(result.error);
@@ -30,11 +31,11 @@ async function sentinelState(file) {
 
 // Exit status detects even forbidden reads swallowed by the freshness/source callbacks.
 function forbiddenReadHook(root, relatives) {
-  return `import fs from 'node:fs/promises'; import path from 'node:path'; import {syncBuiltinESMExports} from 'node:module';
+  return `data:text/javascript,${encodeURIComponent(`import fs from 'node:fs/promises'; import path from 'node:path'; import {syncBuiltinESMExports} from 'node:module';
     const denied=new Set(${JSON.stringify(relatives.map((relative) => path.join(root, relative)))});
     const original=fs.readFile; let forbidden=0;
     fs.readFile=async function(target,...args) { if(denied.has(path.resolve(String(target)))) { forbidden++; throw Error('FORBIDDEN_FIXTURE_READ'); } return original(target,...args); };
-    syncBuiltinESMExports(); process.on('exit',()=>{if(forbidden)process.exitCode=99;});`;
+    syncBuiltinESMExports(); process.on('exit',()=>{if(forbidden)process.exitCode=99;});`)}`;
 }
 
 async function runtimeBytes(root) {
@@ -341,10 +342,10 @@ test('nested ignore privacy applies before reads, persists no ignored facts/hist
       export const lstat=fs.lstat, readdir=fs.readdir, realpath=fs.realpath;
       const denied=new Set(${JSON.stringify(denied.map((relative) => path.join(root, relative)))});
       export async function readFile(target,...args) { if(denied.has(path.resolve(String(target)))) throw new Error('PRIVACY_READ:'+target); return fs.readFile(target,...args); }`;
-    const hook = `import {registerHooks} from 'node:module'; registerHooks({resolve(specifier,context,next) {
+    const hook = moduleHooks(`const hooks = {resolve(specifier,context,next) {
       if(specifier==='node:fs/promises' && context.parentURL?.includes('/indexing-kilo/src/')) return {url:${JSON.stringify(`data:text/javascript,${encodeURIComponent(guardModule)}`)},shortCircuit:true};
       return next(specifier,context);
-    }});`;
+    }};`);
     assert.equal(cli(root, 'init').exit, 0);
     const synced = cli(root, 'sync', [], hook);
     assert.equal(synced.exit, 0, JSON.stringify(synced));
@@ -404,10 +405,10 @@ test('platform-aware nested mixed-case ignore privacy precedes reads and preserv
       export const lstat=fs.lstat, readdir=fs.readdir, realpath=fs.realpath;
       const denied=new Set(${JSON.stringify(denied.map((relative) => path.join(root, relative)))});
       export async function readFile(target,...args) { if(denied.has(path.resolve(String(target)))) throw new Error('PRIVACY_READ:'+target); return fs.readFile(target,...args); }`;
-    const hook = `import {registerHooks} from 'node:module'; registerHooks({resolve(specifier,context,next) {
+    const hook = moduleHooks(`const hooks = {resolve(specifier,context,next) {
       if(specifier==='node:fs/promises' && context.parentURL?.includes('/indexing-kilo/src/')) return {url:${JSON.stringify(`data:text/javascript,${encodeURIComponent(guardModule)}`)},shortCircuit:true};
       return next(specifier,context);
-    }});`;
+    }};`);
     assert.equal(cli(root, 'init').exit, 0);
     const synced = cli(root, 'sync', [], hook);
     assert.equal(synced.exit, 0, JSON.stringify(synced));
@@ -465,10 +466,10 @@ test('mandatory mixed-case exclusions prune before reads and never persist fresh
       export async function lstat(target,...args) { guard(target); return fs.lstat(target,...args); }
       export async function readdir(target,...args) { guard(target); return fs.readdir(target,...args); }
       export async function readFile(target,...args) { guard(target); return fs.readFile(target,...args); }`;
-    const hook = `import {registerHooks} from 'node:module'; registerHooks({resolve(specifier,context,next) {
+    const hook = moduleHooks(`const hooks = {resolve(specifier,context,next) {
       if(specifier==='node:fs/promises' && context.parentURL?.includes('/indexing-kilo/src/')) return {url:${JSON.stringify(`data:text/javascript,${encodeURIComponent(guardModule)}`)},shortCircuit:true};
       return next(specifier,context);
-    }});`;
+    }};`);
     assert.equal(cli(root, 'init').exit, 0);
     const synced = cli(root, 'sync', [], hook);
     assert.equal(synced.exit, 0, JSON.stringify(synced));
@@ -519,10 +520,10 @@ test('Windows CocoaPods directories are pruned before traversal, reads and histo
       export async function lstat(target,...args) { guard(target); return fs.lstat(target,...args); }
       export async function readdir(target,...args) { guard(target); return fs.readdir(target,...args); }
       export async function readFile(target,...args) { guard(target); return fs.readFile(target,...args); }`;
-    const hook = `import {registerHooks} from 'node:module';registerHooks({resolve(specifier,context,next) {
+    const hook = moduleHooks(`const hooks = {resolve(specifier,context,next) {
       if(specifier==='node:fs/promises' && context.parentURL?.includes('/indexing-kilo/src/')) return {url:${JSON.stringify(`data:text/javascript,${encodeURIComponent(guardModule)}`)},shortCircuit:true};
       return next(specifier,context);
-    }});`;
+    }};`);
     assert.equal(cli(root, 'init').exit, 0);
     const synced = cli(root, 'sync', [], hook);
     assert.equal(synced.exit, 0, JSON.stringify(synced));
@@ -606,10 +607,10 @@ test('bounded ignore replacement sharing failures report actionable storage erro
           attempts++;
           throw Object.assign(new Error('injected ${code} '+target),{code:${JSON.stringify(code)}});
         }`;
-      const hook = `import {registerHooks} from 'node:module'; registerHooks({resolve(specifier,context,next) {
+      const hook = moduleHooks(`const hooks = {resolve(specifier,context,next) {
         if(specifier==='node:fs/promises' && context.parentURL?.includes('/cli/src/')) return {url:${JSON.stringify(`data:text/javascript,${encodeURIComponent(guardModule)}`)},shortCircuit:true};
         return next(specifier,context);
-      }});`;
+      }};`);
       const failed = cli(root, 'init', [], hook);
       assert.equal(failed.exit, code === 'EIO' ? 1 : 6, JSON.stringify(failed));
       assert.equal(failed.error.code, code === 'EIO' ? 'INTERNAL' : 'STORAGE_UNAVAILABLE');
