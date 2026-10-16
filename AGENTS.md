@@ -2,7 +2,7 @@
 
 This file provides guidance to agents when working with code in this repository.
 
-- The **0.1.0-prototype.0** [manifest](package.json:3) is private and declares Apache-2.0; [LICENSE](LICENSE) and [NOTICE](NOTICE) describe checkout licensing. The frozen specification still describes MIT: human legal reconciliation, grammar/native-LGPL obligations and dependency compatibility remain unresolved. Use the [current handoff](docs/public-prototype.md) for attributed evidence and review scope, not distribution or G0–G6 acceptance.
+- The **0.1.0-prototype.0** [manifest](package.json:3) is private and declares Apache-2.0; [LICENSE](LICENSE) and [NOTICE](NOTICE) describe checkout licensing. The [2026-10-16 binding human decision](docs/decisions.md#2026-10-16--binding-human-first-party-licensing-decision) licenses all code authored for this repository (not borrowed) Apache-2.0, copyright Vlad Bellomorski, resolving the frozen MIT discrepancy for first-party licensing only. Third-party licences remain unchanged; grammar/native-LGPL obligations, dependency compatibility and distribution disposition remain unresolved. Use the [current handoff](docs/public-prototype.md) for attributed evidence and review scope, not distribution or G0–G6 acceptance.
 - Authority: current human instruction > [specification 2.0](docs/OSG_MVP_SPEC.md:17) > v0.5 > derived documentation.
 - Before a task, read spec §0, §1, §3, §4, §5 and latest §22, then task-specific sections listed in [§0](docs/OSG_MVP_SPEC.md:17).
 - For this handoff freeze the entire specification, including §22: no edits or appends. General future [change rules](docs/OSG_MVP_SPEC.md:33) do not override current human scope.

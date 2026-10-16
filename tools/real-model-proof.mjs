@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 // Opt-in only: node tools/real-model-proof.mjs --download
 // Build first. No npm install, lifecycle scripts, default-suite network, or permanent-store writes.
 // Primary model card: https://huggingface.co/Xenova/all-MiniLM-L6-v2/blob/751bff37182d3f1213fa05d7196b954e230abad9/README.md

@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';

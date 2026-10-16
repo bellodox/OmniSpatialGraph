@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import { randomUUID, createHash } from 'node:crypto';
 import { appendFile, cp, link, lstat, mkdir, readFile, readdir, realpath, rename, rm, stat as statFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';

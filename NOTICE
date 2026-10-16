@@ -26,6 +26,10 @@ replace the licences of included grammars or native libraries.
 
 Exact source references, copyright attributions, installed notice locations and
 remaining source/notice/relinking checks are in docs/third-party-licenses.md.
-This factual notice is not a complete redistribution notice bundle or legal
-clearance. The package remains private; human licensing/distribution decisions
-and the frozen specification's MIT discrepancy remain unresolved.
+The binding human decision of 2026-10-16 licenses all code authored for this
+repository (not borrowed) under Apache-2.0, copyright Vlad Bellomorski, resolving
+the frozen specification's MIT discrepancy for first-party licensing only.
+Third-party components retain their own licences. See docs/decisions.md.
+This factual notice is not a complete redistribution notice bundle or third-party,
+native/LGPL or distribution clearance. The package remains private; those
+obligations and distribution disposition remain unresolved.

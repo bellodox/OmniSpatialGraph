@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 // Opt-in proof instrumentation, not a security sandbox or OS firewall.
 // module.register is available on Node 22.0; real inference is never substituted.
 import { register, syncBuiltinESMExports } from 'node:module';

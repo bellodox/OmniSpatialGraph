@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import { OsgError, blankRow, type Element, type GraphPort, type GraphRow } from '../../contracts/src/index.js';
 import { canon, contentHash, hash } from './hash.js';
 

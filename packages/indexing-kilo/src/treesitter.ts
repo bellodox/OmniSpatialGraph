@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import { createRequire } from 'node:module';
 import { spawn, type ChildProcess } from 'node:child_process';
 import path from 'node:path';

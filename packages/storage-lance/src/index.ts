@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import * as lance from '@lancedb/lancedb';
 import { Field, Int64, List, Schema, Struct, Utf8 } from 'apache-arrow';
 import { lstat, mkdir, mkdtemp, rename, rm } from 'node:fs/promises';

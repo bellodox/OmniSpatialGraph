@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -65,8 +68,8 @@ try {
   assert.equal(beforeEdit.data.versions[0].commitId, initial);
   const sourcePath = path.join(workspace, 'src/greet.js');
   const oldSource = await readFile(sourcePath, 'utf8');
-  assert.equal(oldSource, 'export function greet(name) {\n  return `Hello, ${name}!`;\n}\n');
-  await writeFile(sourcePath, 'export function greet(name) {\n  if (typeof name !== "string" || !name.trim()) throw new TypeError("Name required");\n  return `Hello, ${name.trim()}!`;\n}\n');
+  assert.equal(oldSource, '// Copyright 2026 Vlad Bellomorski\n// SPDX-License-Identifier: Apache-2.0\n\nexport function greet(name) {\n  return `Hello, ${name}!`;\n}\n');
+  await writeFile(sourcePath, '// Copyright 2026 Vlad Bellomorski\n// SPDX-License-Identifier: Apache-2.0\n\nexport function greet(name) {\n  if (typeof name !== "string" || !name.trim()) throw new TypeError("Name required");\n  return `Hello, ${name.trim()}!`;\n}\n');
   const green = tests(8, 0);
   const stale = osg('context', ['--entity', symbol]).packet;
   assert.equal(stale.data.items.find((entry) => entry.elementId === symbol).citation.stale, true);

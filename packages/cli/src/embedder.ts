@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import { OsgError } from '../../contracts/src/index.js';
 import type { Embedder } from '../../core/src/embedding.js';
 

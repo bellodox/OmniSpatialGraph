@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import { fork } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 

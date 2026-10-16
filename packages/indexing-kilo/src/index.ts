@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import ignore, { type Ignore } from 'ignore';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';

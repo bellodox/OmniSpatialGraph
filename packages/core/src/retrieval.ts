@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 import { OsgError, type GraphPort, type GraphRow } from '../../contracts/src/index.js';
 import { resolveCommit, snapshot, type HeadView } from './graph.js';
 import { headView, type StateCache } from './state.js';

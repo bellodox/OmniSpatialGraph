@@ -1,6 +1,6 @@
 # Documentation and Experiment Decisions
 
-These are attributed scope/rationale records, not agent-created binding product decisions. [Specification decisions](OSG_MVP_SPEC.md:126) and [human-only questions](OSG_MVP_SPEC.md:153) retain authority. Later authorization does not retroactively approve earlier work or settle formal gates.
+These are attributed scope/rationale records, not agent-created binding product decisions. Explicit human decisions are identified below. [Specification decisions](OSG_MVP_SPEC.md:126) and [human-only questions](OSG_MVP_SPEC.md:153) otherwise retain authority. Later authorization does not retroactively approve earlier work or settle formal gates.
 
 ## 2026-10-13 — Documentation initialization
 
@@ -14,7 +14,7 @@ These are attributed scope/rationale records, not agent-created binding product 
 
 **Authorization:** The human permitted the standalone experiment's installs, builds, tests and continuation without intermediate pauses in the planned layout. Necessary documentation followed. This did not resolve Q1–Q9, accept G0–G6 or permit upstream copying.
 
-**Choice and alternative:** An independently written TypeScript compiler API provider enabled the initial experiment without upstream adaptation. Non-Tree-sitter extraction was explicitly authorized as an **experimental deviation**, not a permanent replacement of specified Approach A. The present provider uses [Tree-sitter WASM](../packages/indexing-kilo/src/treesitter.ts:34); that implementation is not formal Approach A or grammar-license acceptance.
+**Choice and alternative:** An independently written TypeScript compiler API provider enabled the initial experiment without upstream adaptation. Non-Tree-sitter extraction was explicitly authorized as an **experimental deviation**, not a permanent replacement of specified Approach A. The present provider uses [Tree-sitter WASM](../packages/indexing-kilo/src/treesitter.ts:37); that implementation is not formal Approach A or grammar-license acceptance.
 
 **Retained constraints:** Integer-only canonical hashing, row-based append-only history, atomic head CAS, pure reads, adapter boundaries and runtime confinement. Lexical retrieval made the experiment useful without vectors, host integration, signing or future OpenSpeX emission. Broader platform/durability targets were not silently accepted when Windows checks passed.
 
@@ -51,3 +51,11 @@ Historical, attributed evidence only; detailed test chronology remains in the [h
 **Rationale and alternative:** Transfer unique durable facts and decision chronology into four flat documents rather than retaining overlapping pages, obsolete task redirects, a new index/archive or another task diary. OSG alone retains operational episodes. Remove the former wiki/task directories after link repair; indexing is not the reason for deletion. The existing experiment redirect may remain for protected incoming references.
 
 **Scope:** The entire specification, licensing files, application/tests/dependencies/build output and other harness settings remain protected. Only the existing OSG usage rule receives authorized navigation/nomenclature edits. No new legal, distribution, security or formal gate approval is implied.
+
+## 2026-10-16 — Binding human first-party licensing decision
+
+**Authority and decision:** The human explicitly decided: “all code authored for this repository (not borrowed) is Apache-2.0 from now on; copyright holder "Vlad Bellomorski"; third-party components keep their own licences; resolves Apache-versus-MIT discrepancy.” This is a binding human decision, not an agent legal choice.
+
+**Context and consequence:** This resolves the first-party Apache-versus-MIT discrepancy recorded in the October 15 milestones above and supersedes the frozen specification's MIT description for first-party licensing only. The entire [specification](OSG_MVP_SPEC.md), including §22, remains unchanged. Retaining an unresolved first-party reconciliation blocker would contradict the human instruction. The standard [Apache license](../LICENSE) and existing manifest/lock licensing remain unchanged; [NOTICE](../NOTICE) retains third-party notices. Original source, tests, tools and fixtures receive copyright and Apache-2.0 SPDX headers; borrowed components are not relicensed.
+
+**Retained limits:** Third-party licences and attributions remain applicable. Grammar/native/LGPL obligations, dependency compatibility and distribution disposition are not approved by this decision. It does not authorize third-party copying, resolve Q1–Q9 or accept G0–G6. Prior implementation/review verdicts do not cover this licensing/header/documentation work; current evidence and parent-owned final review/persistence belong in the [designated handoff](public-prototype.md#current-licensing-update).

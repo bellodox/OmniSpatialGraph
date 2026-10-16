@@ -1,3 +1,6 @@
+// Copyright 2026 Vlad Bellomorski
+// SPDX-License-Identifier: Apache-2.0
+
 // Register isolated test hooks through the asynchronous API available before Node 22.0.
 // Keep null CommonJS sources untouched so native dependencies retain Node's normal loader.
 export function moduleHooks(source) {
