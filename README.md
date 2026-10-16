@@ -1,5 +1,15 @@
 # OmniSpatialGraph (osg)
 
+> **Beta · source-only · known limits**
+>
+> This early beta is source-only, not an npm or bundled-binary release. The following known limits are accepted for this beta, not fixed:
+>
+> 1. A slow first model download can push osg embed beyond 120 seconds; rerunning continues with the cached model. **Deferred Item 1.**
+> 2. The model revision is unpinned; upstream changes can silently change vectors. **Deferred Item 3.**
+> 3. The embeddings dependency is about 430 MB under optionalDependencies; npm ci --include=optional installs it.
+> 4. Context takes about 9 seconds at 306k lines.
+> 5. Benefit to agents on real tasks is unmeasured; published memory-for-coding-agents evidence is mixed.
+
 A local CLI-first repository-memory prototype. It indexes code into a versioned graph on embedded [LanceDB](https://lancedb.com), stores decisions as episodes linked to code, and retrieves task-relevant evidence within a token budget, with citations. Retrieval is lexical by default with typed graph expansion; [optional embeddings](#optional-embeddings-meaning-based-search) can add semantic vector candidates. This is not the complete planned GraphRAG MVP.
 
 Single agent at a time. Indexing and retrieval run locally; explicitly enabling optional embeddings can download model files. Reads do not download models.
