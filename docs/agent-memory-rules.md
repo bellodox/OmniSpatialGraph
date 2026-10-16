@@ -4,12 +4,12 @@ Portable guidance for a local workspace; repository authority remains in [root g
 
 ## Retrieve and verify
 
-From the checkout root, use the [public launcher](../packages/cli/src/public.ts:57), not the internal backend. The executable declaration does not put osg on PATH. For another target, pass its explicit workspace and use an absolute launcher path if needed.
+Use osg on PATH to invoke the [public launcher](../packages/cli/src/public.ts:57), not the internal backend. The authorized local checkout already has a Windows command shim registered; a fresh checkout does not register it automatically. If the command is unavailable, use the [installation fallback](../README.md#install): replace osg with `node dist/cli/src/public.js` from the checkout root, or use an absolute launcher path elsewhere. For another target, always pass its explicit workspace with either invocation. The examples below target the current directory.
 
 ```bat
-node dist/cli/src/public.js context --task "Specific task terms" --max-tokens 800 --json
-node dist/cli/src/public.js context --entity "<actual-returned-entity-id>" --max-tokens 800 --json
-node dist/cli/src/public.js history --entity "<actual-returned-entity-id>" --json
+osg context --task "Specific task terms" --max-tokens 800 --json
+osg context --entity "<actual-returned-entity-id>" --max-tokens 800 --json
+osg history --entity "<actual-returned-entity-id>" --json
 ```
 
 Replace placeholders with IDs actually resolved in the selected store. Check exit, success, error and warnings. Inspect actual Git branch/revision/worktree and source: graph branch is not Git branch, stale/changed/missing anchors require verification, and other-branch provenance may not apply. History retains metadata, not raw old source. If task results are irrelevant, refine lexical terms once or use a resolved entity; missing results do not prove absence. The 800-token whole-envelope estimate is not a tokenizer guarantee.
@@ -19,8 +19,8 @@ Replace placeholders with IDs actually resolved in the selected store. Check exi
 After authorized changes and relevant validation, and only with compatible format/write permission:
 
 ```bat
-node dist/cli/src/public.js sync --json
-node dist/cli/src/public.js remember --task "Completed task" --decision "Choice and rationale" --outcome "Observed checks and remaining limits" --entities "<resolved-entity-id>" --json
+osg sync --json
+osg remember --task "Completed task" --decision "Choice and rationale" --outcome "Observed checks and remaining limits" --entities "<resolved-entity-id>" --json
 ```
 
 Record concise searchable facts, not transcripts. Inspect unresolved-entity warnings; success does not guarantee every relationship was saved. Supersede only an actual verified earlier live hypothesis episode using the supported supersession option; inspect warnings. Supersession labels immediate successors, not erasure or approval. Capture actual returned episode/head IDs before claiming memory was saved. Read-only subtasks do not sync merely to refresh facts; the designated parent may own final writes.
@@ -30,7 +30,7 @@ Record concise searchable facts, not transcripts. Inspect unresolved-entity warn
 Embeddings are default-off for new workspaces but [enabled for this authorized repository checkout](public-prototype.md#local-checkout-embedding-snapshot). Within task-authorized writes, use sync → embed for changed source and remember → embed for new episodes. Neither sync nor remember generates vectors automatically:
 
 ```bat
-node dist/cli/src/public.js embed --json
+osg embed --json
 ```
 
 Use the same explicit workspace as the preceding command when targeting another workspace. The explicit embedding command may download missing model assets; an incomplete result resumes on a subsequent authorized invocation. Task context automatically blends valid, text-current vectors with keyword seeds and typed expansion, using local model files without writes or downloads; entity context is unchanged. Missing or invalid vectors/model use the documented lexical fallback and applicable warnings. Until refreshed, new searchable text remains available lexically. Coverage concerns eligible searchable texts, not every graph row or full raw source. Never initialize or repair a store automatically to enable embeddings; images and LanceDB's separate embedding wrapper remain unsupported. Local enablement is not human legal/distribution disposition or gate acceptance.

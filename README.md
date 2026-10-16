@@ -25,7 +25,13 @@ npm run build
 node dist/cli/src/public.js --help
 ```
 
-Examples below abbreviate the [public launcher](packages/cli/src/public.ts:60) as osg. The checkout does not put that command on PATH: use the direct Node invocation above. When targeting another workspace, use the absolute launcher path with an explicit workspace option.
+Use osg as the normal command once it is registered on PATH; it invokes the [public launcher](packages/cli/src/public.ts:60), not the internal backend. This authorized local checkout already has a user-owned Windows command shim registered. Check command availability with:
+
+```sh
+osg --help
+```
+
+A fresh checkout does not register the command automatically. If osg is unavailable, use the direct Node invocation above from the checkout root, replacing osg in the examples below with `node dist/cli/src/public.js`. Outside the checkout, use an absolute launcher path instead. Registration points to the checkout, so moving it requires updating the registration. When targeting another workspace, always pass its explicit workspace option, with either invocation.
 
 ## Quick start
 
@@ -33,9 +39,9 @@ Use a new disposable workspace for a first run; initialization writes runtime da
 
 ```bat
 set "OSG_WORKSPACE=C:\path\to\disposable-workspace"
-node dist/cli/src/public.js init --workspace "%OSG_WORKSPACE%" --json
-node dist/cli/src/public.js sync --workspace "%OSG_WORKSPACE%" --json
-node dist/cli/src/public.js context --workspace "%OSG_WORKSPACE%" --task "Actual task terms" --max-tokens 800 --json
+osg init --workspace "%OSG_WORKSPACE%" --json
+osg sync --workspace "%OSG_WORKSPACE%" --json
+osg context --workspace "%OSG_WORKSPACE%" --task "Actual task terms" --max-tokens 800 --json
 ```
 
 Inspect the returned source and resolve an actual entity before storing a decision. The [agent workflow](docs/agent-memory-rules.md) gives history, remember and recovery examples. Entity references accept IDs or uniquely resolved exact names; unresolved relationships produce warnings. Read the entire JSON envelope, including errors and warnings.
@@ -72,7 +78,7 @@ To switch it on for a workspace within authorized write/download scope:
 1. Use the [checkout installation](#install) with optional dependencies retained; Transformers.js 4.3.1 is already declared. The scoped checkout override selects its supported Sharp range while retaining root Sharp 0.35.5. Root overrides do not propagate to consumers, and LanceDB's separate embedding wrapper remains unsupported; no consumer install-parity claim follows.
 2. Build the index. The explicit command permits model downloads into the workspace's runtime model cache; cached model files can be reused locally:
    ```sh
-   node dist/cli/src/public.js embed --workspace <workspace> --json
+   osg embed --workspace <workspace> --json
    ```
    Each run stops starting new batches after about 70 seconds because commands have a 120-second limit. If the result says `"complete": false`, run `embed` again; it continues where it stopped.
 3. Run `embed` again after `sync` or `remember`, so new symbols and episodes get vectors. Until then they are still found by words.
