@@ -7,6 +7,7 @@ import { OsgError, type GraphPort, type GraphRow } from '../../contracts/src/ind
 import { canon, hash } from './hash.js';
 import { commit, reach, snapshot, verify, type HeadView, type Proposal } from './graph.js';
 import { applyDelta } from './state.js';
+import { committedView, rememberCommittedView } from './committed-views.js';
 
 /** Host-owned immutable assets. put must durably publish bytes before resolving. */
 export interface WorldAssets { put(bytes: Uint8Array): Promise<string>; get(hash: string): Promise<Uint8Array>; }
@@ -80,12 +81,24 @@ export class WorldGraph {
   private view!: HeadView;
   private entries: Entry[] = [];
   private queue: Promise<unknown> = Promise.resolve();
+  private pending = 0;
   private listeners = new Set<(revision: WorldRevision) => void>();
   private constructor(private store: GraphPort, private assets: WorldAssets) {}
   static async open(store: GraphPort, assets: WorldAssets): Promise<WorldGraph> {
     const world = new WorldGraph(store, assets); await world.reload(); return world;
   }
   private async reload(): Promise<void> {
+    const current = await this.store.head('main'), shared = current ? committedView(this.store, current) : undefined;
+    if (shared && this.view) {
+      const accepted = reach(shared.commits, shared.head);
+      if (this.view.head === 'ROOT' || accepted.has(this.view.head)) {
+        const previous = reach(this.view.commits, this.view.head);
+        const delta = await this.store.rowsOfCommits([...accepted].filter(id => !previous.has(id)));
+        this.entries = [...this.entries.filter(e => accepted.has(e.commitId)), ...delta.filter(r => r.kind === 'world_segment')
+          .map(r => ({ segment: JSON.parse(r.props!) as WorldSegment, commitId: r.commit_id! }))];
+        this.view = shared; return;
+      }
+    }
     const rows = await this.store.rows();
     // Use the head returned in the same storage snapshot, never a separate moving head read.
     const head = rows.find((r) => r.row_type === 'head' && r.branch === 'main')?.head;
@@ -94,9 +107,27 @@ export class WorldGraph {
     const entries = rows.filter((r) => r.kind === 'world_segment' && state.reachable.has(r.commit_id!))
       .map((r) => ({ segment: JSON.parse(r.props!) as WorldSegment, commitId: r.commit_id! }));
     this.view = { head, state: state.state, commits: state.commits }; this.entries = entries;
+    rememberCommittedView(this.store, this.view);
   }
-  private serial<T>(fn: () => Promise<T>): Promise<T> {
-    const operation = this.queue.then(fn); this.queue = operation.catch(() => {}); return operation;
+  private serial<T>(fn: () => Promise<T>, retryStale = false): Promise<T> {
+    if (this.pending >= 64) return Promise.reject(new OsgError('WORLD_BUSY', 'World mutation queue is full'));
+    this.pending++;
+    const operation = this.queue.then(async () => {
+      for (let attempt = 0; ; attempt++) {
+        try { return await fn(); }
+        catch (error) {
+          const duplicate = error instanceof OsgError && error.code === 'INVALID_DELTA' && error.message === 'Duplicate or mutable row key';
+          if (!retryStale || !(error instanceof OsgError) || (error.code !== 'STALE_HEAD' && !duplicate) || attempt >= 7) throw error;
+          await this.reload();
+        }
+      }
+    });
+    this.queue = operation.catch(() => {}).finally(() => { this.pending--; }); return operation;
+  }
+  private visible(head: string): Set<string> {
+    const accepted = reach(this.view.commits, this.view.head);
+    requireValue(head === 'ROOT' || accepted.has(head), 'Head is not accepted main history');
+    return reach(this.view.commits, head);
   }
   get revision(): WorldRevision { return { head: this.view.head, generation: this.view.commits.get(this.view.head)?.generation ?? 0 }; }
   subscribe(listener: (revision: WorldRevision) => void): () => void { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; }
@@ -119,6 +150,7 @@ export class WorldGraph {
       const state = new Map(this.view.state); applyDelta(state, written);
       const commits = new Map(this.view.commits); commits.set(result.commitId, commitRow);
       this.view = { head: result.commitId, state, commits };
+      rememberCommittedView(this.store, this.view);
       this.entries = [...this.entries, ...written.filter((r) => r.kind === 'world_segment')
         .map((r) => ({ segment: JSON.parse(r.props!) as WorldSegment, commitId: result.commitId }))];
       for (const listener of this.listeners) { try { listener(this.revision); } catch { /* observers cannot undo a commit */ } }
@@ -157,17 +189,17 @@ export class WorldGraph {
       }
       await this.publish(proposals, 'simulation-world', this.view.head);
       return { ...this.revision, assetHash, idempotent: false };
-    });
+    }, expectedHead === undefined);
   }
   /** Graph-native entity/frame links complement the dense exact-state byte assets. */
   entities(): { head: string; entities: Record<string, unknown>[] } {
     return { head: this.view.head, entities: [...this.view.state.values()].filter((r) => r.kind === 'world_entity')
-      .map((r) => ({ elementId: r.element_id, ...JSON.parse(r.props!) })) };
+      .map((r) => ({ elementId: r.element_id, version: r.row_key, ...JSON.parse(r.props!) })) };
   }
   /** Sparse event index: reads only assets with marked records, never the dense trajectory. */
   async marked({ runId, epoch, timeMicros = Number.MAX_SAFE_INTEGER, head = this.view.head }: { runId: string; epoch: number; timeMicros?: number; head?: string }): Promise<{ head: string; records: WorldRecord[] }> {
     requireValue(text(runId) && integer(epoch) && integer(timeMicros), 'Invalid marked query');
-    const visible = reach(this.view.commits, head);
+    const visible = this.visible(head);
     const entries = this.entries.filter(({ segment: s, commitId }) => visible.has(commitId) && s.runId === runId && s.epoch === epoch && s.firstTimeMicros <= timeMicros && s.markedSequences.length > 0)
       .sort((a, b) => a.segment.firstSequence - b.segment.firstSequence);
     const records: WorldRecord[] = []; let bytesRead = 0;
@@ -182,6 +214,31 @@ export class WorldGraph {
     }
     return { head, records };
   }
+  /** Bounded, head-pinned marked history. A cursor is the next sample sequence in the chosen direction. */
+  async markedPage({ runId, epoch, timeMicros = Number.MAX_SAFE_INTEGER, head = this.view.head,
+    direction = 'backward', fromSequence, limit = 128 }: { runId: string; epoch: number; timeMicros?: number; head?: string;
+      direction?: 'forward' | 'backward'; fromSequence?: number; limit?: number }) {
+    requireValue(text(runId) && integer(epoch) && integer(timeMicros) && ['forward', 'backward'].includes(direction) && integer(limit) && limit > 0 && limit <= 1000, 'Invalid marked page');
+    const cursor = fromSequence ?? (direction === 'forward' ? 1 : Number.MAX_SAFE_INTEGER);
+    requireValue(integer(cursor) && cursor > 0, 'Invalid marked cursor');
+    const visible = this.visible(head), forward = direction === 'forward';
+    const entries = this.entries.filter(({ segment: s, commitId }) => visible.has(commitId) && s.runId === runId && s.epoch === epoch && s.firstTimeMicros <= timeMicros && s.markedSequences.length && (forward ? s.lastSequence >= cursor : s.firstSequence <= cursor))
+      .sort((a, b) => forward ? a.segment.firstSequence - b.segment.firstSequence : b.segment.firstSequence - a.segment.firstSequence);
+    const records: WorldRecord[] = []; let bytesRead = 0;
+    for (const { segment: segment } of entries) {
+      const bytes = await this.assets.get(segment.assetHash);
+      if (bytesRead + bytes.length > 32 * 1024 * 1024) return { head, records, nextSequence: forward ? Math.max(cursor, segment.firstSequence) : Math.min(cursor, segment.lastSequence) };
+      bytesRead += bytes.length; requireValue(digest(bytes) === segment.assetHash, 'World asset hash mismatch');
+      const all = decodeWorldRecords(bytes), marked = all.filter(r => r.marked);
+      requireValue(canon(marked.map(r => r.sequence)) === canon(segment.markedSequences), 'World marker index mismatch');
+      const ordered = forward ? marked : marked.slice().reverse();
+      for (const record of ordered) if (record.timeMicros <= timeMicros && (forward ? record.sequence >= cursor : record.sequence <= cursor)) {
+        if (records.length === limit) return { head, records, nextSequence: record.sequence };
+        records.push(record);
+      }
+    }
+    return { head, records, nextSequence: null };
+  }
   /** Separate namespaces for agent/browser annotations. Never accepts arbitrary physical proposals. */
   annotate(clientId: string, id: string, value: { text: string }, expectedHead: string): Promise<WorldRevision> {
     requireValue(text(clientId) && text(id) && typeof value?.text === 'string' && value.text.length <= 8192, 'Invalid annotation');
@@ -193,13 +250,13 @@ export class WorldGraph {
     });
   }
   annotations(head = this.view.head): { head: string; items: Record<string, unknown>[] } {
-    const visible = reach(this.view.commits, head);
+    const visible = this.visible(head);
     // State at an older revision is reconstructed by the storage caller; this API returns current annotations only.
     requireValue(head === this.view.head, 'Annotations require current revision');
     return { head, items: [...this.view.state.values()].filter((r) => r.kind === 'world_annotation' && visible.has(r.commit_id!)).map((r) => ({ ...JSON.parse(r.props!), status: 'hypothesis', untrusted: true })) };
   }
   streams(head = this.view.head): { head: string; streams: { runId: string; epoch: number; firstTimeMicros: number; lastTimeMicros: number; samples: number; generation: number }[] } {
-    const visible = reach(this.view.commits, head), grouped = new Map<string, any>();
+    const visible = this.visible(head), grouped = new Map<string, any>();
     for (const { segment: s, commitId } of this.entries) if (visible.has(commitId)) {
       const key = streamId(s.runId, s.epoch), entry = grouped.get(key);
       const generation = this.view.commits.get(commitId)!.generation!;
@@ -211,7 +268,7 @@ export class WorldGraph {
   /** Paged exact history. Clients carry both head and nextSequence across pages. */
   async first({ runId, epoch, entityId, head = this.view.head }: { runId: string; epoch: number; entityId: string; head?: string }): Promise<WorldRecord | null> {
     requireValue(text(runId) && integer(epoch) && text(entityId), 'Invalid first-state query');
-    const visible = reach(this.view.commits, head);
+    const visible = this.visible(head);
     const entry = this.entries.filter(({ segment: s, commitId }) => visible.has(commitId) && s.runId === runId && s.epoch === epoch && s.entityIds.includes(entityId))
       .sort((a, b) => a.segment.firstSequence - b.segment.firstSequence)[0];
     if (!entry) return null;
@@ -222,7 +279,7 @@ export class WorldGraph {
   /** Paged exact history. Clients carry both head and nextSequence across pages. */
   async range({ runId, epoch, fromSequence = 1, limit = 1024, head = this.view.head }: { runId: string; epoch: number; fromSequence?: number; limit?: number; head?: string }): Promise<{ head: string; records: WorldRecord[]; nextSequence: number | null }> {
     requireValue(text(runId) && integer(epoch) && integer(fromSequence) && fromSequence > 0 && integer(limit) && limit > 0 && limit <= 4096, 'Invalid world range');
-    const visible = reach(this.view.commits, head);
+    const visible = this.visible(head);
     const entries = this.entries.filter(({ segment: s, commitId }) => visible.has(commitId) && s.runId === runId && s.epoch === epoch && s.lastSequence >= fromSequence)
       .sort((a, b) => a.segment.firstSequence - b.segment.firstSequence);
     const records: WorldRecord[] = []; let bytesRead = 0;
@@ -242,22 +299,27 @@ export class WorldGraph {
   /** Pure read. The selected commit and entry list stay fixed across all asset awaits. */
   async read({ runId, epoch, timeMicros = Number.MAX_SAFE_INTEGER, head = this.view.head }: { runId: string; epoch: number; timeMicros?: number; head?: string }): Promise<{ head: string; records: WorldRecord[]; segmentsRead: number }> {
     requireValue(text(runId) && integer(epoch) && integer(timeMicros), 'Invalid world query');
-    const visible = reach(this.view.commits, head);
+    const visible = this.visible(head);
     const entries = this.entries.filter(({ segment: s, commitId }) => visible.has(commitId) && s.runId === runId && s.epoch === epoch)
       .sort((a, b) => b.segment.firstSequence - a.segment.firstSequence);
-    const targets = new Set(entries.flatMap((e) => e.segment.entityIds));
-    const found = new Map<string, WorldRecord>(); let segmentsRead = 0, bytesRead = 0;
-    for (const { segment: s } of entries) {
-      if (s.firstTimeMicros > timeMicros) continue;
-      const bytes = await this.assets.get(s.assetHash);
-      bytesRead += bytes.length; requireValue(bytesRead <= 32 * 1024 * 1024, 'World snapshot exceeds byte budget');
-      requireValue(digest(bytes) === s.assetHash, 'World asset hash mismatch');
-      const records = decodeWorldRecords(bytes); segmentsRead++;
-      requireValue(records.length === s.count && records[0]!.sequence === s.firstSequence && records.at(-1)!.sequence === s.lastSequence && records[0]!.timeMicros === s.firstTimeMicros && records.at(-1)!.timeMicros === s.lastTimeMicros, 'World asset metadata mismatch');
-      for (let i = records.length - 1; i >= 0; i--) {
-        const r = records[i]!; if (r.timeMicros <= timeMicros && !found.has(r.entityId)) found.set(r.entityId, r);
+    const byEntity = new Map<string, Entry[]>();
+    for (const entry of entries) if (entry.segment.firstTimeMicros <= timeMicros) for (const id of entry.segment.entityIds) {
+      const list = byEntity.get(id) ?? []; list.push(entry); byEntity.set(id, list);
+    }
+    const found = new Map<string, WorldRecord>(), decoded = new Map<string, WorldRecord[]>();
+    let segmentsRead = 0, bytesRead = 0;
+    for (const [id, candidates] of byEntity) for (const { segment: segment } of candidates) {
+      let records = decoded.get(segment.assetHash);
+      if (!records) {
+        const bytes = await this.assets.get(segment.assetHash); bytesRead += bytes.length;
+        requireValue(bytesRead <= 32 * 1024 * 1024, 'World snapshot exceeds byte budget; reduce entity scope');
+        requireValue(digest(bytes) === segment.assetHash, 'World asset hash mismatch');
+        records = decodeWorldRecords(bytes); segmentsRead++;
+        requireValue(records.length === segment.count && records[0]!.sequence === segment.firstSequence && records.at(-1)!.sequence === segment.lastSequence && records[0]!.timeMicros === segment.firstTimeMicros && records.at(-1)!.timeMicros === segment.lastTimeMicros, 'World asset metadata mismatch');
+        decoded.set(segment.assetHash, records);
       }
-      if (found.size === targets.size) break;
+      const record = records.slice().reverse().find(r => r.entityId === id && r.timeMicros <= timeMicros);
+      if (record) { found.set(id, record); break; }
     }
     return { head, records: [...found.values()].filter((r) => r.operation !== 'delete').sort((a, b) => a.entityId.localeCompare(b.entityId)), segmentsRead };
   }

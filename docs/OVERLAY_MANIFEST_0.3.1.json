@@ -1,0 +1,20 @@
+{
+  "baseline": "d4ba8db2150afdb4b11382c9862e0a59305b374d",
+  "targetBranch": "multi",
+  "version": "OSG multi audit fixes paired with OSGSim 0.3.1-dev; package identity remains osg-multi",
+  "cumulative": true,
+  "requiredSupportFiles": [],
+  "files": {
+    "docs/AUDIT_FIXES_0.3.1.md": "948c11328580fc823a898fe840dd6bcd008c87143fd8374959de09f4cc401963",
+    "docs/FROZEN_MULTIPARTICIPANT_DIRECTION.md": "613ba1cca295bce13483dad541284d939721dc912db1303df7f4b66267badec3",
+    "docs/PASTE_CHANGED_FILES.md": "ca87ef0074e5c84f53fd69ee45592115dfcaf8f5438a7c2ad67f7a13381bd736",
+    "docs/experimental-live-world.md": "9a2b9f2803f331039e31b3d43b40b7fa23cd1da87a6918c4d9841e953bf99874",
+    "docs/participation.md": "b4ebf279fbf0560062701efa4777a6d1fe1ca8b3a6841f507651e541ea099a32",
+    "packages/core/src/committed-views.ts": "5e1ec3f73345752e9de1bc026247ded1304c393e7b76e02b101cbc5e18bfb06c",
+    "packages/core/src/index.ts": "feb00357af320ab2386cd2f4d1f49a9743b52680b524bca19543ad143b879c95",
+    "packages/core/src/participation.ts": "eaae0855d494669e1ec193bbcdb7f9a6a6c84c4141eafe38c371a7d96323d7ad",
+    "packages/core/src/world.ts": "4a3deb60fc564a6d4f74a24dc2472136d2a293a7488a4d6cf4a46c0aa0c326f4",
+    "tests/audit-fixes.test.mjs": "fc32faf95e65761f4ef1a8f4a353f525c647b432023d31ff133fb4f02cb2ae66",
+    "tests/participation.test.mjs": "a4930b1c7d9cd9f2d5c948e25dc5003d31ff6c4f3b292267fee7aeaa1f8d6429"
+  }
+}

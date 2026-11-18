@@ -87,8 +87,13 @@ No embedding inference is required for authoritative physical queries.
 `read` returns the latest exact recorded state per entity at or before the selected
 time. `range` pages exact records; preserve the returned head between pages. Deletion
 records suppress an entity in later snapshots, while earlier snapshots retain it.
-`streams` lists run/epoch ranges; `entities` exposes graph-native entity references. `marked` reads a sparse index of event-bearing
-segments; `first` retrieves an entity's original recorded state for stable local
+`streams` lists run/epoch ranges; `entities` exposes graph-native entity references. `marked` retains its bounded full-history query. `markedPage` reads event-bearing
+segments in forward/backward sequence order, with a limit (1–1,000) and
+nextSequence cursor. Carry head, runId, epoch, timeMicros and direction to subsequent
+pages. Each page retains the 32 MiB read budget, so snapshots can fetch a bounded
+recent window without requiring lifetime event reads. Explicit heads must be
+accepted ancestors of the instance revision. `read` uses per-entity segment
+candidates to skip unrelated trajectory assets; `first` retrieves an entity's original recorded state for stable local
 origins after cold reconstruction. `subscribe` signals committed revisions only.
 
 ## Concurrent clients
