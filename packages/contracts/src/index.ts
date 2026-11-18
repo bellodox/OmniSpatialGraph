@@ -48,6 +48,8 @@ export interface GraphPort {
   publish(rows: GraphRow[], expectedHead: string): Promise<boolean>;
   /** Commit rows only: one per commit, so cheap regardless of element history. */
   commitRows(): Promise<GraphRow[]>;
+  /** Optional narrow lookup for a publication acknowledgement; no history scan. */
+  commitRow?(id: string): Promise<GraphRow | null>;
   /** Element rows written by the given commits (ids must match c + 64 hex). */
   rowsOfCommits(ids: string[]): Promise<GraphRow[]>;
   /** Element rows of one kind, for example every episode or every about edge. */

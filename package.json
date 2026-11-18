@@ -1,17 +1,18 @@
 {
-  "name": "omnispatialgraph",
+  "name": "osg-multi",
   "version": "0.1.0-prototype.0",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
   "engines": { "node": "^22.0.0 || ^24.0.0" },
   "workspaces": ["packages/*"],
-  "bin": { "osg": "dist/cli/src/public.js" },
+  "bin": { "osg-multi": "dist/cli/src/public.js" },
   "main": "./dist/core/src/index.js",
   "types": "./dist/core/src/index.d.ts",
   "exports": {
     ".": { "types": "./dist/core/src/index.d.ts", "default": "./dist/core/src/index.js" },
     "./core": { "types": "./dist/core/src/index.d.ts", "default": "./dist/core/src/index.js" },
+    "./world": { "types": "./dist/core/src/world.d.ts", "default": "./dist/core/src/world.js" },
     "./contracts": { "types": "./dist/contracts/src/index.d.ts", "default": "./dist/contracts/src/index.js" },
     "./storage-lance": { "types": "./dist/storage-lance/src/index.d.ts", "default": "./dist/storage-lance/src/index.js" },
     "./indexing-kilo": { "types": "./dist/indexing-kilo/src/index.d.ts", "default": "./dist/indexing-kilo/src/index.js" }

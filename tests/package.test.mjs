@@ -63,10 +63,12 @@ test('optional Transformers closure uses compatible exact pins and narrowly scop
 
 test('public root API remains portable; package controls a single private compiled entry', async () => {
   const manifest = JSON.parse(await readFile('package.json', 'utf8'));
-  assert.equal(manifest.name, 'omnispatialgraph');
+  assert.equal(manifest.name, 'osg-multi');
   assert.equal(manifest.private, true);
   assert.equal(manifest.license, 'Apache-2.0');
-  assert.equal(manifest.bin.osg, 'dist/cli/src/public.js');
+  assert.deepEqual(manifest.bin, {'osg-multi':'dist/cli/src/public.js'});
+  const cliManifest=JSON.parse(await readFile('packages/cli/package.json','utf8'));
+  assert.deepEqual(Object.keys(cliManifest.bin),['osg-multi']);
   assert.deepEqual(manifest.files, ['NOTICE', 'dist/cli/src', 'dist/contracts/src', 'dist/core/src', 'dist/indexing-kilo/src', 'dist/storage-lance/src',
     'tools/showcase.mjs', 'fixtures/showcase/package.json', 'fixtures/showcase/src/greet.js', 'fixtures/showcase/checks.mjs']);
   assert.match(manifest.osgPrototype.compatibility, /embedding wrapper remains unsupported/);

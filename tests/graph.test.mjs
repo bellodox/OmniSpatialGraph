@@ -125,3 +125,22 @@ test('ten independent native two-writer CAS races publish only one reachable sta
     assert.equal(verify(await reader.rows()).commits, 10);
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
+
+test('narrow commit/key lookups preserve quoted IDs and append-only checks across large batches', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'osg-key-lookup-'));
+  const store = await openStore(directory, true);
+  try {
+    const proposals = Array.from({length: 250}, (_, i) => fact(`quote'${i}.ts`, i));
+    const a = await commit(store, proposals, 'provider');
+    assert.equal((await store.commitRow(a.commitId)).commit_id, a.commitId);
+    assert.equal(await store.commitRow('c' + '0'.repeat(64)), null);
+    await assert.rejects(store.commitRow('bad'), {code:'INVALID_SCHEMA'});
+    const rows = await store.rows(), prior = rows.find(r => r.row_type === 'elem');
+    const fakeId = 'c' + '1'.repeat(64);
+    const fakeCommit = {...rows.find(r => r.row_type === 'commit'),row_key:'commit:'+fakeId,commit_id:fakeId};
+    const fakeHead = {...rows.find(r => r.row_type === 'head'),head:fakeId};
+    await assert.rejects(store.publish([{...prior,props:'{"value":999}'},fakeCommit,fakeHead],a.commitId),{code:'INVALID_DELTA'});
+    assert.equal(await store.head('main'),a.commitId);
+    assert.equal(verify(await store.rows()).elements,250);
+  } finally {store.close();await rm(directory,{recursive:true,force:true});}
+});

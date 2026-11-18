@@ -1,5 +1,7 @@
 # OmniSpatialGraph (osg)
 
+Experimental temporal-world API for simultaneous simulation, browser and agent clients: [design, API and limits](docs/experimental-live-world.md).
+
 > **Beta · source-only · known limits**
 >
 > This early beta is source-only, not an npm or bundled-binary release. The following known limits are accepted for this beta, not fixed:

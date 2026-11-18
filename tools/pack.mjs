@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process';
 const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 assert.equal(manifest.private, true);
 assert.equal(manifest.license, 'Apache-2.0');
-assert.equal(manifest.bin.osg, 'dist/cli/src/public.js');
+assert.equal(manifest.bin['osg-multi'], 'dist/cli/src/public.js');
 assert.ok(manifest.files.includes('fixtures/showcase/checks.mjs'));
 assert.ok((await readFile(new URL('../fixtures/showcase/checks.mjs', import.meta.url), 'utf8')).includes('rejects blank names'));
 console.error(manifest.osgPrototype.compatibility);

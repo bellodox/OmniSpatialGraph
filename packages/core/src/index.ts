@@ -7,3 +7,4 @@ export * from './memory.js';
 export * from './state.js';
 export * from './retrieval.js';
 export * from './embedding.js';
+export * from './world.js';

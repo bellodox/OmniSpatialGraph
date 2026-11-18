@@ -98,6 +98,10 @@ export async function openStore(directory: string, create = false): Promise<Grap
       return structuredClone(out);
     },
     async commitRows() { return convert(await table.query().where("row_type = 'commit'").toArrow()); },
+    async commitRow(id) {
+      if (!/^c[0-9a-f]{64}$/.test(id)) throw new OsgError('INVALID_SCHEMA', 'Invalid commit id');
+      return convert(await table.query().where(`row_key = 'commit:${id}'`).toArrow())[0] ?? null;
+    },
     async rowsOfCommits(ids) {
       const out: GraphRow[] = [];
       if (ids.some((id) => !/^c[0-9a-f]{64}$/.test(id))) throw new OsgError('INVALID_SCHEMA', 'Invalid commit id');
@@ -126,7 +130,14 @@ export async function openStore(directory: string, create = false): Promise<Grap
         throw new OsgError('INVALID_DELTA', 'Invalid head CAS');
       }
       const seen = new Set<string>();
-      const existing = new Set((await table.query().select(['row_key']).toArray()).map((row) => row.row_key as string));
+      // Only incoming non-head keys can violate append-only identity. Avoid transferring
+      // every historical row key into JS on every small live-world publication.
+      const existing = new Set<string>();
+      const candidates = [...new Set(rows.filter((row) => row.row_type !== 'head').map((row) => row.row_key))];
+      for (let i = 0; i < candidates.length; i += 200) {
+        const list = candidates.slice(i, i + 200).map((key) => `'${key.replace(/'/g, "''")}'`).join(',');
+        for (const row of await table.query().where(`row_key IN (${list})`).select(['row_key']).toArray()) existing.add(row.row_key as string);
+      }
       for (const row of rows) {
         if (seen.has(row.row_key) || (row.row_type !== 'head' && existing.has(row.row_key))) throw new OsgError('INVALID_DELTA', 'Duplicate or mutable row key');
         seen.add(row.row_key);
